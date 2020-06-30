@@ -10,7 +10,8 @@ namespace Gthx.Test
         public void TestGenericResponse()
         {
             var client = new MockIrcClient();
-            var gthx = new Core.Gthx(client);
+            var data = new MockData();
+            var gthx = new Core.Gthx(client, data);
 
             // Test channel message
             var testChannel = "#reprap";
