@@ -55,7 +55,7 @@ namespace Gthx.Test.Mocks
 
         public List<string> GetFactoid(string factoid)
         {
-            throw new NotImplementedException();
+            return new List<string>();
         }
 
         public List<string> GetFactoidInfo(string factoid)
