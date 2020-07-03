@@ -7,5 +7,6 @@ namespace Gthx.Core.Interfaces
     public interface IIrcClient
     {
         public bool SendMessage(string channel, string message);
+        public bool SendAction(string channel, string message);
     }
 }

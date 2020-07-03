@@ -28,7 +28,15 @@ namespace Gthx.Core
                 var response = module.ProcessMessage(channel, user, message);
                 if (response != null)
                 {
-                    _IrcClient.SendMessage(channel, response);
+                    if (response.Type == ResponseType.Normal)
+                    {
+                        _IrcClient.SendMessage(channel, response.Message);
+                    }
+
+                    if (response.Type == ResponseType.Action)
+                    {
+                        _IrcClient.SendAction(channel, response.Message);
+                    }
                     return;
                 }
             }

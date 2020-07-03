@@ -10,6 +10,11 @@ namespace Gthx.Test.Mocks
         public string SentToChannel { get; set; }
         public string SentMessage { get; set; }
 
+        public bool SendAction(string channel, string message)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool SendMessage(string channel, string message)
         {
             SentToChannel = channel;

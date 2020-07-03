@@ -29,7 +29,7 @@ namespace Gthx.Test
         }
 
         [TestMethod]
-        public void TestSimpleFactoid()
+        public void TestFactoidSetting()
         {
             var client = new MockIrcClient();
             var data = new MockData();
@@ -41,9 +41,6 @@ namespace Gthx.Test
             var testChannel = "#reprap";
             var testUser = "SomeUser";
             var testUser2 = "AnotherUser";
-
-            var retrievedFactoid = data.GetFactoid(testFactoid);
-            Assert.AreEqual(0, retrievedFactoid.Count);
 
             gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid} is {testValue}");
             Assert.AreEqual(testChannel, client.SentToChannel);
@@ -62,6 +59,23 @@ namespace Gthx.Test
             Assert.IsTrue(data.FactoidIsAre);
             Assert.AreEqual(testUser2, data.FactoidUser);
             Assert.IsFalse(data.FactoidReplaceExisting);
+        }
+
+        [TestMethod]
+        public void TestFactoidGetting()
+        {
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var gthx = new Core.Gthx(client, data);
+
+            var testFactoid = "reprap";
+            var testChannel = "#reprap";
+            var testUser = "sandman";
+
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
+            Assert.AreEqual(testChannel, client.SentToChannel);
+            Assert.AreEqual(testFactoid, data.FactoidGotten);
+            Assert.AreEqual($"{testFactoid} is the best way to learn about 3D printing", client.SentMessage);
         }
     }
 }

@@ -8,8 +8,9 @@ namespace Gthx.Core.Modules
 {
     public class FactoidModule : IGthxModule
     {
-        private Regex _FactoidRegex = new Regex(@"(?'factoid'.+?)\s(?'isAre'is|are)(?'hasAlso'\salso)?\s(?'value'.+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private Regex _InvalidRegex = new Regex(@"(here|how|it|something|that|this|what|when|where|which|who|why|you)", RegexOptions.IgnoreCase);
+        private readonly Regex _FactoidSet = new Regex(@"(?'factoid'.+?)\s(?'isAre'is|are)(?'hasAlso'\salso)?\s(?'value'.+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private readonly Regex _InvalidRegex = new Regex(@"(here|how|it|something|that|this|what|when|where|which|who|why|you)", RegexOptions.IgnoreCase);
+        private readonly Regex _FactoidGet = new Regex(@"(?'factoid'.+)[?!](?'hasPipe'\s*$|\s*\|\s*(?'user'[a-zA-Z\*_\\\[\]\{\}^`|\*][a-zA-Z0-9\*_\\\[\]\{\}^`|-]*)$)", RegexOptions.Compiled);        
         private IGthxData _Data;
 
         public FactoidModule(IGthxData data)
@@ -17,10 +18,28 @@ namespace Gthx.Core.Modules
             _Data = data;
         }
 
-
-        public string ProcessMessage(string channel, string user, string message)
+        public IrcResponse ProcessMessage(string channel, string user, string message)
         {
-            var factoidMatch = _FactoidRegex.Match(message);
+            var response = ProcessFactoidGet(channel, user, message);
+            if (response != null)
+            {
+                return response;
+            }
+
+            response = ProcessFactoidSet(channel, user, message);
+            return response;
+        }
+
+        /// <summary>
+        /// Handles setting a factoid
+        /// </summary>
+        /// <param name="channel"></param>
+        /// <param name="user"></param>
+        /// <param name="message"></param>
+        /// <returns>An IrcResponse if a command was found to set a message, null otherwise</returns>
+        private IrcResponse ProcessFactoidSet(string channel, string user, string message)
+        {
+            var factoidMatch = _FactoidSet.Match(message);
             if (!factoidMatch.Success)
             {
                 return null;
@@ -39,10 +58,54 @@ namespace Gthx.Core.Modules
             var success = _Data.AddFactoid(user, factoidName, isAre, value, !hasAlso);
             if (success)
             {
-                return $"{user}: Okay.";
+                return new IrcResponse($"{user}: Okay.");
             }
 
-            return $"I'm sorry, {user}. I'm afraid I can't do that.";
+            return new IrcResponse($"I'm sorry, {user}. I'm afraid I can't do that.");
+        }
+
+        /// <summary>
+        /// Handles getting a factoid
+        /// </summary>
+        /// <param name="channel"></param>
+        /// <param name="user"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        private IrcResponse ProcessFactoidGet(string channel, string user, string message)
+        {
+            var factoidMatch = _FactoidGet.Match(message);
+            if (!factoidMatch.Success)
+            {
+                return null;
+            }
+
+            var factoid = factoidMatch.Groups["factoid"].Value;
+            Console.WriteLine($"Factoid query from {user}:{channel} for '{factoid}'");
+
+            var factoidValueList = _Data.GetFactoid(factoid);
+            if (factoidValueList == null)
+            {
+                return null;
+            }
+
+            var factoidValue = string.Join(" and also ", factoidValueList);
+            return new IrcResponse($"{factoid} is {factoidValue}");
+
+#if false
+            // Replace !who and !channel in the reply
+            answer = re.sub("!who", user, answer)
+            answer = re.sub("!channel", channel, answer)
+
+            if answer.startswith("<reply>"):
+                answer = answer[7:]
+
+            if answer.startswith("<action>"):
+                self.describe(replyChannel, answer[8:])
+            else:
+                if (f.group(3)):
+                    answer = "%s, %s" % (f.group(3), answer)
+                self.msg(replyChannel, answer)
+#endif
         }
     }
 }

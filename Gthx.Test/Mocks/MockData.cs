@@ -12,6 +12,7 @@ namespace Gthx.Test.Mocks
         public bool FactoidIsAre { get; private set; }
         public string FactoidValue { get; private set; }
         public bool FactoidReplaceExisting { get; private set; }
+        public string FactoidGotten { get; private set; }
 
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting)
         {
@@ -55,7 +56,35 @@ namespace Gthx.Test.Mocks
 
         public List<string> GetFactoid(string factoid)
         {
-            return new List<string>();
+            FactoidGotten = factoid;
+
+            switch (factoid)
+            {
+                case "reprap":
+                    return new List<string>
+                    {
+                        "the best way to learn about 3D printing"
+                    };
+
+                case "cake":
+                    return new List<string>
+                    {
+                        "really yummy",
+                        "a lie!"
+                    };
+                case "emoji":
+                    return new List<string>
+                    {
+                        "handled well: 😍🍕🎉💪"
+                    };
+                case "other languages":
+                    return new List<string>
+                    {
+                        "このアプリケーションで十分にサポートされています"
+                    };
+            }
+
+            return null;
         }
 
         public List<string> GetFactoidInfo(string factoid)
