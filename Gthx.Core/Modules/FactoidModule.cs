@@ -8,7 +8,7 @@ namespace Gthx.Core.Modules
 {
     public class FactoidModule : IGthxModule
     {
-        private Regex _FactoidRegex = new Regex(@"(.+?)\s(is|are)(\salso)?\s(.+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private Regex _FactoidRegex = new Regex(@"(?'factoid'.+?)\s(?'isAre'is|are)(?'hasAlso'\salso)?\s(?'value'.+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private Regex _InvalidRegex = new Regex(@"(here|how|it|something|that|this|what|when|where|which|who|why|you)", RegexOptions.IgnoreCase);
         private IGthxData _Data;
 
@@ -32,10 +32,10 @@ namespace Gthx.Core.Modules
                 return null;
             }
 
-            var factoidName = factoidMatch.Groups[1].Value;
-            var isAre = factoidMatch.Groups[2].Value.Equals("are", StringComparison.CurrentCultureIgnoreCase);
-            var hasAlso = factoidMatch.Groups[3].Success;
-            var value = factoidMatch.Groups[4].Value;
+            var factoidName = factoidMatch.Groups["factoid"].Value;
+            var isAre = factoidMatch.Groups["isAre"].Value.Equals("are", StringComparison.CurrentCultureIgnoreCase);
+            var hasAlso = factoidMatch.Groups["hasAlso"].Success;
+            var value = factoidMatch.Groups["value"].Value;
             var success = _Data.AddFactoid(user, factoidName, isAre, value, !hasAlso);
             if (success)
             {
