@@ -1,4 +1,5 @@
-﻿using Gthx.Core.Interfaces;
+﻿using Gthx.Core;
+using Gthx.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -54,33 +55,49 @@ namespace Gthx.Test.Mocks
             throw new NotImplementedException();
         }
 
-        public List<string> GetFactoid(string factoid)
+        private Factoid CreateFactoid(string factoid, string value, bool isAre = false)
+        {
+            return new Factoid
+            {
+                Name = factoid,
+                Value = value,
+                IsAre = isAre,
+                SetByUser = "MockData",
+                Timestamp = DateTime.UtcNow
+            };
+        }
+
+        public List<Factoid> GetFactoid(string factoid)
         {
             FactoidGotten = factoid;
 
             switch (factoid)
             {
                 case "reprap":
-                    return new List<string>
+                    return new List<Factoid>
                     {
-                        "the best way to learn about 3D printing"
+                        CreateFactoid("reprap", "the best way to learn about 3D printing")
                     };
-
                 case "cake":
-                    return new List<string>
+                    return new List<Factoid>
                     {
-                        "really yummy",
-                        "a lie!"
+                        CreateFactoid("cake", "really yummy"),
+                        CreateFactoid("cake", "a lie")
                     };
                 case "emoji":
-                    return new List<string>
+                    return new List<Factoid>
                     {
-                        "handled well: 😍🍕🎉💪"
+                        CreateFactoid("emoji","handled well: 😍🍕🎉💪")
                     };
                 case "other languages":
-                    return new List<string>
+                    return new List<Factoid>
                     {
-                        "このアプリケーションで十分にサポートされています"
+                        CreateFactoid("other languages","このアプリケーションで十分にサポートされています", true)
+                    };
+                case "pennies":
+                    return new List<Factoid>
+                    {
+                        CreateFactoid("pennies", "small coins", true)
                     };
             }
 

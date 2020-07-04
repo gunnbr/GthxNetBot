@@ -1,6 +1,7 @@
 ﻿using Gthx.Core.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -88,8 +89,9 @@ namespace Gthx.Core.Modules
                 return null;
             }
 
-            var factoidValue = string.Join(" and also ", factoidValueList);
-            return new IrcResponse($"{factoid} is {factoidValue}");
+            var factoidValue = string.Join(" and also ", factoidValueList.Select(f => f.Value));
+            var article = factoidValueList[0].IsAre ? "are" : "is";
+            return new IrcResponse($"{factoid} {article} {factoidValue}");
 
 #if false
             // Replace !who and !channel in the reply

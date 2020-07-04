@@ -68,14 +68,48 @@ namespace Gthx.Test
             var data = new MockData();
             var gthx = new Core.Gthx(client, data);
 
-            var testFactoid = "reprap";
+            // Test "is"
             var testChannel = "#reprap";
             var testUser = "sandman";
-
+            var testFactoid = "reprap";
             gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
             Assert.AreEqual(testChannel, client.SentToChannel);
             Assert.AreEqual(testFactoid, data.FactoidGotten);
             Assert.AreEqual($"{testFactoid} is the best way to learn about 3D printing", client.SentMessage);
+
+            // Same test with an exclamation point!
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}!");
+            Assert.AreEqual(testChannel, client.SentToChannel);
+            Assert.AreEqual(testFactoid, data.FactoidGotten);
+            Assert.AreEqual($"{testFactoid} is the best way to learn about 3D printing", client.SentMessage);
+
+            // Test "are"
+            testFactoid = "pennies";
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
+            Assert.AreEqual(testChannel, client.SentToChannel);
+            Assert.AreEqual(testFactoid, data.FactoidGotten);
+            Assert.AreEqual($"{testFactoid} are small coins", client.SentMessage);
+
+            // Test multiple values set:
+            testFactoid = "cake";
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
+            Assert.AreEqual(testChannel, client.SentToChannel);
+            Assert.AreEqual(testFactoid, data.FactoidGotten);
+            Assert.AreEqual($"{testFactoid} is really yummy and also a lie", client.SentMessage);
+
+            // Test emoji
+            testFactoid = "emoji";
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
+            Assert.AreEqual(testChannel, client.SentToChannel);
+            Assert.AreEqual(testFactoid, data.FactoidGotten);
+            Assert.AreEqual($"{testFactoid} is handled well: 😍🍕🎉💪", client.SentMessage);
+
+            // Test extended unicode points
+            testFactoid = "other languages";
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
+            Assert.AreEqual(testChannel, client.SentToChannel);
+            Assert.AreEqual(testFactoid, data.FactoidGotten);
+            Assert.AreEqual($"{testFactoid} are このアプリケーションで十分にサポートされています", client.SentMessage);
         }
     }
 }
