@@ -28,6 +28,10 @@ namespace Gthx.Core.Modules
                 return response;
             }
 
+            // TODO: Implement info handling
+
+            // TODO: Implement forget handling
+
             response = ProcessFactoidSet(channel, user, message);
             return response;
         }

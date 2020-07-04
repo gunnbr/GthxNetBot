@@ -23,6 +23,10 @@ namespace Gthx.Core
 
         public void HandleReceivedMessage(string channel, string user, string message)
         {
+            // TODO: Update last seen time
+
+            // TODO: Check for waiting 'tell' messagae
+
             foreach (var module in _Modules)
             {
                 var response = module.ProcessMessage(channel, user, message);
