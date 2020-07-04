@@ -2,6 +2,7 @@
 using Gthx.Core.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Gthx.Test.Mocks
@@ -98,6 +99,21 @@ namespace Gthx.Test.Mocks
                     return new List<Factoid>
                     {
                         CreateFactoid("pennies", "small coins", true)
+                    };
+                case "botsmack":
+                    return new List<Factoid>
+                    {
+                        CreateFactoid("botsmack","<reply>!who, stop that!")
+                    };
+                case "lost":
+                    return new List<Factoid>
+                    {
+                        CreateFactoid("lost","<reply>!who, you're in !channel")
+                    };
+                case "dance":
+                    return new List<Factoid>
+                    {
+                        CreateFactoid("dance","<action>dances a little jig around !who.")
                     };
             }
 

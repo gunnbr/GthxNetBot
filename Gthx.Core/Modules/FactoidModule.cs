@@ -1,6 +1,7 @@
 ﻿using Gthx.Core.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -11,7 +12,7 @@ namespace Gthx.Core.Modules
     {
         private readonly Regex _FactoidSet = new Regex(@"(?'factoid'.+?)\s(?'isAre'is|are)(?'hasAlso'\salso)?\s(?'value'.+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex _InvalidRegex = new Regex(@"(here|how|it|something|that|this|what|when|where|which|who|why|you)", RegexOptions.IgnoreCase);
-        private readonly Regex _FactoidGet = new Regex(@"(?'factoid'.+)[?!](?'hasPipe'\s*$|\s*\|\s*(?'user'[a-zA-Z\*_\\\[\]\{\}^`|\*][a-zA-Z0-9\*_\\\[\]\{\}^`|-]*)$)", RegexOptions.Compiled);        
+        private readonly Regex _FactoidGet = new Regex(@"(?'factoid'.+)[?!](?'hasPipe'\s*$|\s*\|\s*(?'pipeToUser'[a-zA-Z\*_\\\[\]\{\}^`|\*][a-zA-Z0-9\*_\\\[\]\{\}^`|-]*)$)", RegexOptions.Compiled);        
         private IGthxData _Data;
 
         public FactoidModule(IGthxData data)
@@ -91,23 +92,26 @@ namespace Gthx.Core.Modules
 
             var factoidValue = string.Join(" and also ", factoidValueList.Select(f => f.Value));
             var article = factoidValueList[0].IsAre ? "are" : "is";
+            factoidValue = factoidValue.Replace("!who", user);
+            factoidValue = factoidValue.Replace("!channel", channel);
+
+            if (factoidValue.StartsWith("<reply>"))
+            {
+                return new IrcResponse(factoidValue.Remove(0,7));
+            }
+
+            if (factoidValue.StartsWith("<action>"))
+            {
+                return new IrcResponse(factoidValue.Remove(0,8), ResponseType.Action);
+            }
+
+            if (factoidMatch.Groups["pipeToUser"].Success)
+            {
+                var pipeToUser = factoidMatch.Groups["pipeToUser"];
+                return new IrcResponse($"{pipeToUser}, {factoid} {article} {factoidValue}");
+            }
+
             return new IrcResponse($"{factoid} {article} {factoidValue}");
-
-#if false
-            // Replace !who and !channel in the reply
-            answer = re.sub("!who", user, answer)
-            answer = re.sub("!channel", channel, answer)
-
-            if answer.startswith("<reply>"):
-                answer = answer[7:]
-
-            if answer.startswith("<action>"):
-                self.describe(replyChannel, answer[8:])
-            else:
-                if (f.group(3)):
-                    answer = "%s, %s" % (f.group(3), answer)
-                self.msg(replyChannel, answer)
-#endif
         }
     }
 }
