@@ -111,7 +111,7 @@ namespace Gthx.Test
             Assert.AreEqual(testFactoid, data.FactoidGotten);
             Assert.AreEqual($"{testFactoid} are このアプリケーションで十分にサポートされています", client.SentMessage);
         }
- 
+
         [TestMethod]
         public void TestAdvancedFactoidGetting()
         {
@@ -141,6 +141,26 @@ namespace Gthx.Test
             Assert.AreEqual(testChannel, client.SentToChannel);
             Assert.AreEqual(testFactoid, data.FactoidGotten);
             Assert.AreEqual($"dances a little jig around {testUser}.", client.SentAction);
+        }
+
+        [TestMethod]
+        public void TestTellSetting()
+        {
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var gthx = new Core.Gthx(client, data);
+
+            var testChannel = "#reprap";
+            var testUser = "AcidBurn";
+            var testTellToUser = "CrashOverride";
+            var testMessage = "Mess with the best, die like the rest.";
+            gthx.HandleReceivedMessage(testChannel, testUser, $"tell {testTellToUser} {testMessage}");
+            Assert.AreEqual(testChannel, client.SentToChannel);
+            Assert.AreEqual($"{testUser}: Okay.", client.SentMessage);
+
+            Assert.AreEqual(testUser, data.TellFromUser);
+            Assert.AreEqual(testTellToUser, data.TellToUser);
+            Assert.AreEqual(testMessage, data.TellMessage);
         }
     }
 }

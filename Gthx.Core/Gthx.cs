@@ -17,6 +17,7 @@ namespace Gthx.Core
             _Data = data;
             _Modules = new List<IGthxModule>
             {
+                new TellModule(data),
                 new FactoidModule(data)
             };
         }

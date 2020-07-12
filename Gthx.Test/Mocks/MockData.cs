@@ -16,6 +16,10 @@ namespace Gthx.Test.Mocks
         public bool FactoidReplaceExisting { get; private set; }
         public string FactoidGotten { get; private set; }
 
+        public string TellFromUser { get; private set; }
+        public string TellToUser { get; private set; }
+        public string TellMessage { get; private set; }
+
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting)
         {
             FactoidUser = user;
@@ -28,7 +32,10 @@ namespace Gthx.Test.Mocks
 
         public bool AddTell(string fromUser, string toUser, string message)
         {
-            throw new NotImplementedException();
+            TellFromUser = fromUser;
+            TellToUser = toUser;
+            TellMessage = message;
+            return true;
         }
 
         public bool AddThingiverseReference(string item)
