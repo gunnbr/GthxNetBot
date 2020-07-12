@@ -13,7 +13,7 @@ namespace Gthx.Core.Interfaces
         public List<Factoid> GetFactoid(string factoid);
         public List<string> GetFactoidInfo(string factoid);
         public bool AddTell(string fromUser, string toUser, string message);
-        public string GetTell(string user);
+        public List<Tell> GetTell(string forUser);
         public bool AddThingiverseReference(string item);
         public bool AddThingiverseTitle(string item, string title);
         public bool AddYoutubeReference(string item);

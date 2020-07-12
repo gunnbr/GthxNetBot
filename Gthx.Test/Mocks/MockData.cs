@@ -19,6 +19,7 @@ namespace Gthx.Test.Mocks
         public string TellFromUser { get; private set; }
         public string TellToUser { get; private set; }
         public string TellMessage { get; private set; }
+        public string TellCheckUser { get; private set; }
 
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting)
         {
@@ -142,9 +143,19 @@ namespace Gthx.Test.Mocks
             throw new NotImplementedException();
         }
 
-        public string GetTell(string user)
+        public List<Tell> GetTell(string forUser)
         {
-            throw new NotImplementedException();
+            TellCheckUser = forUser;
+            switch (forUser)
+            {
+                case "CrashOverride":
+                    return new List<Tell> 
+                    {
+                        new Tell("AcidBurn", "CrashOverride", "Mess with the best, die like the rest.", new DateTime(1995, 11, 4, 23, 49, 13)) 
+                    };
+            }
+
+            return new List<Tell>();
         }
 
         public void UpdateLastSeen(string user, string channel, string message)

@@ -162,5 +162,23 @@ namespace Gthx.Test
             Assert.AreEqual(testTellToUser, data.TellToUser);
             Assert.AreEqual(testMessage, data.TellMessage);
         }
+
+        [TestMethod]
+        public void TestTellGetting()
+        {
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var gthx = new Core.Gthx(client, data);
+
+            var testChannel = "#reprap";
+            var testUser = "CrashOverride";
+            var testMessage = "Hey all! What's up?";
+            gthx.HandleReceivedMessage(testChannel, testUser, testMessage);
+            Assert.AreEqual(testUser, data.TellCheckUser);
+
+            Assert.AreEqual(testChannel, client.SentToChannel);
+            Assert.IsTrue(client.SentMessage.StartsWith($"{testUser}: "));
+            Assert.IsTrue(client.SentMessage.EndsWith($"tell {testUser} Mess with the best, die like the rest."));
+        }
     }
 }

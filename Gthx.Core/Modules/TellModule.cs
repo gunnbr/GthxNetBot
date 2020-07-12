@@ -1,6 +1,7 @@
 ﻿using Gthx.Core.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -18,6 +19,16 @@ namespace Gthx.Core.Modules
 
         public IrcResponse ProcessMessage(string channel, string user, string message)
         {
+            var waitingMessages = _Data.GetTell(user);
+            foreach (var waitingMessage in waitingMessages)
+            {
+                Debug.WriteLine($"Found tell for '{user}' from '{waitingMessage.FromUser}");
+                // TODO: Implement timeSinceString()
+                var timeSince = DateTime.UtcNow - waitingMessage.TimeSet;
+                // TODO: Fix this cause it's not the proper logic
+                return new IrcResponse($"{user}: {timeSince} ago {waitingMessage.FromUser} tell {waitingMessage.ToUser} {waitingMessage.Message}");
+            }
+
             var tellMatch = _TellRegex.Match(message);
             if (!tellMatch.Success)
             {
