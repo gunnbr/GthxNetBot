@@ -177,8 +177,8 @@ namespace Gthx.Test
             Assert.AreEqual(testUser, data.TellCheckUser);
 
             Assert.AreEqual(testChannel, client.SentToChannel);
-            Assert.IsTrue(client.SentMessage.StartsWith($"{testUser}: "));
-            Assert.IsTrue(client.SentMessage.EndsWith($"tell {testUser} Mess with the best, die like the rest."));
+            Assert.IsTrue(client.SentMessage.StartsWith($"{testUser}: "), $"Incorrect start of reply: {client.SentMessage}");
+            Assert.IsTrue(client.SentMessage.EndsWith($"tell {testUser} Mess with the best, die like the rest."), $"Incorrect end of reply: {client.SentMessage}");
         }
     }
 }

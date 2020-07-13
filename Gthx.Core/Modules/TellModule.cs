@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Gthx.Core.Modules
@@ -19,23 +18,23 @@ namespace Gthx.Core.Modules
 
         public List<IrcResponse> ProcessMessage(string channel, string user, string message)
         {
+            var replies = new List<IrcResponse>();
+
             var waitingMessages = _Data.GetTell(user);
             foreach (var waitingMessage in waitingMessages)
             {
                 Debug.WriteLine($"Found tell for '{user}' from '{waitingMessage.FromUser}");
                 // TODO: Implement timeSinceString()
                 var timeSince = DateTime.UtcNow - waitingMessage.TimeSet;
-                // TODO: Fix this cause it's not the proper logic
-                return new List<IrcResponse>
-                {
-                    new IrcResponse($"{user}: {timeSince} ago {waitingMessage.FromUser} tell {waitingMessage.ToUser} {waitingMessage.Message}")
-                };
+                var reply = new IrcResponse($"{user}: {timeSince} ago {waitingMessage.FromUser} tell {waitingMessage.ToUser} {waitingMessage.Message}", 
+                    ResponseType.Normal, false);
+                replies.Add(reply);
             }
 
             var tellMatch = _TellRegex.Match(message);
             if (!tellMatch.Success)
             {
-                return null;
+                return replies;
             }
 
             var nick = tellMatch.Groups["nick"].Value;
@@ -44,16 +43,14 @@ namespace Gthx.Core.Modules
             var success = _Data.AddTell(user, nick, tellMessage);
             if (success)
             {
-                return new List<IrcResponse>
-                { 
-                    new IrcResponse($"{user}: Okay.")
-                };
+                replies.Add(new IrcResponse($"{user}: Okay."));
+            }
+            else
+            {
+                replies.Add(new IrcResponse($"I'm sorry, {user}. I'm afraid I can't do that."));
             }
 
-            return new List<IrcResponse>
-            {
-                new IrcResponse($"I'm sorry, {user}. I'm afraid I can't do that.")
-            };
+            return replies;
         }
     }
 }
