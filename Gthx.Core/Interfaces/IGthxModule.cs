@@ -18,14 +18,20 @@ namespace Gthx.Core.Interfaces
     /// </summary>
     public class IrcResponse
     {
-        public IrcResponse(string message, ResponseType type = ResponseType.Normal)
+        public IrcResponse(string message, ResponseType type = ResponseType.Normal, bool isFinalResponse = true)
         {
             Message = message;
             Type = type;
+            IsFinalResponse = isFinalResponse;
         }
 
         public ResponseType Type { get; set; }
         public string Message { get; set; }
+        /// <summary>
+        /// If false, keep processing to look for additional responses.
+        /// If true, stop processing and send all replies.
+        /// </summary>
+        public bool IsFinalResponse { get; set; }
     }
 
     interface IGthxModule
@@ -38,6 +44,6 @@ namespace Gthx.Core.Interfaces
         /// <param name="user">Nick of the user who sent the message</param>
         /// <param name="message">Text of the message that was sent</param>
         /// <returns>IrcResponse to reply if the message was handled or null otherwise</returns>
-        public IrcResponse ProcessMessage(string channel, string user, string message);
+        public List<IrcResponse> ProcessMessage(string channel, string user, string message);
     }
 }

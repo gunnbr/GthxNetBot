@@ -7,7 +7,7 @@ namespace Gthx.Core.Modules
 {
     public class LurkerModule : IGthxModule
     {
-        public IrcResponse ProcessMessage(string channel, string user, string message)
+        public List<IrcResponse> ProcessMessage(string channel, string user, string message)
         {
             // TODO: Implement lurker module
             throw new NotImplementedException();

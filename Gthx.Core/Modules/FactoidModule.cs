@@ -20,12 +20,12 @@ namespace Gthx.Core.Modules
             _Data = data;
         }
 
-        public IrcResponse ProcessMessage(string channel, string user, string message)
+        public List<IrcResponse> ProcessMessage(string channel, string user, string message)
         {
             var response = ProcessFactoidGet(channel, user, message);
             if (response != null)
             {
-                return response;
+                return new List<IrcResponse> { response };
             }
 
             // TODO: Implement info handling
@@ -33,7 +33,12 @@ namespace Gthx.Core.Modules
             // TODO: Implement forget handling
 
             response = ProcessFactoidSet(channel, user, message);
-            return response;
+            if (response != null)
+            {
+                return new List<IrcResponse> { response };
+            }
+
+            return null;
         }
 
         /// <summary>

@@ -17,7 +17,7 @@ namespace Gthx.Core.Modules
             this._Data = data;
         }
 
-        public IrcResponse ProcessMessage(string channel, string user, string message)
+        public List<IrcResponse> ProcessMessage(string channel, string user, string message)
         {
             var waitingMessages = _Data.GetTell(user);
             foreach (var waitingMessage in waitingMessages)
@@ -26,7 +26,10 @@ namespace Gthx.Core.Modules
                 // TODO: Implement timeSinceString()
                 var timeSince = DateTime.UtcNow - waitingMessage.TimeSet;
                 // TODO: Fix this cause it's not the proper logic
-                return new IrcResponse($"{user}: {timeSince} ago {waitingMessage.FromUser} tell {waitingMessage.ToUser} {waitingMessage.Message}");
+                return new List<IrcResponse>
+                {
+                    new IrcResponse($"{user}: {timeSince} ago {waitingMessage.FromUser} tell {waitingMessage.ToUser} {waitingMessage.Message}")
+                };
             }
 
             var tellMatch = _TellRegex.Match(message);
@@ -41,10 +44,16 @@ namespace Gthx.Core.Modules
             var success = _Data.AddTell(user, nick, tellMessage);
             if (success)
             {
-                return new IrcResponse($"{user}: Okay.");
+                return new List<IrcResponse>
+                { 
+                    new IrcResponse($"{user}: Okay.")
+                };
             }
 
-            return new IrcResponse($"I'm sorry, {user}. I'm afraid I can't do that.");
+            return new List<IrcResponse>
+            {
+                new IrcResponse($"I'm sorry, {user}. I'm afraid I can't do that.")
+            };
         }
     }
 }

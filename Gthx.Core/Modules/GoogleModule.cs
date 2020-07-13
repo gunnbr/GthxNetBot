@@ -7,7 +7,7 @@ namespace Gthx.Core.Modules
 {
     public class GoogleModule : IGthxModule
     {
-        public IrcResponse ProcessMessage(string channel, string user, string message)
+        public List<IrcResponse> ProcessMessage(string channel, string user, string message)
         {
             // TODO: Implement google module
             throw new NotImplementedException();

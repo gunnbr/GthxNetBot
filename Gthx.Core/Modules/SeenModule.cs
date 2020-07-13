@@ -7,7 +7,7 @@ namespace Gthx.Core.Modules
 {
     public class SeenModule : IGthxModule
     {
-        public IrcResponse ProcessMessage(string channel, string user, string message)
+        public List<IrcResponse> ProcessMessage(string channel, string user, string message)
         {
             // TODO: Implement seen module
             throw new NotImplementedException();

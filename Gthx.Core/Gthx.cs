@@ -30,22 +30,30 @@ namespace Gthx.Core
 
             foreach (var module in _Modules)
             {
-                var response = module.ProcessMessage(channel, user, message);
-                if (response != null)
+                var responses = module.ProcessMessage(channel, user, message);
+                if (responses != null)
                 {
-                    if (response.Type == ResponseType.Normal)
+                    foreach (var response in responses)
                     {
-                        _IrcClient.SendMessage(channel, response.Message);
-                    }
+                        if (response.Type == ResponseType.Normal)
+                        {
+                            _IrcClient.SendMessage(channel, response.Message);
+                        }
 
-                    if (response.Type == ResponseType.Action)
-                    {
-                        _IrcClient.SendAction(channel, response.Message);
+                        if (response.Type == ResponseType.Action)
+                        {
+                            _IrcClient.SendAction(channel, response.Message);
+                        }
+
+                        if (response.IsFinalResponse)
+                        {
+                            return;
+                        }
                     }
-                    return;
                 }
             }
 
+            // TODO: Take this out!!
             _IrcClient.SendMessage(channel, $"Hello, {user}");
         }
     }
