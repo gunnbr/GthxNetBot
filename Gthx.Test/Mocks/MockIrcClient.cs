@@ -1,30 +1,60 @@
 ﻿using Gthx.Core.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Gthx.Test.Mocks
 {
+    public class Replies
+    {
+        public string Channel;
+        public List<string> Actions;
+        public List<string> Messages;
+    }
+
     public class MockIrcClient : IIrcClient
     {
-        public string SentToChannel { get; set; }
+        private string SentToChannel { get; set; }
 
-        public string SentAction { get; set; }
+        private List<string> SentActions { get; set; } = new List<string>();
 
-        public string SentMessage { get; set; }
+        private List<string> SentMessages { get; set; } = new List<string>();
 
         public bool SendAction(string channel, string action)
         {
             SentToChannel = channel;
-            SentAction = action;
+            SentActions.Add(action);
             return true;
         }
 
         public bool SendMessage(string channel, string message)
         {
             SentToChannel = channel;
-            SentMessage = message;
+            SentMessages.Add(message);
             return true;
         }
+
+        #region Methods for testing
+        /// <summary>
+        /// Returns only the replies sent since the last time this method was called.
+        /// </summary>
+        /// <returns></returns>
+        public Replies GetReplies()
+        {
+            var replies = new Replies
+            {
+                Channel = SentToChannel,
+                Actions = SentActions,
+                Messages = SentMessages
+            };
+
+            SentToChannel = null;
+            SentActions = new List<string>();
+            SentMessages = new List<string>();
+
+            return replies;
+        }
+        #endregion
     }
 }

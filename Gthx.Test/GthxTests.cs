@@ -1,5 +1,6 @@
 using Gthx.Test.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Diagnostics;
 
 namespace Gthx.Test
 {
@@ -17,15 +18,21 @@ namespace Gthx.Test
             var testChannel = "#reprap";
             var testUser = "SomeUser";
             gthx.HandleReceivedMessage(testChannel, testUser, "Which printer is best?");
-            Assert.AreEqual(testChannel, client.SentToChannel);
-            Assert.AreEqual($"Hello, {testUser}", client.SentMessage);
+            
+            var replies = client.GetReplies();
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual($"Hello, {testUser}", replies.Messages[0]);
 
             // Test DM
             testChannel = "gthx";
             testUser = "SomeOtherUser";
             gthx.HandleReceivedMessage(testChannel, testUser, "Hey, can you help me?");
-            Assert.AreEqual(testChannel, client.SentToChannel);
-            Assert.AreEqual($"Hello, {testUser}", client.SentMessage);
+
+            replies = client.GetReplies();
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"Hello, {testUser}", replies.Messages[0]);
         }
 
         [TestMethod]
@@ -43,8 +50,11 @@ namespace Gthx.Test
             var testUser2 = "AnotherUser";
 
             gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid} is {testValue}");
-            Assert.AreEqual(testChannel, client.SentToChannel);
-            Assert.AreEqual($"{testUser}: Okay.", client.SentMessage);
+
+            var replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser}: Okay.", replies.Messages[0]);
             Assert.AreEqual(testFactoid, data.FactoidItem);
             Assert.AreEqual(testValue, data.FactoidValue);
             Assert.IsFalse(data.FactoidIsAre);
@@ -52,8 +62,11 @@ namespace Gthx.Test
             Assert.IsTrue(data.FactoidReplaceExisting);
 
             gthx.HandleReceivedMessage(testChannel, testUser2, $"{testFactoid} are also {testValue2}");
-            Assert.AreEqual(testChannel, client.SentToChannel);
-            Assert.AreEqual($"{testUser2}: Okay.", client.SentMessage);
+
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser2}: Okay.", replies.Messages[0]);
             Assert.AreEqual(testFactoid, data.FactoidItem);
             Assert.AreEqual(testValue2, data.FactoidValue);
             Assert.IsTrue(data.FactoidIsAre);
@@ -72,44 +85,63 @@ namespace Gthx.Test
             var testChannel = "#reprap";
             var testUser = "sandman";
             var testFactoid = "reprap";
+
             gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
-            Assert.AreEqual(testChannel, client.SentToChannel);
+
+            var replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual(testFactoid, data.FactoidGotten);
-            Assert.AreEqual($"{testFactoid} is the best way to learn about 3D printing", client.SentMessage);
+            Assert.AreEqual($"{testFactoid} is the best way to learn about 3D printing", replies.Messages[0]);
 
             // Same test with an exclamation point!
             gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}!");
-            Assert.AreEqual(testChannel, client.SentToChannel);
+
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual(testFactoid, data.FactoidGotten);
-            Assert.AreEqual($"{testFactoid} is the best way to learn about 3D printing", client.SentMessage);
+            Assert.AreEqual($"{testFactoid} is the best way to learn about 3D printing", replies.Messages[0]);
 
             // Test "are"
             testFactoid = "pennies";
             gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
-            Assert.AreEqual(testChannel, client.SentToChannel);
+
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual(testFactoid, data.FactoidGotten);
-            Assert.AreEqual($"{testFactoid} are small coins", client.SentMessage);
+            Assert.AreEqual($"{testFactoid} are small coins", replies.Messages[0]);
 
             // Test multiple values set:
             testFactoid = "cake";
             gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
-            Assert.AreEqual(testChannel, client.SentToChannel);
+
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual(testFactoid, data.FactoidGotten);
-            Assert.AreEqual($"{testFactoid} is really yummy and also a lie", client.SentMessage);
+            Assert.AreEqual($"{testFactoid} is really yummy and also a lie", replies.Messages[0]);
 
             // Test emoji
             testFactoid = "emoji";
             gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
-            Assert.AreEqual(testChannel, client.SentToChannel);
+
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual(testFactoid, data.FactoidGotten);
-            Assert.AreEqual($"{testFactoid} is handled well: 😍🍕🎉💪", client.SentMessage);
+            Assert.AreEqual($"{testFactoid} is handled well: 😍🍕🎉💪", replies.Messages[0]);
 
             // Test extended unicode points
             testFactoid = "other languages";
             gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
-            Assert.AreEqual(testChannel, client.SentToChannel);
+
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual(testFactoid, data.FactoidGotten);
-            Assert.AreEqual($"{testFactoid} are このアプリケーションで十分にサポートされています", client.SentMessage);
+            Assert.AreEqual($"{testFactoid} are このアプリケーションで十分にサポートされています", replies.Messages[0]);
         }
 
         [TestMethod]
@@ -123,24 +155,35 @@ namespace Gthx.Test
             var testChannel = "#reprap";
             var testUser = "eliteBoi";
             var testFactoid = "botsmack";
+
             gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}!");
-            Assert.AreEqual(testChannel, client.SentToChannel);
+
+            var replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual(testFactoid, data.FactoidGotten);
-            Assert.AreEqual($"{testUser}, stop that!", client.SentMessage);
+            Assert.AreEqual($"{testUser}, stop that!", replies.Messages[0]);
 
             // Test "!who" and "!channel"
             testFactoid = "lost";
             gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
-            Assert.AreEqual(testChannel, client.SentToChannel);
+
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual(testFactoid, data.FactoidGotten);
-            Assert.AreEqual($"{testUser}, you're in {testChannel}", client.SentMessage);
+            Assert.AreEqual($"{testUser}, you're in {testChannel}", replies.Messages[0]);
 
             // Test "<action>" and "!who"
             testFactoid = "dance";
             gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}!");
-            Assert.AreEqual(testChannel, client.SentToChannel);
+
+            replies = client.GetReplies();
+            Assert.AreEqual(0, replies.Messages.Count);
+            Assert.AreEqual(1, replies.Actions.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual(testFactoid, data.FactoidGotten);
-            Assert.AreEqual($"dances a little jig around {testUser}.", client.SentAction);
+            Assert.AreEqual($"dances a little jig around {testUser}.", replies.Actions[0]);
         }
 
         [TestMethod]
@@ -154,9 +197,13 @@ namespace Gthx.Test
             var testUser = "AcidBurn";
             var testTellToUser = "CrashOverride";
             var testMessage = "Mess with the best, die like the rest.";
+
             gthx.HandleReceivedMessage(testChannel, testUser, $"tell {testTellToUser} {testMessage}");
-            Assert.AreEqual(testChannel, client.SentToChannel);
-            Assert.AreEqual($"{testUser}: Okay.", client.SentMessage);
+
+            var replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser}: Okay.", replies.Messages[0]);
 
             Assert.AreEqual(testUser, data.TellFromUser);
             Assert.AreEqual(testTellToUser, data.TellToUser);
@@ -174,11 +221,28 @@ namespace Gthx.Test
             var testUser = "CrashOverride";
             var testMessage = "Hey all! What's up?";
             gthx.HandleReceivedMessage(testChannel, testUser, testMessage);
+
             Assert.AreEqual(testUser, data.TellCheckUser);
 
-            Assert.AreEqual(testChannel, client.SentToChannel);
-            Assert.IsTrue(client.SentMessage.StartsWith($"{testUser}: "), $"Incorrect start of reply: {client.SentMessage}");
-            Assert.IsTrue(client.SentMessage.EndsWith($"tell {testUser} Mess with the best, die like the rest."), $"Incorrect end of reply: {client.SentMessage}");
+            var replies = client.GetReplies();
+            Assert.AreEqual(2, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            var foundTell = false;
+            foreach (var message in replies.Messages)
+            {
+                Debug.WriteLine("Testing message: {message}");
+                if (message.StartsWith($"{testUser}: "))
+                {
+                    if (message.EndsWith($"tell {testUser} Mess with the best, die like the rest."))
+                    {
+                        Debug.WriteLine("Found the message we're looking for!");
+                        foundTell = true;
+                        break;
+                    }
+                }
+            }
+
+            Assert.IsTrue(foundTell, "Expected reply not received");
         }
     }
 }
