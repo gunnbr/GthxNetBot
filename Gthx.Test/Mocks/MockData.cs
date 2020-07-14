@@ -2,8 +2,6 @@
 using Gthx.Core.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Gthx.Test.Mocks
 {
@@ -152,6 +150,13 @@ namespace Gthx.Test.Mocks
                     return new List<Tell> 
                     {
                         new Tell("AcidBurn", "CrashOverride", "Mess with the best, die like the rest.", new DateTime(1995, 11, 4, 23, 49, 13)) 
+                    };
+
+                case "gunnbr":
+                    return new List<Tell>
+                    {
+                        new Tell("JimmyRockets", "gunnbr", "Can you fix a gthx bug?", new DateTime(2015, 10, 8, 12, 30, 32)),
+                        new Tell("PaulBunyan", "gunnbr", "Do you need any help with emoji 🧑🏿😨🍦?", new DateTime(2015, 10, 9, 3, 34, 43)),
                     };
             }
 

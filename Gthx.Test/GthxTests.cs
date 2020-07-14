@@ -18,7 +18,7 @@ namespace Gthx.Test
             var testChannel = "#reprap";
             var testUser = "SomeUser";
             gthx.HandleReceivedMessage(testChannel, testUser, "Which printer is best?");
-            
+
             var replies = client.GetReplies();
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual(1, replies.Messages.Count);
@@ -233,7 +233,7 @@ namespace Gthx.Test
                 Debug.WriteLine("Testing message: {message}");
                 if (message.StartsWith($"{testUser}: "))
                 {
-                    if (message.EndsWith($"tell {testUser} Mess with the best, die like the rest."))
+                    if (message.EndsWith($"ago AcidBurn tell {testUser} Mess with the best, die like the rest."))
                     {
                         Debug.WriteLine("Found the message we're looking for!");
                         foundTell = true;
@@ -243,6 +243,49 @@ namespace Gthx.Test
             }
 
             Assert.IsTrue(foundTell, "Expected reply not received");
+
+
+            testUser = "gunnbr";
+            testMessage = "Finally got my printer tuned!";
+            gthx.HandleReceivedMessage(testChannel, testUser, testMessage);
+
+            Assert.AreEqual(testUser, data.TellCheckUser);
+
+            replies = client.GetReplies();
+            Assert.IsTrue(replies.Messages.Count > 2, "Not enough replies returned.");
+            Assert.AreEqual(testChannel, replies.Channel);
+            var foundJimmy = false;
+            var foundPaul = false;
+            foreach (var message in replies.Messages)
+            {
+                Debug.WriteLine("Testing message: {message}");
+                if (message.StartsWith($"{testUser}: "))
+                {
+                    if (message.EndsWith($"ago JimmyRockets tell {testUser} Can you fix a gthx bug?"))
+                    {
+                        Debug.WriteLine("Found Jimmy's message.");
+                        foundJimmy = true;
+                    }
+
+                    if (message.EndsWith($"ago PaulBunyan tell {testUser} Do you need any help with emoji 🧑🏿😨🍦?"))
+                    {
+                        Debug.WriteLine("Found Paul's message.");
+                        foundPaul = true;
+                    }
+                }
+            }
+
+            Assert.IsTrue(foundJimmy, "Didn't get Jimmy's tell");
+            Assert.IsTrue(foundPaul, "Didn't get Paul's tell");
+        }
+
+        [TestMethod]
+        public void TestTellSince()
+        {
+            // Test one simple case to start
+
+            // TODO: Add tests for each element of the since string
+            //       and all boundry conditions
         }
     }
 }
