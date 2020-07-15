@@ -29,7 +29,7 @@ namespace Gthx.Core
                 new GoogleModule(),
                 new FactoidModule(data),
                 // new ThingiverseModule(data),
-                // new YoutubeModule(data),
+                new YoutubeModule(data),
             };
         }
 

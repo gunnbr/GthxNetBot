@@ -37,7 +37,7 @@ namespace Gthx.Test.Mocks
             return true;
         }
 
-        public bool AddThingiverseReference(string item)
+        public ReferenceData AddThingiverseReference(string item)
         {
             throw new NotImplementedException();
         }
@@ -47,9 +47,28 @@ namespace Gthx.Test.Mocks
             throw new NotImplementedException();
         }
 
-        public bool AddYoutubeReference(string item)
+        public ReferenceData AddYoutubeReference(string item)
         {
-            throw new NotImplementedException();
+            switch (item)
+            {
+                case "ykKIZQKaT5c":
+                    return new ReferenceData
+                    {
+                        Id = item,
+                        ReferenceCount = 42,
+                        Title = "Spinner"
+                    };
+
+                case "W3B2C0nNpFU":
+                    return new ReferenceData
+                    {
+                        Id = item,
+                        ReferenceCount = 83,
+                        Title = "Best relaxing piano studio ghibli complete collection ピアノスタジオジブリコレクション"
+                    };
+            }
+
+            return null;
         }
 
         public bool AddYoutubeTitle(string item, string title)

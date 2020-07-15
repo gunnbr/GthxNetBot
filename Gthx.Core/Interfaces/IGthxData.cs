@@ -4,6 +4,13 @@ using System.Text;
 
 namespace Gthx.Core.Interfaces
 {
+    public class ReferenceData
+    {
+        public string Id;
+        public string Title;
+        public int ReferenceCount;
+    }
+
     public interface IGthxData
     {
         public void GetLastSeen(string user);
@@ -14,9 +21,9 @@ namespace Gthx.Core.Interfaces
         public List<string> GetFactoidInfo(string factoid);
         public bool AddTell(string fromUser, string toUser, string message);
         public List<Tell> GetTell(string forUser);
-        public bool AddThingiverseReference(string item);
+        public ReferenceData AddThingiverseReference(string item);
         public bool AddThingiverseTitle(string item, string title);
-        public bool AddYoutubeReference(string item);
+        public ReferenceData AddYoutubeReference(string item);
         public bool AddYoutubeTitle(string item, string title);
         public int GetMood();
     }

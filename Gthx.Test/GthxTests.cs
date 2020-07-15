@@ -302,5 +302,30 @@ namespace Gthx.Test
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testGoogleUser}: http://lmgtfy.com/?q=does+3%3d4%3f", replies.Messages[0]);
         }
+
+        [TestMethod]
+        public void TestYoutubeReferences()
+        {
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var gthx = new Core.Gthx(client, data);
+
+            var testChannel = "#reprap";
+            var testUser = "BobYourUncle";
+            gthx.HandleReceivedMessage(testChannel, testUser, $"Check out this cool spinner: https://www.youtube.com/watch?v=ykKIZQKaT5c");
+            var replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser} linked to YouTube video \"Spinner\" => 42 IRC mentions", replies.Messages[0]);
+
+            // Test non-Western characters
+            testUser = "AndrewJohnson";
+            gthx.HandleReceivedMessage(testChannel, testUser, $"Calm down and listen to this: https://youtu.be/W3B2C0nNpFU");
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser} linked to YouTube video \"Best relaxing piano studio ghibli complete collection ピアノスタジオジブリコレクション\" => 83 IRC mentions", replies.Messages[0]);
+
+        }
     }
 }
