@@ -8,7 +8,7 @@ namespace Gthx.Core.Modules
 {
     public class TellModule : IGthxModule
     {
-        private readonly Regex _TellRegex = new Regex(@"\s*tell\s+(?'nick'[a-zA-Z\*_\\\[\]\{\}^`|\*][a-zA-Z0-9\*_\\\[\]\{\}^`|-]*)\s*(?'message'.+)");
+        private readonly Regex _TellRegex = new Regex(@$"\s*tell\s+(?'nick'{Util.NickMatch})\s*(?'message'.+)");
         private readonly IGthxData _Data;
 
         public TellModule(IGthxData data)
