@@ -6,6 +6,11 @@ namespace Gthx.Core
     public class Util
     {
         /// <summary>
+        /// Regex string to match IRC nicknames
+        /// </summary>
+        public static readonly string NickMatch = @"[a-zA-Z\*_\\\[\]\{\}^`|\*][a-zA-Z0-9\*_\\\[\]\{\}^`|-]*";
+
+        /// <summary>
         /// User readable "gthx standard" time between two times
         /// </summary>
         /// <param name="firstTime">UTC DateTime of the first time to compare against <paramref name="secondTime"/></param>

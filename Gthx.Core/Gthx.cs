@@ -15,10 +15,21 @@ namespace Gthx.Core
         {
             _IrcClient = ircClient;
             _Data = data;
+
             _Modules = new List<IGthxModule>
             {
+            // In this order because that's how it was in the
+            // original source. Could probably change it without problems.
+            // TODO: Rearrange these in a better priority order and retest once
+            //       all unit tests are done.
                 new TellModule(data),
-                new FactoidModule(data)
+                // new StatusModule(data),
+                // new LurkerModule(data),
+                // new SeenModule(data),
+                new GoogleModule(),
+                new FactoidModule(data),
+                // new ThingiverseModule(data),
+                // new YoutubeModule(data),
             };
         }
 
@@ -26,7 +37,8 @@ namespace Gthx.Core
         {
             // TODO: Update last seen time
 
-            // TODO: Check for waiting 'tell' messagae
+            // TODO: Handle some messages directly addressed to gthx differently than
+            //       the same message not addressed to gthx.
 
             foreach (var module in _Modules)
             {
@@ -53,8 +65,10 @@ namespace Gthx.Core
                 }
             }
 
+#if DEBUG
             // TODO: Take this out!!
             _IrcClient.SendMessage(channel, $"Hello, {user}");
+#endif
         }
     }
 }

@@ -280,12 +280,27 @@ namespace Gthx.Test
         }
 
         [TestMethod]
-        public void TestTellSince()
+        public void TestGoogleForSomeone()
         {
-            // Test one simple case to start
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var gthx = new Core.Gthx(client, data);
 
-            // TODO: Add tests for each element of the since string
-            //       and all boundry conditions
+            var testChannel = "#reprap";
+            var testUser = "CerealKiller";
+            var testGoogleUser = "Joey";
+
+            gthx.HandleReceivedMessage(testChannel, testUser, $"google plastic for {testGoogleUser}");
+            var replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testGoogleUser}: http://lmgtfy.com/?q=plastic", replies.Messages[0]);
+
+            gthx.HandleReceivedMessage(testChannel, testUser, $"google does 3=4? for {testGoogleUser}");
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testGoogleUser}: http://lmgtfy.com/?q=does+3%3d4%3f", replies.Messages[0]);
         }
     }
 }
