@@ -24,8 +24,7 @@ namespace Gthx.Core.Modules
             foreach (var waitingMessage in waitingMessages)
             {
                 Debug.WriteLine($"Found tell for '{user}' from '{waitingMessage.FromUser}");
-                // TODO: Implement timeSinceString()
-                var timeSince = DateTime.UtcNow - waitingMessage.TimeSet;
+                var timeSince = Util.TimeBetweenString(waitingMessage.TimeSet);
                 var reply = new IrcResponse($"{user}: {timeSince} ago {waitingMessage.FromUser} tell {waitingMessage.ToUser} {waitingMessage.Message}", 
                     ResponseType.Normal, false);
                 replies.Add(reply);
