@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Gthx.Core.Modules
 {
@@ -50,6 +51,11 @@ namespace Gthx.Core.Modules
             }
 
             return replies;
+        }
+
+        public Task<List<IrcResponse>> ProcessMessageAsync(string channel, string user, string message)
+        {
+            throw new NotImplementedException();
         }
     }
 }

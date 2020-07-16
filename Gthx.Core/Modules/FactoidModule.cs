@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Gthx.Core.Modules
 {
@@ -121,6 +122,11 @@ namespace Gthx.Core.Modules
             }
 
             return new IrcResponse($"{factoid} {article} {factoidValue}");
+        }
+
+        public Task<List<IrcResponse>> ProcessMessageAsync(string channel, string user, string message)
+        {
+            throw new NotImplementedException();
         }
     }
 }

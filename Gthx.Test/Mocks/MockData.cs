@@ -18,6 +18,9 @@ namespace Gthx.Test.Mocks
         public string TellToUser { get; private set; }
         public string TellMessage { get; private set; }
         public string TellCheckUser { get; private set; }
+        public string AddedYoutubeId { get; private set; }
+        public string AddedYoutubeTitle { get; private set; }
+
 
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting)
         {
@@ -71,9 +74,10 @@ namespace Gthx.Test.Mocks
             return null;
         }
 
-        public bool AddYoutubeTitle(string item, string title)
+        public void AddYoutubeTitle(string item, string title)
         {
-            throw new NotImplementedException();
+            AddedYoutubeId = item;
+            AddedYoutubeTitle = title;
         }
 
         public bool ForgetFactoid(string user, string factoid)

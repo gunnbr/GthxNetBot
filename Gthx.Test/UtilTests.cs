@@ -1,5 +1,5 @@
 ﻿using Gthx.Core;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,13 +9,13 @@ namespace Gthx.Test
     /// <summary>
     /// Tests for the methods in Util.cs
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class UtilTests
     {
         /// <summary>
         /// Test time string formatting
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTimeSinceString()
         {
             // Verify that 0 seconds works and includes an 's' at the end

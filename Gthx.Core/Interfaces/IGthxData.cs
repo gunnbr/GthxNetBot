@@ -24,7 +24,7 @@ namespace Gthx.Core.Interfaces
         public ReferenceData AddThingiverseReference(string item);
         public bool AddThingiverseTitle(string item, string title);
         public ReferenceData AddYoutubeReference(string item);
-        public bool AddYoutubeTitle(string item, string title);
+        public void AddYoutubeTitle(string item, string title);
         public int GetMood();
     }
 }

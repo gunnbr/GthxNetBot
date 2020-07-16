@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace Gthx.Core.Modules
@@ -28,6 +29,11 @@ namespace Gthx.Core.Modules
             {
                 new IrcResponse($"{nick}: http://lmgtfy.com/?q={search}")
             };
+        }
+
+        public Task<List<IrcResponse>> ProcessMessageAsync(string channel, string user, string message)
+        {
+            throw new NotImplementedException();
         }
     }
 }
