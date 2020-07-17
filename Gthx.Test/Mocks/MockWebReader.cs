@@ -32,8 +32,8 @@ namespace Gthx.Test.Mocks
                 else
                 {
                     dataString = utf8Encoding.GetBytes(@"<head>
-<title>My Fake Title - YouTube</title>
-</head>");
+</head>
+<body>Sorry no title!</body>");
                 }
 
                 memStream.Write(dataString, 0, dataString.Length);

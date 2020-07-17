@@ -36,25 +36,31 @@ namespace Gthx.Core.Modules
                 return null;
             }
 
+            var reply = new List<IrcResponse>();
+
             var url = youtubeMatch.Groups[0].Value;
             var id = youtubeMatch.Groups["id"].Value;
             Console.WriteLine($"Checking for Youtube title for '{id}'");
             var referenceData = _Data.AddYoutubeReference(id);
-            if (referenceData?.Title != null)
+            if (referenceData.Title != null)
             {
                 Debug.WriteLine($"Already have a title for youtube item {referenceData.Id}:{referenceData.Title}");
-                return new List<IrcResponse>
-                {
-                    new IrcResponse($"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.ReferenceCount} IRC mentions")
-                };
+                reply.Add(new IrcResponse($"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.ReferenceCount} IRC mentions"));
+                return reply;
             }
 
             var title = await GetTitle(url, id);
             _Data.AddYoutubeTitle(id, title);
-            return new List<IrcResponse>
+            if (string.IsNullOrEmpty(title))
             {
-                new IrcResponse($"{user} linked to YouTube video \"{title}\" => 1 IRC mentions")
-            };
+                reply.Add(new IrcResponse($"{user} linked to a YouTube video with an unknown title => {referenceData.ReferenceCount} IRC mentions"));
+            }
+            else
+            {
+                reply.Add(new IrcResponse($"{user} linked to YouTube video \"{title}\" => 1 IRC mentions"));
+            }
+
+            return reply;
         }
 
         private async Task<string> GetTitle(string url, string id)
@@ -63,7 +69,6 @@ namespace Gthx.Core.Modules
 
             using (var reader = new StreamReader(webStream))
             {
-                Console.WriteLine("Reading web data:");
                 while (!reader.EndOfStream)
                 {
                     var line = await reader.ReadLineAsync();
@@ -71,14 +76,14 @@ namespace Gthx.Core.Modules
                     var titleMatch = _titleRegex.Match(line);
                     if (titleMatch.Success)
                     {
-                        Console.WriteLine($"\n\nFound title: {titleMatch.Groups["title"].Value}");
+                        Console.WriteLine($"Found title: {titleMatch.Groups["title"].Value}");
                         return titleMatch.Groups["title"].Value;
                     }
 
                     var metaMatch = _metaRegex.Match(line);
                     if (metaMatch.Success)
                     {
-                        Console.WriteLine($"\n\nFound title: {metaMatch.Groups["title"].Value}");
+                        Console.WriteLine($"Found title: {metaMatch.Groups["title"].Value}");
                         return metaMatch.Groups["title"].Value;
                     }
                 }

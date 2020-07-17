@@ -71,7 +71,11 @@ namespace Gthx.Test.Mocks
                     };
             }
 
-            return null;
+            return new ReferenceData
+            {
+                Id = item,
+                ReferenceCount = 1
+            };
         }
 
         public void AddYoutubeTitle(string item, string title)

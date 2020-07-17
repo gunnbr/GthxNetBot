@@ -349,6 +349,14 @@ namespace Gthx.Test
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testUser} linked to YouTube video \"Meta Title\" => 1 IRC mentions", replies.Messages[0]);
+
+            // Test message when no title is found
+            testUser = "AnotherNick";
+            await gthx.HandleReceivedMessage(testChannel, testUser, $"Does thie one work for you? https://youtu.be/notitle");
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser} linked to a YouTube video with an unknown title => 1 IRC mentions", replies.Messages[0]);
         }
     }
 }
