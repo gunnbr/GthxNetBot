@@ -311,7 +311,7 @@ namespace Gthx.Test
         }
 
         [Test]
-        public async Task TestYoutubeReferences()
+        public async Task TestMockYoutubeReferences()
         {
             var client = new MockIrcClient();
             var data = new MockData();

@@ -10,7 +10,7 @@ namespace Gthx.Core.Modules
 {
     public class YoutubeModule : IGthxModule
     {
-       private readonly Regex _youtubeRegex = new Regex(@$"http(s)?:\/\/(?'url'www\.youtube\.com\/watch\?v=|youtu\.be\/)(?'id'[\w\-]*)(\S*)");
+        private readonly Regex _youtubeRegex = new Regex(@$"http(s)?:\/\/(?'url'www\.youtube\.com\/watch\?v=|youtu\.be\/)(?'id'[\w\-]*)(\S*)");
         private readonly Regex _titleRegex = new Regex(@"<title>(?'title'.*) - .*<\/title>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
         private readonly Regex _metaRegex = new Regex("<meta name=\"title\" content=\"(?'title'.*)\"", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
@@ -64,19 +64,21 @@ namespace Gthx.Core.Modules
             using (var reader = new StreamReader(webStream))
             {
                 Console.WriteLine("Reading web data:");
-                while (reader.Peek() >= 0)
+                while (!reader.EndOfStream)
                 {
                     var line = await reader.ReadLineAsync();
-                    Console.WriteLine(line);
+
                     var titleMatch = _titleRegex.Match(line);
                     if (titleMatch.Success)
                     {
+                        Console.WriteLine($"\n\nFound title: {titleMatch.Groups["title"].Value}");
                         return titleMatch.Groups["title"].Value;
                     }
 
                     var metaMatch = _metaRegex.Match(line);
                     if (metaMatch.Success)
                     {
+                        Console.WriteLine($"\n\nFound title: {metaMatch.Groups["title"].Value}");
                         return metaMatch.Groups["title"].Value;
                     }
                 }
