@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -10,13 +10,17 @@ namespace Gthx.Core.Modules
 {
     public class YoutubeModule : IGthxModule
     {
-        private readonly Regex _youtubeRegex = new Regex(@$"http(s)?:\/\/(?'url'www\.youtube\.com\/watch\?v=|youtu\.be\/)(?'id'[\w\-]*)(\S*)");
+       private readonly Regex _youtubeRegex = new Regex(@$"http(s)?:\/\/(?'url'www\.youtube\.com\/watch\?v=|youtu\.be\/)(?'id'[\w\-]*)(\S*)");
+        private readonly Regex _titleRegex = new Regex(@"<title>(?'title'.*) - .*<\/title>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private readonly Regex _metaRegex = new Regex("<meta name=\"title\" content=\"(?'title'.*)\"", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
         private readonly IGthxData _Data;
+        private readonly IWebReader _WebReader;
 
-        public YoutubeModule(IGthxData data)
+        public YoutubeModule(IGthxData data, IWebReader webReader)
         {
             this._Data = data;
+            this._WebReader = webReader;
         }
 
         public List<IrcResponse> ProcessMessage(string channel, string user, string message)
@@ -32,7 +36,7 @@ namespace Gthx.Core.Modules
                 return null;
             }
 
-            var url = youtubeMatch.Groups["url"].Value;
+            var url = youtubeMatch.Groups[0].Value;
             var id = youtubeMatch.Groups["id"].Value;
             Console.WriteLine($"Checking for Youtube title for '{id}'");
             var referenceData = _Data.AddYoutubeReference(id);
@@ -45,7 +49,6 @@ namespace Gthx.Core.Modules
                 };
             }
 
-            // TODO: Implement getting of title from youtube!
             var title = await GetTitle(url, id);
             _Data.AddYoutubeTitle(id, title);
             return new List<IrcResponse>
@@ -56,8 +59,30 @@ namespace Gthx.Core.Modules
 
         private async Task<string> GetTitle(string url, string id)
         {
-            await Task.Delay(3000);
-            return "Dummy Title";
+            var webStream = await _WebReader.GetStreamFromUrlAsync(url);
+
+            using (var reader = new StreamReader(webStream))
+            {
+                Console.WriteLine("Reading web data:");
+                while (reader.Peek() >= 0)
+                {
+                    var line = await reader.ReadLineAsync();
+                    Console.WriteLine(line);
+                    var titleMatch = _titleRegex.Match(line);
+                    if (titleMatch.Success)
+                    {
+                        return titleMatch.Groups["title"].Value;
+                    }
+
+                    var metaMatch = _metaRegex.Match(line);
+                    if (metaMatch.Success)
+                    {
+                        return metaMatch.Groups["title"].Value;
+                    }
+                }
+            }
+
+            return null;
         } 
     }
 }

@@ -10,13 +10,16 @@ namespace Gthx.Core
     {
         private readonly IIrcClient _IrcClient;
         private readonly IGthxData _Data;
+        private readonly IWebReader _WebReader;
+
         private readonly List<IGthxModule> _Modules;
         private readonly List<IGthxModule> _AsyncModules;
 
-        public Gthx(IIrcClient ircClient, IGthxData data)
+        public Gthx(IIrcClient ircClient, IGthxData data, IWebReader webReader)
         {
             _IrcClient = ircClient;
             _Data = data;
+            _WebReader = webReader;
 
             _Modules = new List<IGthxModule>
             {
@@ -35,7 +38,7 @@ namespace Gthx.Core
             _AsyncModules = new List<IGthxModule>
             {
                 // new ThingiverseModule(data),
-                new YoutubeModule(data),
+                new YoutubeModule(data, _WebReader),
             };
         }
 

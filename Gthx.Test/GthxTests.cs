@@ -13,7 +13,8 @@ namespace Gthx.Test
         {
             var client = new MockIrcClient();
             var data = new MockData();
-            var gthx = new Core.Gthx(client, data);
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
 
             // Test channel message
             var testChannel = "#reprap";
@@ -41,7 +42,8 @@ namespace Gthx.Test
         {
             var client = new MockIrcClient();
             var data = new MockData();
-            var gthx = new Core.Gthx(client, data);
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
 
             var testFactoid = "testFactoid";
             var testValue = "working";
@@ -80,7 +82,8 @@ namespace Gthx.Test
         {
             var client = new MockIrcClient();
             var data = new MockData();
-            var gthx = new Core.Gthx(client, data);
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
 
             // Test "is"
             var testChannel = "#reprap";
@@ -150,7 +153,8 @@ namespace Gthx.Test
         {
             var client = new MockIrcClient();
             var data = new MockData();
-            var gthx = new Core.Gthx(client, data);
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
 
             // Test "<reply>" and "!who"
             var testChannel = "#reprap";
@@ -192,7 +196,8 @@ namespace Gthx.Test
         {
             var client = new MockIrcClient();
             var data = new MockData();
-            var gthx = new Core.Gthx(client, data);
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
 
             var testChannel = "#reprap";
             var testUser = "AcidBurn";
@@ -216,7 +221,8 @@ namespace Gthx.Test
         {
             var client = new MockIrcClient();
             var data = new MockData();
-            var gthx = new Core.Gthx(client, data);
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
 
             var testChannel = "#reprap";
             var testUser = "CrashOverride";
@@ -284,7 +290,8 @@ namespace Gthx.Test
         {
             var client = new MockIrcClient();
             var data = new MockData();
-            var gthx = new Core.Gthx(client, data);
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
 
             var testChannel = "#reprap";
             var testUser = "CerealKiller";
@@ -308,7 +315,8 @@ namespace Gthx.Test
         {
             var client = new MockIrcClient();
             var data = new MockData();
-            var gthx = new Core.Gthx(client, data);
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
 
             var testChannel = "#reprap";
             var testUser = "BobYourUncle";
@@ -326,13 +334,21 @@ namespace Gthx.Test
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testUser} linked to YouTube video \"Best relaxing piano studio ghibli complete collection ピアノスタジオジブリコレクション\" => 83 IRC mentions", replies.Messages[0]);
 
-            // Test fetching a new title
+            // Test fetching a new title that uses the <title> element
             testUser = "RandomNick";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"here's another link https://youtu.be/DUMMY");
+            await gthx.HandleReceivedMessage(testChannel, testUser, $"here's another link https://youtu.be/title");
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testUser} linked to YouTube video \"Dummy Title\" => 1 IRC mentions", replies.Messages[0]);
+
+            // Test fetching a new title that uses the <meta> element for the title
+            testUser = "AnotherNick";
+            await gthx.HandleReceivedMessage(testChannel, testUser, $"Or take a look at this one https://youtu.be/meta which I think is better");
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser} linked to YouTube video \"Meta Title\" => 1 IRC mentions", replies.Messages[0]);
         }
     }
 }
