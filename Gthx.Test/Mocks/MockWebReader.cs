@@ -27,7 +27,21 @@ namespace Gthx.Test.Mocks
                 }
                 else if (url.EndsWith("/meta"))
                 {
-                    dataString = utf8Encoding.GetBytes("<head>\r<meta name=\"title\" content=\"Meta Title\">\r</head>");
+                    dataString = utf8Encoding.GetBytes(@"<head>
+<meta name=""title"" content=""Meta Title"">
+</head>");
+                }
+                else if (url.EndsWith(":2810756"))
+                {
+                    dataString = utf8Encoding.GetBytes(@"<head>
+<title>Articulated Butterfly - Thingiverse</title>
+</head>");
+                }
+                else if (url.EndsWith(":2818955"))
+                {
+                    dataString = utf8Encoding.GetBytes(@"<head>
+<meta name=""title"" content=""Articulated Slug"">
+</head>");
                 }
                 else
                 {

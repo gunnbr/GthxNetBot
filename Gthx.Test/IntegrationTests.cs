@@ -35,5 +35,23 @@ namespace Gthx.Test
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testUser} linked to YouTube video \"Studio Ghibli - Music Collection (Piano and Violin Duo) 株式会社スタジオジブリ- Relaxing music song\" => 1 IRC mentions", replies.Messages[0]);
         }
+
+        [Test]
+        public async Task TestLiveThingiverseReferences()
+        {
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var mockReader = new WebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
+
+            // Test fetching a new title that uses the <title> element
+            var testChannel = "#reprap";
+            var testUser = "RandomNick";
+            await gthx.HandleReceivedMessage(testChannel, testUser, $"Your daughter would really like this: https://www.thingiverse.com/thing:2810756");
+            var replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser} linked to \"Articulated Butterfly by 8ran\" on thingiverse => 1 IRC mentions", replies.Messages[0]);
+        }
     }
 }

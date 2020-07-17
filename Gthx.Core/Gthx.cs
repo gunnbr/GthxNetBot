@@ -37,7 +37,7 @@ namespace Gthx.Core
 
             _AsyncModules = new List<IGthxModule>
             {
-                // new ThingiverseModule(data),
+                new ThingiverseModule(data, _WebReader),
                 new YoutubeModule(data, _WebReader),
             };
         }

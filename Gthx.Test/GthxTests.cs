@@ -311,7 +311,7 @@ namespace Gthx.Test
         }
 
         [Test]
-        public async Task TestMockYoutubeReferences()
+        public async Task TestYoutubeReferences()
         {
             var client = new MockIrcClient();
             var data = new MockData();
@@ -326,7 +326,7 @@ namespace Gthx.Test
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testUser} linked to YouTube video \"Spinner\" => 42 IRC mentions", replies.Messages[0]);
 
-            // Test non-Western characters
+            // Test non-ASCII characters
             testUser = "AndrewJohnson";
             await gthx.HandleReceivedMessage(testChannel, testUser, $"Calm down and listen to this: https://youtu.be/W3B2C0nNpFU");
             replies = client.GetReplies();
@@ -357,6 +357,55 @@ namespace Gthx.Test
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testUser} linked to a YouTube video with an unknown title => 1 IRC mentions", replies.Messages[0]);
+        }
+
+        [Test]
+        public async Task TestThingiverseReferences()
+        {
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
+
+            var testChannel = "#reprap";
+            var testUser = "BobYourUncle";
+            await gthx.HandleReceivedMessage(testChannel, testUser, $"Check out this cool spinner: https://www.thingiverse.com/thing:2823006");
+            var replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser} linked to \"Air Spinner\" on thingiverse => 42 IRC mentions", replies.Messages[0]);
+
+            // Test non-ASCII characters
+            testUser = "AndrewJohnson";
+            await gthx.HandleReceivedMessage(testChannel, testUser, $"https://www.thingiverse.com/thing:1276095 this is the coolest fish!!");
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser} linked to \"Flexifish 🦈🌊\" on thingiverse => 23 IRC mentions", replies.Messages[0]);
+
+            // Test fetching a new title that uses the <title> element
+            testUser = "RandomNick";
+            await gthx.HandleReceivedMessage(testChannel, testUser, $"Your daughter would really like this: https://www.thingiverse.com/thing:2810756");
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser} linked to \"Articulated Butterfly\" on thingiverse => 1 IRC mentions", replies.Messages[0]);
+
+            // Test fetching a new title that uses the <meta> element for the title
+            testUser = "AnotherNick";
+            await gthx.HandleReceivedMessage(testChannel, testUser, $"Or this one: https://www.thingiverse.com/thing:2818955");
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser} linked to \"Articulated Slug\" on thingiverse => 1 IRC mentions", replies.Messages[0]);
+
+            // Test message when no title is found
+            testUser = "AnotherNick";
+            await gthx.HandleReceivedMessage(testChannel, testUser, $"Does thie one work for you? https://www.thingiverse.com/thing:4052802");
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser} linked to thing 4052802 on thingiverse => 1 IRC mentions", replies.Messages[0]);
         }
     }
 }

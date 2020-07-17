@@ -42,7 +42,30 @@ namespace Gthx.Test.Mocks
 
         public ReferenceData AddThingiverseReference(string item)
         {
-            throw new NotImplementedException();
+            switch (item)
+            {
+                case "2823006":
+                    return new ReferenceData
+                    {
+                        Id = item,
+                        ReferenceCount = 42,
+                        Title = "Air Spinner"
+                    };
+
+                case "1276095":
+                    return new ReferenceData
+                    {
+                        Id = item,
+                        ReferenceCount = 23,
+                        Title = "Flexifish 🦈🌊"
+                    };
+            }
+
+            return new ReferenceData
+            {
+                Id = item,
+                ReferenceCount = 1
+            };
         }
 
         public bool AddThingiverseTitle(string item, string title)
