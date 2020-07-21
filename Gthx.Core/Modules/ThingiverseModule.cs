@@ -15,28 +15,25 @@ namespace Gthx.Core.Modules
         private readonly Regex _metaRegex = new Regex("<meta name=\"title\" content=\"(?'title'.*)\"", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
         private readonly IGthxData _Data;
+        private readonly IIrcClient _IrcClient;
         private readonly IWebReader _WebReader;
 
-        public ThingiverseModule(IGthxData data, IWebReader webReader)
+        public ThingiverseModule(IGthxData data, IIrcClient ircClient, IWebReader webReader)
         {
             this._Data = data;
+            this._IrcClient = ircClient;
             this._WebReader = webReader;
         }
 
         public List<IrcResponse> ProcessMessage(string channel, string user, string message)
         {
-            throw new NotImplementedException();
-        }
-
-        public async Task<List<IrcResponse>> ProcessMessageAsync(string channel, string user, string message)
-        {
+            Console.WriteLine("ThingiverseModule running...");
             var youtubeMatch = _thingiRegex.Match(message);
             if (!youtubeMatch.Success)
             {
+                Console.WriteLine("No thingiverse match");
                 return null;
             }
-
-            var reply = new List<IrcResponse>();
 
             var url = youtubeMatch.Groups[0].Value;
             var id = youtubeMatch.Groups["id"].Value;
@@ -45,29 +42,24 @@ namespace Gthx.Core.Modules
             if (referenceData.Title != null)
             {
                 Console.WriteLine($"Already have a title for Thingiverse item {referenceData.Id}:{referenceData.Title}");
-                reply.Add(new IrcResponse($"{user} linked to \"{referenceData.Title}\" on thingiverse => {referenceData.ReferenceCount} IRC mentions"));
-                return reply;
+                _IrcClient.SendMessage(channel, $"{user} linked to \"{referenceData.Title}\" on thingiverse => {referenceData.ReferenceCount} IRC mentions");
+                return null;
             }
 
-            var title = await GetTitle(url, id);
-            _Data.AddYoutubeTitle(id, title);
+            GetAndSaveTitle(url, id, channel, user, referenceData?.ReferenceCount ?? 1);
 
-            if (string.IsNullOrEmpty(title))
-            {
-                reply.Add(new IrcResponse($"{user} linked to thing {id} on thingiverse => {referenceData.ReferenceCount} IRC mentions"));
-            }
-            else
-            {
-                reply.Add(new IrcResponse($"{user} linked to \"{title}\" on thingiverse => {referenceData.ReferenceCount} IRC mentions"));
-            }
-
-            return reply;
+            return null;
         }
 
-        // TODO: Move this to the Util class once a DI solution is found
+        // TODO: Move this to the Util class once a DI solution is found that
+        //       works with unit tests so the WebReader can be mocked
         private async Task<string> GetTitle(string url, string id)
         {
+            Console.WriteLine($"Getting thingiverse title for '{id}'");
+
             var webStream = await _WebReader.GetStreamFromUrlAsync(url);
+
+            Console.WriteLine("Finished waiting for the web stream...");
 
             using (var reader = new StreamReader(webStream))
             {
@@ -92,6 +84,24 @@ namespace Gthx.Core.Modules
             }
 
             return null;
+        }
+
+        public async void GetAndSaveTitle(string url, string id, string channel, string user, int referenceCount)
+        {
+            var title = await GetTitle(url, id);
+            Console.WriteLine($"Got the title for ID {id} as '{title}'");
+            _Data.AddYoutubeTitle(id, title);
+
+            if (string.IsNullOrEmpty(title))
+            {
+                _IrcClient.SendMessage(channel, $"{user} linked to thing {id} on thingiverse => {referenceCount} IRC mentions");
+            }
+            else
+            {
+                Console.WriteLine($"Sending reply about the title");
+                _IrcClient.SendMessage(channel, $"{user} linked to \"{title}\" on thingiverse => {referenceCount} IRC mentions");
+                Console.WriteLine("Done sending reply about the title");
+            }
         }
     }
 }

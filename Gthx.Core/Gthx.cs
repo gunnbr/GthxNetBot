@@ -13,7 +13,6 @@ namespace Gthx.Core
         private readonly IWebReader _WebReader;
 
         private readonly List<IGthxModule> _Modules;
-        private readonly List<IGthxModule> _AsyncModules;
 
         public Gthx(IIrcClient ircClient, IGthxData data, IWebReader webReader)
         {
@@ -27,6 +26,12 @@ namespace Gthx.Core
                 // original source. Could probably change it without problems.
                 // TODO: Rearrange these in a better priority order and retest once
                 //       all unit tests are done.
+
+                // Reference and title checkers must come first because they aren't the final word
+                // and we want additional modules to run after them.
+                new ThingiverseModule(data, _IrcClient, _WebReader),
+                new YoutubeModule(data, _IrcClient, _WebReader),
+
                 new TellModule(data),
                 // new StatusModule(data),
                 // new LurkerModule(data),
@@ -34,15 +39,9 @@ namespace Gthx.Core
                 new GoogleModule(),
                 new FactoidModule(data),
             };
-
-            _AsyncModules = new List<IGthxModule>
-            {
-                new ThingiverseModule(data, _WebReader),
-                new YoutubeModule(data, _WebReader),
-            };
         }
 
-        public async Task HandleReceivedMessage(string channel, string user, string message)
+        public void HandleReceivedMessage(string channel, string user, string message)
         {
             // TODO: Update last seen time
 
@@ -74,34 +73,9 @@ namespace Gthx.Core
                 }
             }
 
-            foreach (var asyncModule in _AsyncModules)
-            {
-                var asyncResponses = await asyncModule.ProcessMessageAsync(channel, user, message);
-                if (asyncResponses != null)
-                {
-                    foreach (var response in asyncResponses)
-                    {
-                        if (response.Type == ResponseType.Normal)
-                        {
-                            _IrcClient.SendMessage(channel, response.Message);
-                        }
-
-                        if (response.Type == ResponseType.Action)
-                        {
-                            _IrcClient.SendAction(channel, response.Message);
-                        }
-
-                        if (response.IsFinalResponse)
-                        {
-                            return;
-                        }
-                    }
-                }
-            }
-
 #if DEBUG
                 // TODO: Take this out!!
-                _IrcClient.SendMessage(channel, $"Hello, {user}");
+                //_IrcClient.SendMessage(channel, $"Hello, {user}");
 #endif
         }
     }

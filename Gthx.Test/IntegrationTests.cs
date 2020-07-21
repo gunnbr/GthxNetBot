@@ -21,7 +21,8 @@ namespace Gthx.Test
 
             var testChannel = "#reprap";
             var testUser = "BobYourUncle";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"OMG! Check this out! https://www.youtube.com/watch?v=I7nVrT00ST4");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"OMG! Check this out! https://www.youtube.com/watch?v=I7nVrT00ST4");
+            await Task.Delay(5000);
             var replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -29,7 +30,8 @@ namespace Gthx.Test
 
             // Test non-Western characters
             testUser = "AndrewJohnson";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"Calm down and listen to this: https://www.youtube.com/watch?v=xtAHgrNs7r4");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"Calm down and listen to this: https://www.youtube.com/watch?v=xtAHgrNs7r4");
+            await Task.Delay(5000);
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -47,7 +49,8 @@ namespace Gthx.Test
             // Test fetching a new title that uses the <title> element
             var testChannel = "#reprap";
             var testUser = "RandomNick";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"Your daughter would really like this: https://www.thingiverse.com/thing:2810756");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"Your daughter would really like this: https://www.thingiverse.com/thing:2810756");
+            await Task.Delay(5000);
             var replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);

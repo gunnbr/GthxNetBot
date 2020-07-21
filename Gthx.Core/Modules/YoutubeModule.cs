@@ -15,17 +15,40 @@ namespace Gthx.Core.Modules
         private readonly Regex _metaRegex = new Regex("<meta name=\"title\" content=\"(?'title'.*)\"", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
         private readonly IGthxData _Data;
+        private readonly IIrcClient _IrcClient;
         private readonly IWebReader _WebReader;
 
-        public YoutubeModule(IGthxData data, IWebReader webReader)
+        public YoutubeModule(IGthxData data, IIrcClient ircClient, IWebReader webReader)
         {
             this._Data = data;
+            this._IrcClient = ircClient;
             this._WebReader = webReader;
         }
 
         public List<IrcResponse> ProcessMessage(string channel, string user, string message)
         {
-            throw new NotImplementedException();
+            var youtubeMatch = _youtubeRegex.Match(message);
+            if (!youtubeMatch.Success)
+            {
+                return null;
+            }
+
+            var reply = new List<IrcResponse>();
+
+            var url = youtubeMatch.Groups[0].Value;
+            var id = youtubeMatch.Groups["id"].Value;
+            Console.WriteLine($"Checking for Youtube title for '{id}'");
+            var referenceData = _Data.AddYoutubeReference(id);
+            if (referenceData.Title != null)
+            {
+                Debug.WriteLine($"Already have a title for youtube item {referenceData.Id}:{referenceData.Title}");
+                reply.Add(new IrcResponse($"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.ReferenceCount} IRC mentions"));
+                return reply;
+            }
+
+            GetAndSaveTitle(url, id, channel, user, referenceData?.ReferenceCount ?? 1);
+
+            return reply;
         }
 
         public async Task<List<IrcResponse>> ProcessMessageAsync(string channel, string user, string message)
@@ -91,5 +114,19 @@ namespace Gthx.Core.Modules
 
             return null;
         } 
+
+        public async void GetAndSaveTitle(string url, string id, string channel, string user, int referenceCount)
+        {
+            var title = await GetTitle(url, id);
+            _Data.AddYoutubeTitle(id, title);
+            if (string.IsNullOrEmpty(title))
+            {
+                _IrcClient.SendMessage(channel, $"{user} linked to a YouTube video with an unknown title => {referenceCount} IRC mentions");
+            }
+            else
+            {
+                _IrcClient.SendMessage(channel, $"{user} linked to YouTube video \"{title}\" => 1 IRC mentions");
+            }
+        }
     }
 }

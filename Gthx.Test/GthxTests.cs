@@ -1,5 +1,6 @@
 using Gthx.Test.Mocks;
 using NUnit.Framework;
+using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -9,7 +10,7 @@ namespace Gthx.Test
     public class GthxTests
     {
         [Test]
-        public async Task TestGenericResponse()
+        public void TestGenericResponse()
         {
             var client = new MockIrcClient();
             var data = new MockData();
@@ -19,7 +20,7 @@ namespace Gthx.Test
             // Test channel message
             var testChannel = "#reprap";
             var testUser = "SomeUser";
-            await gthx.HandleReceivedMessage(testChannel, testUser, "Which printer is best?");
+            gthx.HandleReceivedMessage(testChannel, testUser, "Which printer is best?");
 
             var replies = client.GetReplies();
             Assert.AreEqual(testChannel, replies.Channel);
@@ -29,7 +30,7 @@ namespace Gthx.Test
             // Test DM
             testChannel = "gthx";
             testUser = "SomeOtherUser";
-            await gthx.HandleReceivedMessage(testChannel, testUser, "Hey, can you help me?");
+            gthx.HandleReceivedMessage(testChannel, testUser, "Hey, can you help me?");
 
             replies = client.GetReplies();
             Assert.AreEqual(testChannel, replies.Channel);
@@ -38,7 +39,7 @@ namespace Gthx.Test
         }
 
         [Test]
-        public async Task TestFactoidSetting()
+        public void TestFactoidSetting()
         {
             var client = new MockIrcClient();
             var data = new MockData();
@@ -52,7 +53,7 @@ namespace Gthx.Test
             var testUser = "SomeUser";
             var testUser2 = "AnotherUser";
 
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid} is {testValue}");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid} is {testValue}");
 
             var replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -64,7 +65,7 @@ namespace Gthx.Test
             Assert.AreEqual(testUser, data.FactoidUser);
             Assert.IsTrue(data.FactoidReplaceExisting);
 
-            await gthx.HandleReceivedMessage(testChannel, testUser2, $"{testFactoid} are also {testValue2}");
+            gthx.HandleReceivedMessage(testChannel, testUser2, $"{testFactoid} are also {testValue2}");
 
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -78,7 +79,7 @@ namespace Gthx.Test
         }
 
         [Test]
-        public async Task TestFactoidGetting()
+        public void TestFactoidGetting()
         {
             var client = new MockIrcClient();
             var data = new MockData();
@@ -90,7 +91,7 @@ namespace Gthx.Test
             var testUser = "sandman";
             var testFactoid = "reprap";
 
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
 
             var replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -99,7 +100,7 @@ namespace Gthx.Test
             Assert.AreEqual($"{testFactoid} is the best way to learn about 3D printing", replies.Messages[0]);
 
             // Same test with an exclamation point!
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}!");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}!");
 
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -109,7 +110,7 @@ namespace Gthx.Test
 
             // Test "are"
             testFactoid = "pennies";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
 
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -119,7 +120,7 @@ namespace Gthx.Test
 
             // Test multiple values set:
             testFactoid = "cake";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
 
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -129,7 +130,7 @@ namespace Gthx.Test
 
             // Test emoji
             testFactoid = "emoji";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
 
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -139,7 +140,7 @@ namespace Gthx.Test
 
             // Test extended unicode points
             testFactoid = "other languages";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
 
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -149,7 +150,7 @@ namespace Gthx.Test
         }
 
         [Test]
-        public async Task TestAdvancedFactoidGetting()
+        public void TestAdvancedFactoidGetting()
         {
             var client = new MockIrcClient();
             var data = new MockData();
@@ -161,7 +162,7 @@ namespace Gthx.Test
             var testUser = "eliteBoi";
             var testFactoid = "botsmack";
 
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}!");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}!");
 
             var replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -171,7 +172,7 @@ namespace Gthx.Test
 
             // Test "!who" and "!channel"
             testFactoid = "lost";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
 
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -181,7 +182,7 @@ namespace Gthx.Test
 
             // Test "<action>" and "!who"
             testFactoid = "dance";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}!");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}!");
 
             replies = client.GetReplies();
             Assert.AreEqual(0, replies.Messages.Count);
@@ -192,7 +193,7 @@ namespace Gthx.Test
         }
 
         [Test]
-        public async Task TestTellSetting()
+        public void TestTellSetting()
         {
             var client = new MockIrcClient();
             var data = new MockData();
@@ -204,7 +205,7 @@ namespace Gthx.Test
             var testTellToUser = "CrashOverride";
             var testMessage = "Mess with the best, die like the rest.";
 
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"tell {testTellToUser} {testMessage}");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"tell {testTellToUser} {testMessage}");
 
             var replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -217,7 +218,7 @@ namespace Gthx.Test
         }
 
         [Test]
-        public async Task TestTellGetting()
+        public void TestTellGetting()
         {
             var client = new MockIrcClient();
             var data = new MockData();
@@ -227,7 +228,7 @@ namespace Gthx.Test
             var testChannel = "#reprap";
             var testUser = "CrashOverride";
             var testMessage = "Hey all! What's up?";
-            await gthx.HandleReceivedMessage(testChannel, testUser, testMessage);
+            gthx.HandleReceivedMessage(testChannel, testUser, testMessage);
 
             Assert.AreEqual(testUser, data.TellCheckUser);
 
@@ -253,7 +254,7 @@ namespace Gthx.Test
 
             testUser = "gunnbr";
             testMessage = "Finally got my printer tuned!";
-            await gthx.HandleReceivedMessage(testChannel, testUser, testMessage);
+            gthx.HandleReceivedMessage(testChannel, testUser, testMessage);
 
             Assert.AreEqual(testUser, data.TellCheckUser);
 
@@ -286,7 +287,7 @@ namespace Gthx.Test
         }
 
         [Test]
-        public async Task TestGoogleForSomeone()
+        public void TestGoogleForSomeone()
         {
             var client = new MockIrcClient();
             var data = new MockData();
@@ -297,13 +298,13 @@ namespace Gthx.Test
             var testUser = "CerealKiller";
             var testGoogleUser = "Joey";
 
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"google plastic for {testGoogleUser}");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"google plastic for {testGoogleUser}");
             var replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testGoogleUser}: http://lmgtfy.com/?q=plastic", replies.Messages[0]);
 
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"google does 3=4? for {testGoogleUser}");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"google does 3=4? for {testGoogleUser}");
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -320,7 +321,7 @@ namespace Gthx.Test
 
             var testChannel = "#reprap";
             var testUser = "BobYourUncle";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"Check out this cool spinner: https://www.youtube.com/watch?v=ykKIZQKaT5c");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"Check out this cool spinner: https://www.youtube.com/watch?v=ykKIZQKaT5c");
             var replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -328,7 +329,7 @@ namespace Gthx.Test
 
             // Test non-ASCII characters
             testUser = "AndrewJohnson";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"Calm down and listen to this: https://youtu.be/W3B2C0nNpFU");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"Calm down and listen to this: https://youtu.be/W3B2C0nNpFU");
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -336,7 +337,8 @@ namespace Gthx.Test
 
             // Test fetching a new title that uses the <title> element
             testUser = "RandomNick";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"here's another link https://youtu.be/title");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"here's another link https://youtu.be/title");
+            await Task.Delay(500);
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -344,7 +346,8 @@ namespace Gthx.Test
 
             // Test fetching a new title that uses the <meta> element for the title
             testUser = "AnotherNick";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"Or take a look at this one https://youtu.be/meta which I think is better");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"Or take a look at this one https://youtu.be/meta which I think is better");
+            await Task.Delay(500);
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -352,7 +355,8 @@ namespace Gthx.Test
 
             // Test message when no title is found
             testUser = "AnotherNick";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"Does thie one work for you? https://youtu.be/notitle");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"Does thie one work for you? https://youtu.be/notitle");
+            await Task.Delay(500);
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -369,7 +373,7 @@ namespace Gthx.Test
 
             var testChannel = "#reprap";
             var testUser = "BobYourUncle";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"Check out this cool spinner: https://www.thingiverse.com/thing:2823006");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"Check out this cool spinner: https://www.thingiverse.com/thing:2823006");
             var replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -377,7 +381,7 @@ namespace Gthx.Test
 
             // Test non-ASCII characters
             testUser = "AndrewJohnson";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"https://www.thingiverse.com/thing:1276095 this is the coolest fish!!");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"https://www.thingiverse.com/thing:1276095 this is the coolest fish!!");
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -385,7 +389,8 @@ namespace Gthx.Test
 
             // Test fetching a new title that uses the <title> element
             testUser = "RandomNick";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"Your daughter would really like this: https://www.thingiverse.com/thing:2810756");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"Your daughter would really like this: https://www.thingiverse.com/thing:2810756");
+            await Task.Delay(500);
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -393,7 +398,8 @@ namespace Gthx.Test
 
             // Test fetching a new title that uses the <meta> element for the title
             testUser = "AnotherNick";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"Or this one: https://www.thingiverse.com/thing:2818955");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"Or this one: https://www.thingiverse.com/thing:2818955");
+            await Task.Delay(500);
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -401,11 +407,51 @@ namespace Gthx.Test
 
             // Test message when no title is found
             testUser = "AnotherNick";
-            await gthx.HandleReceivedMessage(testChannel, testUser, $"Does thie one work for you? https://www.thingiverse.com/thing:4052802");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"Does thie one work for you? https://www.thingiverse.com/thing:4052802");
+            await Task.Delay(500);
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testUser} linked to thing 4052802 on thingiverse => 1 IRC mentions", replies.Messages[0]);
+        }
+
+        [Test]
+        public async Task TestThingiverseInTell()
+        {
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
+
+            var testChannel = "#reprap";
+            var testUser = "CerealKiller";
+            var tellToUser = "Nikon";
+            gthx.HandleReceivedMessage(testChannel, testUser, $"tell {tellToUser} Can I crash at your place and print this out? https://www.thingiverse.com/thing:2823006");
+            Console.WriteLine("Finished processing received message");
+            // Wait for async replies to get sent
+            await Task.Delay(500);
+            Console.WriteLine("Finished delay for async messages");
+            var replies = client.GetReplies();
+            Console.WriteLine($"Got {replies.Messages.Count} messages");
+            Assert.AreEqual(2, replies.Messages.Count, "Didn't get the expected number of replies");
+            Assert.AreEqual(testChannel, replies.Channel);
+
+            var gotTellResponse = false;
+            var gotTitleResponse = false;
+            foreach (var message in replies.Messages)
+            {
+                if (message == $"{testUser}: Okay.")
+                {
+                    gotTellResponse = true;
+                }
+                if (message == $"{testUser} linked to \"Air Spinner\" on thingiverse => 42 IRC mentions")
+                {
+                    gotTitleResponse = true;
+                }
+            }
+
+            Assert.IsTrue(gotTellResponse, "Failed to get expected response to the tell request");
+            Assert.IsTrue(gotTitleResponse, "Failed to get expected response to the thingi title request");
         }
     }
 }
