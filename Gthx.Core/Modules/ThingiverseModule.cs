@@ -27,11 +27,9 @@ namespace Gthx.Core.Modules
 
         public List<IrcResponse> ProcessMessage(string channel, string user, string message)
         {
-            Console.WriteLine("ThingiverseModule running...");
             var youtubeMatch = _thingiRegex.Match(message);
             if (!youtubeMatch.Success)
             {
-                Console.WriteLine("No thingiverse match");
                 return null;
             }
 

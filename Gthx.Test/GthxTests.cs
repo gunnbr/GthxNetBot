@@ -23,9 +23,7 @@ namespace Gthx.Test
             gthx.HandleReceivedMessage(testChannel, testUser, "Which printer is best?");
 
             var replies = client.GetReplies();
-            Assert.AreEqual(testChannel, replies.Channel);
-            Assert.AreEqual(1, replies.Messages.Count);
-            Assert.AreEqual($"Hello, {testUser}", replies.Messages[0]);
+            Assert.AreEqual(0, replies.Messages.Count);
 
             // Test DM
             testChannel = "gthx";
@@ -33,9 +31,7 @@ namespace Gthx.Test
             gthx.HandleReceivedMessage(testChannel, testUser, "Hey, can you help me?");
 
             replies = client.GetReplies();
-            Assert.AreEqual(testChannel, replies.Channel);
-            Assert.AreEqual(testChannel, replies.Channel);
-            Assert.AreEqual($"Hello, {testUser}", replies.Messages[0]);
+            Assert.AreEqual(0, replies.Messages.Count);
         }
 
         [Test]
@@ -233,7 +229,7 @@ namespace Gthx.Test
             Assert.AreEqual(testUser, data.TellCheckUser);
 
             var replies = client.GetReplies();
-            Assert.AreEqual(2, replies.Messages.Count);
+            Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
             var foundTell = false;
             foreach (var message in replies.Messages)
@@ -259,7 +255,7 @@ namespace Gthx.Test
             Assert.AreEqual(testUser, data.TellCheckUser);
 
             replies = client.GetReplies();
-            Assert.IsTrue(replies.Messages.Count > 2, "Not enough replies returned.");
+            Assert.IsTrue(replies.Messages.Count > 1, "Not enough replies returned.");
             Assert.AreEqual(testChannel, replies.Channel);
             var foundJimmy = false;
             var foundPaul = false;
