@@ -14,10 +14,5 @@ namespace Gthx.Core.Modules
             throw new NotImplementedException();
 
         }
-
-        public Task<List<IrcResponse>> ProcessMessageAsync(string channel, string user, string message)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

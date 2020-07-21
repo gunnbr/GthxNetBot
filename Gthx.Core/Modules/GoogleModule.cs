@@ -30,10 +30,5 @@ namespace Gthx.Core.Modules
                 new IrcResponse($"{nick}: http://lmgtfy.com/?q={search}")
             };
         }
-
-        public Task<List<IrcResponse>> ProcessMessageAsync(string channel, string user, string message)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -51,41 +51,6 @@ namespace Gthx.Core.Modules
             return reply;
         }
 
-        public async Task<List<IrcResponse>> ProcessMessageAsync(string channel, string user, string message)
-        {
-            var youtubeMatch = _youtubeRegex.Match(message);
-            if (!youtubeMatch.Success)
-            {
-                return null;
-            }
-
-            var reply = new List<IrcResponse>();
-
-            var url = youtubeMatch.Groups[0].Value;
-            var id = youtubeMatch.Groups["id"].Value;
-            Console.WriteLine($"Checking for Youtube title for '{id}'");
-            var referenceData = _Data.AddYoutubeReference(id);
-            if (referenceData.Title != null)
-            {
-                Debug.WriteLine($"Already have a title for youtube item {referenceData.Id}:{referenceData.Title}");
-                reply.Add(new IrcResponse($"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.ReferenceCount} IRC mentions"));
-                return reply;
-            }
-
-            var title = await GetTitle(url, id);
-            _Data.AddYoutubeTitle(id, title);
-            if (string.IsNullOrEmpty(title))
-            {
-                reply.Add(new IrcResponse($"{user} linked to a YouTube video with an unknown title => {referenceData.ReferenceCount} IRC mentions"));
-            }
-            else
-            {
-                reply.Add(new IrcResponse($"{user} linked to YouTube video \"{title}\" => 1 IRC mentions"));
-            }
-
-            return reply;
-        }
-
         private async Task<string> GetTitle(string url, string id)
         {
             var webStream = await _WebReader.GetStreamFromUrlAsync(url);

@@ -123,10 +123,5 @@ namespace Gthx.Core.Modules
 
             return new IrcResponse($"{factoid} {article} {factoidValue}");
         }
-
-        public Task<List<IrcResponse>> ProcessMessageAsync(string channel, string user, string message)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
