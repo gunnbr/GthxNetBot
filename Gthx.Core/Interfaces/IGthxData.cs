@@ -11,6 +11,19 @@ namespace Gthx.Core.Interfaces
         public int ReferenceCount;
     }
 
+    public class FactoidInfo
+    {
+        public string User;
+        public string Value;
+        public string Timestamp;
+    }
+
+    public class FactoidInfoReply
+    {
+        public int RefCount;
+        public List<FactoidInfo> InfoList;
+    }
+
     public interface IGthxData
     {
         public void GetLastSeen(string user);
@@ -18,7 +31,7 @@ namespace Gthx.Core.Interfaces
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting);
         public bool ForgetFactoid(string user, string factoid);
         public List<Factoid> GetFactoid(string factoid);
-        public List<string> GetFactoidInfo(string factoid);
+        public FactoidInfoReply GetFactoidInfo(string factoid);
         public bool AddTell(string fromUser, string toUser, string message);
         public List<Tell> GetTell(string forUser);
         public ReferenceData AddThingiverseReference(string item);

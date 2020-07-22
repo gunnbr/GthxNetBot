@@ -241,6 +241,38 @@ namespace Gthx.Test
         }
 
         [Test]
+        public void TestFactoidInfo()
+        {
+            Assert.Fail("This test isn't implemented yet.");
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
+
+            var testFactoid = "testFactoid";
+            var testChannel = "#reprap";
+            var testUser = "SomeUser";
+
+            gthx.HandleReceivedMessage(testChannel, testUser, $"forget {testFactoid}");
+
+            var replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser}: I've forgotten about {testFactoid}", replies.Messages[0]);
+            Assert.AreEqual(testFactoid, data.ForgottenFactoid);
+            Assert.AreEqual(testUser, data.ForgettingUser);
+
+            var testUser2 = "MaliciousUser";
+            var lockedFactoid = "locked factoid";
+            gthx.HandleReceivedMessage(testChannel, testUser2, $"forget {lockedFactoid}");
+
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser2}: Okay, but {lockedFactoid} didn't exist anyway", replies.Messages[0]);
+        }
+
+        [Test]
         public void TestTellSetting()
         {
             var client = new MockIrcClient();

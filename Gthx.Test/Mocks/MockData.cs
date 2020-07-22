@@ -189,7 +189,7 @@ namespace Gthx.Test.Mocks
             return null;
         }
 
-        public List<string> GetFactoidInfo(string factoid)
+        public FactoidInfoReply GetFactoidInfo(string factoid)
         {
             throw new NotImplementedException();
         }

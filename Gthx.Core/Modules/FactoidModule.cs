@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Gthx.Core.Modules
 {
@@ -27,7 +28,11 @@ namespace Gthx.Core.Modules
                 return;
             }
 
-            // TODO: Implement info handling
+            wasProcessed = ProcessFactoidInfo(channel, user, message);
+            if (wasProcessed)
+            {
+                return;
+            }
 
             wasProcessed = ProcessFactoidForget(channel, user, message);
             if (wasProcessed)
@@ -63,6 +68,55 @@ namespace Gthx.Core.Modules
             else
             {
                 _IrcClient.SendMessage(channel, $"{user}: Okay, but {factoid} didn't exist anyway");
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Handles factoid info
+        /// </summary>
+        /// <param name="channel"></param>
+        /// <param name="user"></param>
+        /// <param name="message"></param>
+        /// <returns>True if a command was found to get info for a factoid, false otherwise</returns>
+        private bool ProcessFactoidInfo(string channel, string user, string message)
+        {
+            if (!message.StartsWith("info "))
+            {
+                return false;
+            }
+
+            var factoid = message.Remove(0, 5);
+            Console.WriteLine($"info request for '{factoid}' in {channel}");
+
+            var info = _Data.GetFactoidInfo(factoid);
+            if (info == null)
+            {
+                Console.WriteLine($"No info for factoid '{factoid}'");
+                _IrcClient.SendMessage(channel, $"Sorry, I couldn't find an entry for {factoid}");
+                return true;
+            }
+
+            Console.WriteLine($"Factoid '{factoid}' has been referenced {info.RefCount} times");
+            _IrcClient.SendMessage(channel, $"Factoid '{factoid}' has been referenced {info.RefCount} times");
+            foreach (var data in info.InfoList)
+            {
+                if (string.IsNullOrWhiteSpace(data.User))
+                {
+                    data.User = "Unknown";
+                }
+
+                if (data.Value == null)
+                {
+                    Console.WriteLine($"At {data.Timestamp}, {data.User} deleted this item");
+                    _IrcClient.SendMessage(channel, $"At {data.Timestamp}, {data.User} deleted this item");
+                }
+                else
+                {
+                    Console.WriteLine($"At {data.Timestamp}, {data.User} set to: {data.Value}");
+                    _IrcClient.SendMessage(channel, $"At {data.Timestamp}, {data.User} set to: {data.Value}");
+                }
             }
 
             return true;
