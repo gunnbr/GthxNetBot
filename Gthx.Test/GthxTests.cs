@@ -75,6 +75,30 @@ namespace Gthx.Test
         }
 
         [Test]
+        public void TestLockedFactoidSetting()
+        {
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
+
+            var testFactoid = "locked factoid";
+            var testValue = "something that can't be changed.";
+            var testChannel = "#reprap";
+            var testUser = "MaliciousUser";
+
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid} is {testValue}");
+
+            var replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"I'm sorry, {testUser}. I'm afraid I can't do that.", replies.Messages[0]);
+            Assert.AreEqual(null, data.FactoidItem);
+            Assert.AreEqual(null, data.FactoidValue);
+            Assert.AreEqual(null, data.FactoidUser);
+        }
+
+        [Test]
         public void TestFactoidGetting()
         {
             var client = new MockIrcClient();
