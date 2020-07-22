@@ -15,31 +15,27 @@ namespace Gthx.Core.Modules
         private readonly Regex _InvalidRegex = new Regex(@"(here|how|it|something|that|this|what|when|where|which|who|why|you)", RegexOptions.IgnoreCase);
         private readonly Regex _FactoidGet = new Regex(@$"(?'factoid'.+)[?!](?'hasPipe'\s*$|\s*\|\s*(?'pipeToUser'{Util.NickMatch})$)", RegexOptions.Compiled);
         private IGthxData _Data;
+        private readonly IIrcClient _IrcClient;
 
-        public FactoidModule(IGthxData data)
+        public FactoidModule(IGthxData data, IIrcClient ircClient)
         {
             _Data = data;
+            this._IrcClient = ircClient;
         }
 
-        public List<IrcResponse> ProcessMessage(string channel, string user, string message)
+        public void ProcessMessage(string channel, string user, string message)
         {
-            var response = ProcessFactoidGet(channel, user, message);
-            if (response != null)
+            var wasProcessed = ProcessFactoidGet(channel, user, message);
+            if (wasProcessed)
             {
-                return new List<IrcResponse> { response };
+                return;
             }
 
             // TODO: Implement info handling
 
             // TODO: Implement forget handling
 
-            response = ProcessFactoidSet(channel, user, message);
-            if (response != null)
-            {
-                return new List<IrcResponse> { response };
-            }
-
-            return null;
+            ProcessFactoidSet(channel, user, message);
         }
 
         /// <summary>
@@ -49,18 +45,18 @@ namespace Gthx.Core.Modules
         /// <param name="user"></param>
         /// <param name="message"></param>
         /// <returns>An IrcResponse if a command was found to set a message, null otherwise</returns>
-        private IrcResponse ProcessFactoidSet(string channel, string user, string message)
+        private bool ProcessFactoidSet(string channel, string user, string message)
         {
             var factoidMatch = _FactoidSet.Match(message);
             if (!factoidMatch.Success)
             {
-                return null;
+                return false;
             }
 
             var invalidMatch = _InvalidRegex.Match(factoidMatch.Groups[1].ToString());
             if (invalidMatch.Success)
             {
-                return null;
+                return false;
             }
 
             var factoidName = factoidMatch.Groups["factoid"].Value;
@@ -70,10 +66,14 @@ namespace Gthx.Core.Modules
             var success = _Data.AddFactoid(user, factoidName, isAre, value, !hasAlso);
             if (success)
             {
-                return new IrcResponse($"{user}: Okay.");
+                _IrcClient.SendMessage(channel, $"{user}: Okay.");
+            }
+            else
+            {
+                _IrcClient.SendMessage(channel, $"I'm sorry, {user}. I'm afraid I can't do that.");
             }
 
-            return new IrcResponse($"I'm sorry, {user}. I'm afraid I can't do that.");
+            return true;
         }
 
         /// <summary>
@@ -82,13 +82,13 @@ namespace Gthx.Core.Modules
         /// <param name="channel"></param>
         /// <param name="user"></param>
         /// <param name="message"></param>
-        /// <returns></returns>
-        private IrcResponse ProcessFactoidGet(string channel, string user, string message)
+        /// <returns>True if a factoid get message was detected and handled, false otherwise</returns>
+        private bool ProcessFactoidGet(string channel, string user, string message)
         {
             var factoidMatch = _FactoidGet.Match(message);
             if (!factoidMatch.Success)
             {
-                return null;
+                return false;
             }
 
             var factoid = factoidMatch.Groups["factoid"].Value;
@@ -97,7 +97,7 @@ namespace Gthx.Core.Modules
             var factoidValueList = _Data.GetFactoid(factoid);
             if (factoidValueList == null)
             {
-                return null;
+                return false;
             }
 
             var factoidValue = string.Join(" and also ", factoidValueList.Select(f => f.Value));
@@ -107,21 +107,25 @@ namespace Gthx.Core.Modules
 
             if (factoidValue.StartsWith("<reply>"))
             {
-                return new IrcResponse(factoidValue.Remove(0,7));
+                _IrcClient.SendMessage(channel, factoidValue.Remove(0, 7));
+                return true;
             }
 
             if (factoidValue.StartsWith("<action>"))
             {
-                return new IrcResponse(factoidValue.Remove(0,8), ResponseType.Action);
+                _IrcClient.SendAction(channel, factoidValue.Remove(0, 8));
+                return true;
             }
 
             if (factoidMatch.Groups["pipeToUser"].Success)
             {
                 var pipeToUser = factoidMatch.Groups["pipeToUser"];
-                return new IrcResponse($"{pipeToUser}, {factoid} {article} {factoidValue}");
+                _IrcClient.SendMessage(channel, $"{pipeToUser}, {factoid} {article} {factoidValue}");
+                return true;
             }
 
-            return new IrcResponse($"{factoid} {article} {factoidValue}");
+            _IrcClient.SendMessage(channel, $"{factoid} {article} {factoidValue}");
+            return true;
         }
     }
 }

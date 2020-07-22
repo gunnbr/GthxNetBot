@@ -32,12 +32,12 @@ namespace Gthx.Core
                 new ThingiverseModule(data, _IrcClient, _WebReader),
                 new YoutubeModule(data, _IrcClient, _WebReader),
 
-                new TellModule(data),
+                new TellModule(data, _IrcClient),
                 // new StatusModule(data),
                 // new LurkerModule(data),
                 // new SeenModule(data),
-                new GoogleModule(),
-                new FactoidModule(data),
+                new GoogleModule(_IrcClient),
+                new FactoidModule(data, _IrcClient),
             };
         }
 
@@ -50,27 +50,7 @@ namespace Gthx.Core
 
             foreach (var module in _Modules)
             {
-                var responses = module.ProcessMessage(channel, user, message);
-                if (responses != null)
-                {
-                    foreach (var response in responses)
-                    {
-                        if (response.Type == ResponseType.Normal)
-                        {
-                            _IrcClient.SendMessage(channel, response.Message);
-                        }
-
-                        if (response.Type == ResponseType.Action)
-                        {
-                            _IrcClient.SendAction(channel, response.Message);
-                        }
-
-                        if (response.IsFinalResponse)
-                        {
-                            return;
-                        }
-                    }
-                }
+                module.ProcessMessage(channel, user, message);
             }
 
 #if DEBUG

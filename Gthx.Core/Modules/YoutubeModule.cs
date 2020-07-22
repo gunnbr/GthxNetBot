@@ -25,15 +25,13 @@ namespace Gthx.Core.Modules
             this._WebReader = webReader;
         }
 
-        public List<IrcResponse> ProcessMessage(string channel, string user, string message)
+        public void ProcessMessage(string channel, string user, string message)
         {
             var youtubeMatch = _youtubeRegex.Match(message);
             if (!youtubeMatch.Success)
             {
-                return null;
+                return;
             }
-
-            var reply = new List<IrcResponse>();
 
             var url = youtubeMatch.Groups[0].Value;
             var id = youtubeMatch.Groups["id"].Value;
@@ -42,13 +40,11 @@ namespace Gthx.Core.Modules
             if (referenceData.Title != null)
             {
                 Debug.WriteLine($"Already have a title for youtube item {referenceData.Id}:{referenceData.Title}");
-                reply.Add(new IrcResponse($"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.ReferenceCount} IRC mentions"));
-                return reply;
+                _IrcClient.SendMessage(channel, $"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.ReferenceCount} IRC mentions");
+                return;
             }
 
             GetAndSaveTitle(url, id, channel, user, referenceData?.ReferenceCount ?? 1);
-
-            return reply;
         }
 
         private async Task<string> GetTitle(string url, string id)

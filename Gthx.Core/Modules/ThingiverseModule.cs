@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -25,12 +24,12 @@ namespace Gthx.Core.Modules
             this._WebReader = webReader;
         }
 
-        public List<IrcResponse> ProcessMessage(string channel, string user, string message)
+        public void ProcessMessage(string channel, string user, string message)
         {
             var youtubeMatch = _thingiRegex.Match(message);
             if (!youtubeMatch.Success)
             {
-                return null;
+                return;
             }
 
             var url = youtubeMatch.Groups[0].Value;
@@ -41,12 +40,10 @@ namespace Gthx.Core.Modules
             {
                 Console.WriteLine($"Already have a title for Thingiverse item {referenceData.Id}:{referenceData.Title}");
                 _IrcClient.SendMessage(channel, $"{user} linked to \"{referenceData.Title}\" on thingiverse => {referenceData.ReferenceCount} IRC mentions");
-                return null;
+                return;
             }
 
             GetAndSaveTitle(url, id, channel, user, referenceData?.ReferenceCount ?? 1);
-
-            return null;
         }
 
         // TODO: Move this to the Util class once a DI solution is found that
