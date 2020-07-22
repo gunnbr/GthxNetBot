@@ -29,9 +29,43 @@ namespace Gthx.Core.Modules
 
             // TODO: Implement info handling
 
-            // TODO: Implement forget handling
+            wasProcessed = ProcessFactoidForget(channel, user, message);
+            if (wasProcessed)
+            {
+                return;
+            }
 
             ProcessFactoidSet(channel, user, message);
+        }
+
+        /// <summary>
+        /// Handles forgetting a factoid
+        /// </summary>
+        /// <param name="channel"></param>
+        /// <param name="user"></param>
+        /// <param name="message"></param>
+        /// <returns>True if a command was found to set a message, false otherwise</returns>
+        private bool ProcessFactoidForget(string channel, string user, string message)
+        {
+            if (!message.StartsWith("forget "))
+            {
+                return false;
+            }
+
+            var factoid = message.Remove(0, 7);
+            Console.WriteLine($"forget request for '{factoid}'");
+
+            var isForgotten = _Data.ForgetFactoid(user, factoid);
+            if (isForgotten)
+            {
+                _IrcClient.SendMessage(channel, $"{user}: I've forgotten about {factoid}");
+            }
+            else
+            {
+                _IrcClient.SendMessage(channel, $"{user}: Okay, but {factoid} didn't exist anyway");
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -40,7 +74,7 @@ namespace Gthx.Core.Modules
         /// <param name="channel"></param>
         /// <param name="user"></param>
         /// <param name="message"></param>
-        /// <returns>An IrcResponse if a command was found to set a message, null otherwise</returns>
+        /// <returns>True if a command was found to set a message, false otherwise</returns>
         private bool ProcessFactoidSet(string channel, string user, string message)
         {
             var factoidMatch = _FactoidSet.Match(message);

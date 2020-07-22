@@ -20,7 +20,8 @@ namespace Gthx.Test.Mocks
         public string TellCheckUser { get; private set; }
         public string AddedYoutubeId { get; private set; }
         public string AddedYoutubeTitle { get; private set; }
-
+        public string ForgettingUser { get; private set; }
+        public string ForgottenFactoid { get; private set; }
 
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting)
         {
@@ -114,7 +115,14 @@ namespace Gthx.Test.Mocks
 
         public bool ForgetFactoid(string user, string factoid)
         {
-            throw new NotImplementedException();
+            if (factoid == "locked factoid")
+            {
+                return false;
+            }
+
+            ForgettingUser = user;
+            ForgottenFactoid = factoid;
+            return true;
         }
 
         private Factoid CreateFactoid(string factoid, string value, bool isAre = false)
