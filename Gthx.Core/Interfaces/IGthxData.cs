@@ -15,7 +15,7 @@ namespace Gthx.Core.Interfaces
     {
         public string User;
         public string Value;
-        public string Timestamp;
+        public DateTime Timestamp;
     }
 
     public class FactoidInfoReply

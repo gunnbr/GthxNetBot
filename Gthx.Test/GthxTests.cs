@@ -243,33 +243,37 @@ namespace Gthx.Test
         [Test]
         public void TestFactoidInfo()
         {
-            Assert.Fail("This test isn't implemented yet.");
             var client = new MockIrcClient();
             var data = new MockData();
             var mockReader = new MockWebReader();
             var gthx = new Core.Gthx(client, data, mockReader);
 
-            var testFactoid = "testFactoid";
+            var testFactoid = "makers";
             var testChannel = "#reprap";
-            var testUser = "SomeUser";
+            var testUser = "PlayerOne";
 
-            gthx.HandleReceivedMessage(testChannel, testUser, $"forget {testFactoid}");
+            gthx.HandleReceivedMessage(testChannel, testUser, $"info {testFactoid}");
 
             var replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
-            Assert.AreEqual($"{testUser}: I've forgotten about {testFactoid}", replies.Messages[0]);
-            Assert.AreEqual(testFactoid, data.ForgottenFactoid);
-            Assert.AreEqual(testUser, data.ForgettingUser);
+            Assert.AreEqual(testFactoid, data.InfoFactoid);
+            Assert.AreEqual($"Sorry, I couldn't find an entry for {testFactoid}", replies.Messages[0]);
 
-            var testUser2 = "MaliciousUser";
-            var lockedFactoid = "locked factoid";
-            gthx.HandleReceivedMessage(testChannel, testUser2, $"forget {lockedFactoid}");
+            testFactoid = "cake";
+
+            gthx.HandleReceivedMessage(testChannel, testUser, $"info {testFactoid}");
 
             replies = client.GetReplies();
-            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(5, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
-            Assert.AreEqual($"{testUser2}: Okay, but {lockedFactoid} didn't exist anyway", replies.Messages[0]);
+            Assert.AreEqual(testFactoid, data.InfoFactoid);
+
+            Assert.AreEqual($"Factoid '{testFactoid}' has been referenced 176 times", replies.Messages[0]);
+            Assert.AreEqual("At Wed, 10 Oct 2007 08:00:00 GMT, GLaDOS set to: delicious", replies.Messages[1]);
+            Assert.AreEqual("At Wed, 10 Oct 2007 14:34:53 GMT, Chell deleted this item", replies.Messages[2]);
+            Assert.AreEqual("At Wed, 10 Oct 2007 14:34:53 GMT, UnknownEntity set to: a lie!", replies.Messages[3]);
+            Assert.AreEqual("At Wed, 10 Oct 2007 14:34:55 GMT, Unknown set to: delicious", replies.Messages[4]);
         }
 
         [Test]

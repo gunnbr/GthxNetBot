@@ -22,6 +22,7 @@ namespace Gthx.Test.Mocks
         public string AddedYoutubeTitle { get; private set; }
         public string ForgettingUser { get; private set; }
         public string ForgottenFactoid { get; private set; }
+        public string InfoFactoid { get; private set; }
 
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting)
         {
@@ -191,7 +192,25 @@ namespace Gthx.Test.Mocks
 
         public FactoidInfoReply GetFactoidInfo(string factoid)
         {
-            throw new NotImplementedException();
+            InfoFactoid = factoid;
+
+            switch (factoid)
+            {
+                case "cake":
+                    return new FactoidInfoReply()
+                    {
+                        RefCount = 176,
+                        InfoList = new List<FactoidInfo>
+                        {
+                            new FactoidInfo() { User = "GLaDOS", Value = "delicious", Timestamp = new DateTime(2007, 10, 10, 8, 0, 0)},
+                            new FactoidInfo() { User = "Chell", Value = null, Timestamp = new DateTime(2007, 10, 10, 14, 34, 53)},
+                            new FactoidInfo() { User = "UnknownEntity", Value = "a lie!", Timestamp = new DateTime(2007, 10, 10, 14, 34, 53)},
+                            new FactoidInfo() { User = null, Value = "delicious", Timestamp = new DateTime(2007, 10, 10, 14, 34, 55)},
+                        }
+                    };
+            }
+
+            return null;
         }
 
         public void GetLastSeen(string user)

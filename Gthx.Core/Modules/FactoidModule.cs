@@ -110,12 +110,12 @@ namespace Gthx.Core.Modules
                 if (data.Value == null)
                 {
                     Console.WriteLine($"At {data.Timestamp}, {data.User} deleted this item");
-                    _IrcClient.SendMessage(channel, $"At {data.Timestamp}, {data.User} deleted this item");
+                    _IrcClient.SendMessage(channel, $"At {data.Timestamp:R}, {data.User} deleted this item");
                 }
                 else
                 {
                     Console.WriteLine($"At {data.Timestamp}, {data.User} set to: {data.Value}");
-                    _IrcClient.SendMessage(channel, $"At {data.Timestamp}, {data.User} set to: {data.Value}");
+                    _IrcClient.SendMessage(channel, $"At {data.Timestamp:R}, {data.User} set to: {data.Value}");
                 }
             }
 
