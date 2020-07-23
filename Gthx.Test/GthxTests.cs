@@ -2,6 +2,7 @@ using Gthx.Test.Mocks;
 using NUnit.Framework;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Gthx.Test
@@ -536,6 +537,49 @@ namespace Gthx.Test
 
             Assert.IsTrue(gotTellResponse, "Failed to get expected response to the tell request");
             Assert.IsTrue(gotTitleResponse, "Failed to get expected response to the thingi title request");
+        }
+
+        [Test]
+        public void TestSeenRequests()
+        {
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
+
+            var testChannel = "#reprap";
+            var testUser = "PhantomPhreak";
+            var testSeenUser = "gunnbr";
+
+            gthx.HandleReceivedMessage(testChannel, testUser, $"seen {testSeenUser}?");
+            var replies = client.GetReplies();
+            Assert.AreEqual(2, replies.Messages.Count);
+            Assert.AreEqual(data.LastSeenUserQuery, testSeenUser);
+
+            Assert.AreEqual("gunnbr was last seen in #gthxtest ", replies.Messages[0].Substring(0, 34));
+            Assert.AreEqual(" ago saying 'gthx: status?'.", replies.Messages[0].Substring(replies.Messages[0].Length - 28, 28));
+            Assert.AreEqual("gunnbr_ was last seen in #reprap ", replies.Messages[1].Substring(0, 33));
+            Assert.AreEqual(" ago saying 'Yeah, I'm trying to fix that.'.", replies.Messages[1].Substring(replies.Messages[1].Length - 44, 44));
+
+            // Test without the question mark at the end
+
+            // TODO: Test that only 3 replies are returned to seen queries, no matter how many data returns
+        }
+
+        [Test]
+        public void TestSeenUpdates()
+        {
+            // TODO: Verify that any message updates the seen data
+
+            // TODO: Verify that private messages don't update the seen info
+
+            // TODO: Verify that actions also update the seen
+        }
+
+        [Test]
+        public void TestSeenInPM()
+        {
+            // TODO: Verify that direct messages don't update the seen info
         }
     }
 }

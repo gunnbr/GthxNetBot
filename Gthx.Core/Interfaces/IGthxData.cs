@@ -24,10 +24,18 @@ namespace Gthx.Core.Interfaces
         public List<FactoidInfo> InfoList;
     }
 
+    public class SeenData
+    {
+        public string Channel;
+        public string User;
+        public string Message;
+        public DateTime LastSeenTime;
+    }
+
     public interface IGthxData
     {
-        public void GetLastSeen(string user);
-        public void UpdateLastSeen(string user, string channel, string message);
+        public List<SeenData> GetLastSeen(string user);
+        public void UpdateLastSeen(string channel, string user, string message);
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting);
         public bool IsFactoidLocked(string factoid);
         public bool ForgetFactoid(string user, string factoid);

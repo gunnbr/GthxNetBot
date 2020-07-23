@@ -18,11 +18,21 @@ namespace Gthx.Test.Mocks
         public string TellToUser { get; private set; }
         public string TellMessage { get; private set; }
         public string TellCheckUser { get; private set; }
+
+        // TODO: Don't we need these fields for Thingiverse too?
         public string AddedYoutubeId { get; private set; }
         public string AddedYoutubeTitle { get; private set; }
+
         public string ForgettingUser { get; private set; }
         public string ForgottenFactoid { get; private set; }
+
         public string InfoFactoid { get; private set; }
+
+        public string LastSeenChannel { get; private set; }
+        public string LastSeenUser { get; private set; }
+        public string LastSeenMessage { get; private set; }
+        public DateTime LastSeenTimestamp { get; private set; }
+        public string LastSeenUserQuery { get; private set; }
 
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting)
         {
@@ -213,9 +223,21 @@ namespace Gthx.Test.Mocks
             return null;
         }
 
-        public void GetLastSeen(string user)
+        public List<SeenData> GetLastSeen(string user)
         {
-            throw new NotImplementedException();
+            LastSeenUserQuery = user;
+
+            switch (user)
+            {
+                case "gunnbr":
+                    return new List<SeenData>()
+                    {
+                        new SeenData() { Channel = "#gthxtest", User = "gunnbr", Message = "gthx: status?", LastSeenTime = new DateTime(2020, 7, 23, 8, 23, 43)},
+                        new SeenData() { Channel = "#reprap", User = "gunnbr_", Message = "Yeah, I'm trying to fix that.", LastSeenTime = new DateTime(2020, 2, 3, 13, 44, 1)}
+                    };
+            }
+
+            return null;
         }
 
         public int GetMood()
@@ -245,9 +267,12 @@ namespace Gthx.Test.Mocks
             return new List<Tell>();
         }
 
-        public void UpdateLastSeen(string user, string channel, string message)
+        public void UpdateLastSeen(string channel, string user, string message)
         {
-            throw new NotImplementedException();
+            LastSeenChannel = channel;
+            LastSeenUser = user;
+            LastSeenMessage = message;
+            LastSeenTimestamp = DateTime.UtcNow;
         }
     }
 }

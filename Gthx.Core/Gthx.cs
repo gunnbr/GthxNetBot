@@ -22,22 +22,18 @@ namespace Gthx.Core
 
             _Modules = new List<IGthxModule>
             {
-                // In this order because that's how it was in the
-                // original source. Could probably change it without problems.
-                // TODO: Rearrange these in a better priority order and retest once
-                //       all unit tests are done.
+                //new StatusModule(data, _IrcClient),
+                new FactoidModule(data, _IrcClient),
+                new TellModule(data, _IrcClient),
+                new SeenModule(data, _IrcClient),
+                // new LurkerModule(data, _IrcClient),
+                new GoogleModule(_IrcClient),
 
-                // Reference and title checkers must come first because they aren't the final word
-                // and we want additional modules to run after them.
+                // Reference and title checkers come last because their
+                // responses should come after any responses from the above
+                // modules, if any.
                 new ThingiverseModule(data, _IrcClient, _WebReader),
                 new YoutubeModule(data, _IrcClient, _WebReader),
-
-                new TellModule(data, _IrcClient),
-                // new StatusModule(data),
-                // new LurkerModule(data),
-                // new SeenModule(data),
-                new GoogleModule(_IrcClient),
-                new FactoidModule(data, _IrcClient),
             };
         }
 
