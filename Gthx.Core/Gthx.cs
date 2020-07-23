@@ -43,8 +43,6 @@ namespace Gthx.Core
 
         public void HandleReceivedMessage(string channel, string user, string message)
         {
-            // TODO: Update last seen time
-
             // TODO: Handle some messages directly addressed to gthx differently than
             //       the same message not addressed to gthx.
 
@@ -52,11 +50,6 @@ namespace Gthx.Core
             {
                 module.ProcessMessage(channel, user, message);
             }
-
-#if DEBUG
-                // TODO: Take this out!!
-                //_IrcClient.SendMessage(channel, $"Hello, {user}");
-#endif
         }
     }
 }

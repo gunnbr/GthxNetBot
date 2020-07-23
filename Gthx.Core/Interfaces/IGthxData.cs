@@ -29,6 +29,7 @@ namespace Gthx.Core.Interfaces
         public void GetLastSeen(string user);
         public void UpdateLastSeen(string user, string channel, string message);
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting);
+        public bool IsFactoidLocked(string factoid);
         public bool ForgetFactoid(string user, string factoid);
         public List<Factoid> GetFactoid(string factoid);
         public FactoidInfoReply GetFactoidInfo(string factoid);

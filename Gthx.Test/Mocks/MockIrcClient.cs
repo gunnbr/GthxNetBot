@@ -32,6 +32,9 @@ namespace Gthx.Test.Mocks
         {
             SentToChannel = channel;
             SentMessages.Add(message);
+            // TODO: Implement some kind of event trigger when a message is sent so
+            //       that unit tests can use longer timeouts but still complete as soon
+            //       as a message is sent..
             return true;
         }
 

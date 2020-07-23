@@ -26,17 +26,17 @@ namespace Gthx.Test.Mocks
 
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting)
         {
-            if (factoid == "locked factoid")
-            {
-                return false;
-            }
-
             FactoidUser = user;
             FactoidItem = factoid;
             FactoidIsAre = isAre;
             FactoidValue = value;
             FactoidReplaceExisting = replaceExisting;
             return true;
+        }
+
+        public bool IsFactoidLocked(string factoid)
+        {
+            return factoid == "locked factoid";
         }
 
         public bool AddTell(string fromUser, string toUser, string message)

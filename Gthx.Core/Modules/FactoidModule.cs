@@ -147,7 +147,14 @@ namespace Gthx.Core.Modules
             var isAre = factoidMatch.Groups["isAre"].Value.Equals("are", StringComparison.CurrentCultureIgnoreCase);
             var hasAlso = factoidMatch.Groups["hasAlso"].Success;
             var value = factoidMatch.Groups["value"].Value;
-            var success = _Data.AddFactoid(user, factoidName, isAre, value, !hasAlso);
+
+            var success = false;
+            var isLocked = _Data.IsFactoidLocked(factoidName);
+            if (!isLocked)
+            {
+                success = _Data.AddFactoid(user, factoidName, isAre, value, !hasAlso);
+            }
+
             if (success)
             {
                 _IrcClient.SendMessage(channel, $"{user}: Okay.");
