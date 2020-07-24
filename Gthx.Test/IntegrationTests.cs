@@ -11,6 +11,9 @@ namespace Gthx.Test
     [TestFixture]
     public class IntegrationTests
     {
+        // TODO: Add integration test for "seen user*" to verify the asterisk is handled correctly
+
+
         [Test]
         public async Task TestLiveYoutubeReferences()
         {

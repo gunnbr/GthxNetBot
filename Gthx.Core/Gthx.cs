@@ -47,5 +47,8 @@ namespace Gthx.Core
                 module.ProcessMessage(channel, user, message);
             }
         }
+        public void HandleReceivedAction(string channel, string user, string action)
+        {
+        }
     }
 }

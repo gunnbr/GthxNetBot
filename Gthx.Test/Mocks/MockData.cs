@@ -235,6 +235,20 @@ namespace Gthx.Test.Mocks
                         new SeenData() { Channel = "#gthxtest", User = "gunnbr", Message = "gthx: status?", LastSeenTime = new DateTime(2020, 7, 23, 8, 23, 43)},
                         new SeenData() { Channel = "#reprap", User = "gunnbr_", Message = "Yeah, I'm trying to fix that.", LastSeenTime = new DateTime(2020, 2, 3, 13, 44, 1)}
                     };
+                case "Razor":
+                    return new List<SeenData>()
+                    {
+                        new SeenData() { Channel = "#twitch", User = "Razor", Message = "Stream is starting NOW! Tune in!", LastSeenTime = new DateTime(2020, 7, 24, 6, 52, 11)},
+                    };
+                case "The":
+                    return new List<SeenData>()
+                    {
+                        new SeenData() { Channel = "#openscad", User = "TheHelper", Message = "Just get rid of that let statement.", LastSeenTime = new DateTime(2020, 7, 14, 22, 3, 15)},
+                        new SeenData() { Channel = "#leets", User = "ThePlague", Message = "Which one of you losers thinks you can beat me?", LastSeenTime = new DateTime(1995, 9, 15, 22, 3, 15)},
+                        new SeenData() { Channel = "#superherohigh", User = "Themyscira", Message = "Hey everyone, come visit!", LastSeenTime = new DateTime(2020, 7, 20, 5, 6, 7)},
+                        new SeenData() { Channel = "#TheMatrix", User = "TheOne", Message = "Whoah", LastSeenTime = new DateTime(1999, 3, 31, 14, 0, 0)},
+                        new SeenData() { Channel = "#reprap", User = "TheOwner", Message = "Don't make me kick you.", LastSeenTime = new DateTime(2020, 7, 17, 13, 31, 32)},
+                    };
             }
 
             return null;

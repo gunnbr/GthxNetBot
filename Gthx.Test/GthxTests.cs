@@ -562,24 +562,100 @@ namespace Gthx.Test
             Assert.AreEqual(" ago saying 'Yeah, I'm trying to fix that.'.", replies.Messages[1].Substring(replies.Messages[1].Length - 44, 44));
 
             // Test without the question mark at the end
+            testChannel = "#openscad";
+            testUser = "AcidBurn";
+            testSeenUser = "Razor";
 
-            // TODO: Test that only 3 replies are returned to seen queries, no matter how many data returns
+            gthx.HandleReceivedMessage(testChannel, testUser, $"seen {testSeenUser}");
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(data.LastSeenUserQuery, testSeenUser);
+
+            Assert.AreEqual("Razor was last seen in #twitch ", replies.Messages[0].Substring(0, 31));
+            Assert.AreEqual("Stream is starting NOW! Tune in!'.", replies.Messages[0].Substring(replies.Messages[0].Length - 34, 34));
+        }
+
+        [Test]
+        public void TestSeenMaxReplies()
+        {
+            // Test that only 3 replies are returned to seen queries, no matter how many data returns
+
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
+
+            var testChannel = "#reprap";
+            var testUser = "someone";
+            var testSeenUser = "The";
+
+            gthx.HandleReceivedMessage(testChannel, testUser, $"seen {testSeenUser}?");
+            var replies = client.GetReplies();
+            Assert.AreEqual(3, replies.Messages.Count);
+            Assert.AreEqual(data.LastSeenUserQuery, testSeenUser);
+
+            Assert.AreEqual("TheHelper was last seen in #openscad ", replies.Messages[0].Substring(0, 37));
+            Assert.AreEqual("ThePlague was last seen in #leets ", replies.Messages[1].Substring(0, 34));
+            Assert.AreEqual("Themyscira was last seen in #superherohigh ", replies.Messages[2].Substring(0, 43));
         }
 
         [Test]
         public void TestSeenUpdates()
         {
-            // TODO: Verify that any message updates the seen data
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
 
-            // TODO: Verify that private messages don't update the seen info
+            var testChannel = "#reprap";
+            var testUser = "Joey";
+            var testMessage = "Yo, yo, YO guys! I need a handle!!";
 
-            // TODO: Verify that actions also update the seen
+            gthx.HandleReceivedMessage(testChannel, testUser, testMessage);
+            Assert.AreEqual(testUser, data.LastSeenUser);
+            Assert.AreEqual(testChannel, data.LastSeenChannel);
+            Assert.AreEqual(testMessage, data.LastSeenMessage);
+            // Not useful to test LastSeenTimestamp here as that's set in MockData.
+            // Make an integration test for it.
+        }
+
+        [Test]
+        public void TestSeenUpdateOnAction()
+        {
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
+
+            var testChannel = "#reprap";
+            var testUser = "PhantomPhreak";
+            var testAction = "smacks Joey.";
+
+            gthx.HandleReceivedAction(testChannel, testUser, testAction);
+            Assert.AreEqual(testUser, data.LastSeenUser);
+            Assert.AreEqual(testChannel, data.LastSeenChannel);
+            Assert.AreEqual($"* {testUser} {testAction}", data.LastSeenMessage);
+            // Not useful to test LastSeenTimestamp here as tgat's set in MockData.
+            // Make an integration test for it.
         }
 
         [Test]
         public void TestSeenInPM()
         {
-            // TODO: Verify that direct messages don't update the seen info
+            // Verify that private messages don't update the seen info
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
+
+            var testChannel = "gthx";
+            var testUser = "Joey";
+            var testMessage = "Dude! I found the garbage file!";
+
+            gthx.HandleReceivedMessage(testChannel, testUser, testMessage);
+            Assert.AreEqual(null, data.LastSeenUser);
+            Assert.AreEqual(null, data.LastSeenChannel);
+            Assert.AreEqual(null, data.LastSeenMessage);
         }
     }
 }
