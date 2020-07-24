@@ -657,5 +657,22 @@ namespace Gthx.Test
             Assert.AreEqual(null, data.LastSeenChannel);
             Assert.AreEqual(null, data.LastSeenMessage);
         }
+
+        [Test]
+        public void TestStatus()
+        {
+            var client = new MockIrcClient();
+            var data = new MockData();
+            var mockReader = new MockWebReader();
+            var gthx = new Core.Gthx(client, data, mockReader);
+
+            var testChannel = "#reprap";
+            var testUser = "gunnbr";
+
+            gthx.HandleReceivedMessage(testChannel, testUser, $"status?");
+            var replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.IsTrue(replies.Messages[0].Contains(": OK; Up for "), "Invalid status reply");
+        }
     }
 }

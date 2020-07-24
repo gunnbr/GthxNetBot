@@ -8,6 +8,8 @@ namespace Gthx.Core
 {
     public class Gthx
     {
+        public readonly static string Version = "0.8 2020-07-24";
+
         private readonly IIrcClient _IrcClient;
         private readonly IGthxData _Data;
         private readonly IWebReader _WebReader;
@@ -22,7 +24,7 @@ namespace Gthx.Core
 
             _Modules = new List<IGthxModule>
             {
-                //new StatusModule(data, _IrcClient),
+                new StatusModule(data, _IrcClient),
                 new FactoidModule(data, _IrcClient),
                 new TellModule(data, _IrcClient),
                 new SeenModule(data, _IrcClient),
