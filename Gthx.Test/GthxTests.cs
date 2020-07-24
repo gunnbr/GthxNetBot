@@ -667,7 +667,7 @@ namespace Gthx.Test
             var gthx = new Core.Gthx(client, data, mockReader);
 
             var testChannel = "#reprap";
-            var testUser = "gunnbr";
+            var testUser = "admin";
 
             gthx.HandleReceivedMessage(testChannel, testUser, $"status?");
             var replies = client.GetReplies();
