@@ -44,7 +44,7 @@ namespace Gthx.Core.Interfaces
         public bool AddTell(string fromUser, string toUser, string message);
         public List<Tell> GetTell(string forUser);
         public ReferenceData AddThingiverseReference(string item);
-        public bool AddThingiverseTitle(string item, string title);
+        public void AddThingiverseTitle(string item, string title);
         public ReferenceData AddYoutubeReference(string item);
         public void AddYoutubeTitle(string item, string title);
         public int GetMood();

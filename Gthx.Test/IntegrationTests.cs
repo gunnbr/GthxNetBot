@@ -29,6 +29,8 @@ namespace Gthx.Test
             var replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual("I7nVrT00ST4", data.AddedYoutubeId);
+            Assert.AreEqual("Pro Riders Laughing", data.AddedYoutubeTitle);
             Assert.AreEqual($"{testUser} linked to YouTube video \"Pro Riders Laughing\" => 1 IRC mentions", replies.Messages[0]);
 
             // Test non-Western characters
@@ -38,6 +40,8 @@ namespace Gthx.Test
             replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual("xtAHgrNs7r4", data.AddedYoutubeId);
+            Assert.AreEqual("Studio Ghibli - Music Collection (Piano and Violin Duo) 株式会社スタジオジブリ- Relaxing music song", data.AddedYoutubeTitle);
             Assert.AreEqual($"{testUser} linked to YouTube video \"Studio Ghibli - Music Collection (Piano and Violin Duo) 株式会社スタジオジブリ- Relaxing music song\" => 1 IRC mentions", replies.Messages[0]);
         }
 
@@ -57,6 +61,8 @@ namespace Gthx.Test
             var replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual("2810756", data.AddedThingiverseId);
+            Assert.AreEqual("Articulated Butterfly by 8ran", data.AddedThingiverseTitle);
             Assert.AreEqual($"{testUser} linked to \"Articulated Butterfly by 8ran\" on thingiverse => 1 IRC mentions", replies.Messages[0]);
         }
     }

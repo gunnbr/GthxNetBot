@@ -85,7 +85,7 @@ namespace Gthx.Core.Modules
         {
             var title = await GetTitle(url, id);
             Console.WriteLine($"Got the title for ID {id} as '{title}'");
-            _Data.AddYoutubeTitle(id, title);
+            _Data.AddThingiverseTitle(id, title);
 
             if (string.IsNullOrEmpty(title))
             {

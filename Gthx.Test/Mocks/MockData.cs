@@ -33,6 +33,8 @@ namespace Gthx.Test.Mocks
         public string LastSeenMessage { get; private set; }
         public DateTime LastSeenTimestamp { get; private set; }
         public string LastSeenUserQuery { get; private set; }
+        public string AddedThingiverseId { get; private set; }
+        public string AddedThingiverseTitle { get; private set; }
 
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting)
         {
@@ -85,9 +87,10 @@ namespace Gthx.Test.Mocks
             };
         }
 
-        public bool AddThingiverseTitle(string item, string title)
+        public void AddThingiverseTitle(string item, string title)
         {
-            throw new NotImplementedException();
+            AddedThingiverseId = item;
+            AddedThingiverseTitle = title;
         }
 
         public ReferenceData AddYoutubeReference(string item)
@@ -256,7 +259,7 @@ namespace Gthx.Test.Mocks
 
         public int GetMood()
         {
-            throw new NotImplementedException();
+            return 4;
         }
 
         public List<Tell> GetTell(string forUser)
