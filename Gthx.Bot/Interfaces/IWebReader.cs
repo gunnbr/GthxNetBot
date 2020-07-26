@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 
-namespace Gthx.Core.Interfaces
+namespace Gthx.Bot.Interfaces
 {
     public interface IWebReader
     {

@@ -1,10 +1,10 @@
-﻿using Gthx.Core.Interfaces;
+﻿using Gthx.Bot.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Gthx.Core.Modules
+namespace Gthx.Bot.Modules
 {
     public class StatusModule : IGthxModule
     {

@@ -1,4 +1,4 @@
-﻿using Gthx.Core;
+﻿using Gthx.Bot;
 using Gthx.Test.Mocks;
 using NUnit.Framework;
 using System;
@@ -20,7 +20,7 @@ namespace Gthx.Test
             var client = new MockIrcClient();
             var data = new MockData();
             var webReader = new WebReader();
-            var gthx = new Core.Gthx(client, data, webReader);
+            var gthx = new Bot.Gthx(client, data, webReader);
 
             var testChannel = "#reprap";
             var testUser = "BobYourUncle";
@@ -51,7 +51,7 @@ namespace Gthx.Test
             var client = new MockIrcClient();
             var data = new MockData();
             var mockReader = new WebReader();
-            var gthx = new Core.Gthx(client, data, mockReader);
+            var gthx = new Bot.Gthx(client, data, mockReader);
 
             // Test fetching a new title that uses the <title> element
             var testChannel = "#reprap";

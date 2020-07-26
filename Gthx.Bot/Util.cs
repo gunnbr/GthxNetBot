@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Gthx.Core
+namespace Gthx.Bot
 {
     public class Util
     {
@@ -16,10 +16,15 @@ namespace Gthx.Core
         /// <param name="firstTime">UTC DateTime of the first time to compare against <paramref name="secondTime"/></param>
         /// <param name="secondTime">UTC DateTime of the first time to compare against <paramref name="firstTime"/></param>
         /// <returns>A string in user readable format between the times passed in</returns>
-        public static string TimeBetweenString(DateTime firstTime, DateTime? secondTime = null)
+        public static string TimeBetweenString(DateTime? firstTime, DateTime? secondTime = null)
         {
+            if (firstTime == null)
+            {
+                return "<Unknown>";
+            }
+
             var replyString = new StringBuilder();
-            var since = (secondTime ?? DateTime.UtcNow) - firstTime;
+            var since = (secondTime ?? DateTime.UtcNow) - firstTime.Value;
 
             var years = since.Days / 365;
             var days = since.Days % 365;

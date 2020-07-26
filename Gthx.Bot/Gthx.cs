@@ -1,10 +1,10 @@
-﻿using Gthx.Core.Interfaces;
-using Gthx.Core.Modules;
+﻿using Gthx.Bot.Interfaces;
+using Gthx.Bot.Modules;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Gthx.Core
+namespace Gthx.Bot
 {
     public class Gthx
     {

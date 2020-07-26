@@ -1,4 +1,4 @@
-﻿using Gthx.Core.Interfaces;
+﻿using Gthx.Bot.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;

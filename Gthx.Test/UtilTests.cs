@@ -1,8 +1,6 @@
-﻿using Gthx.Core;
+﻿using Gthx.Bot;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Gthx.Test
 {

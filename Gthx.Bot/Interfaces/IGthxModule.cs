@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Gthx.Core.Interfaces
+namespace Gthx.Bot.Interfaces
 {
     /// <summary>
     /// Response types: Normal messages or actions

@@ -1,10 +1,10 @@
-﻿using Gthx.Core.Interfaces;
+﻿using Gthx.Bot.Interfaces;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Web;
 
-namespace Gthx.Core.Modules
+namespace Gthx.Bot.Modules
 {
     public class GoogleModule : IGthxModule
     {

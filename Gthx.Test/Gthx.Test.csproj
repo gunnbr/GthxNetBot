@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Gthx.Bot\Gthx.Bot.csproj" />
     <ProjectReference Include="..\Gthx.Core\Gthx.Core.csproj" />
   </ItemGroup>
 

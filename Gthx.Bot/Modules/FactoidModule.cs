@@ -1,10 +1,10 @@
-﻿using Gthx.Core.Interfaces;
+﻿using Gthx.Bot.Interfaces;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-namespace Gthx.Core.Modules
+namespace Gthx.Bot.Modules
 {
     public class FactoidModule : IGthxModule
     {

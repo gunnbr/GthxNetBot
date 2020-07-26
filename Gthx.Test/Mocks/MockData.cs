@@ -1,5 +1,5 @@
 ﻿using Gthx.Core;
-using Gthx.Core.Interfaces;
+using Gthx.Bot.Interfaces;
 using System;
 using System.Collections.Generic;
 
@@ -226,31 +226,31 @@ namespace Gthx.Test.Mocks
             return null;
         }
 
-        public List<SeenData> GetLastSeen(string user)
+        public List<Seen> GetLastSeen(string user)
         {
             LastSeenUserQuery = user;
 
             switch (user)
             {
                 case "gunnbr":
-                    return new List<SeenData>()
+                    return new List<Seen>()
                     {
-                        new SeenData() { Channel = "#gthxtest", User = "gunnbr", Message = "gthx: status?", LastSeenTime = new DateTime(2020, 7, 23, 8, 23, 43)},
-                        new SeenData() { Channel = "#reprap", User = "gunnbr_", Message = "Yeah, I'm trying to fix that.", LastSeenTime = new DateTime(2020, 2, 3, 13, 44, 1)}
+                        new Seen() { Channel = "#gthxtest", Name = "gunnbr", Message = "gthx: status?", Timestamp = new DateTime(2020, 7, 23, 8, 23, 43)},
+                        new Seen() { Channel = "#reprap", Name = "gunnbr_", Message = "Yeah, I'm trying to fix that.", Timestamp = new DateTime(2020, 2, 3, 13, 44, 1)}
                     };
                 case "Razor":
-                    return new List<SeenData>()
+                    return new List<Seen>()
                     {
-                        new SeenData() { Channel = "#twitch", User = "Razor", Message = "Stream is starting NOW! Tune in!", LastSeenTime = new DateTime(2020, 7, 24, 6, 52, 11)},
+                        new Seen() { Channel = "#twitch", Name = "Razor", Message = "Stream is starting NOW! Tune in!", Timestamp = new DateTime(2020, 7, 24, 6, 52, 11)},
                     };
                 case "The":
-                    return new List<SeenData>()
+                    return new List<Seen>()
                     {
-                        new SeenData() { Channel = "#openscad", User = "TheHelper", Message = "Just get rid of that let statement.", LastSeenTime = new DateTime(2020, 7, 14, 22, 3, 15)},
-                        new SeenData() { Channel = "#leets", User = "ThePlague", Message = "Which one of you losers thinks you can beat me?", LastSeenTime = new DateTime(1995, 9, 15, 22, 3, 15)},
-                        new SeenData() { Channel = "#superherohigh", User = "Themyscira", Message = "Hey everyone, come visit!", LastSeenTime = new DateTime(2020, 7, 20, 5, 6, 7)},
-                        new SeenData() { Channel = "#TheMatrix", User = "TheOne", Message = "Whoah", LastSeenTime = new DateTime(1999, 3, 31, 14, 0, 0)},
-                        new SeenData() { Channel = "#reprap", User = "TheOwner", Message = "Don't make me kick you.", LastSeenTime = new DateTime(2020, 7, 17, 13, 31, 32)},
+                        new Seen() { Channel = "#openscad", Name = "TheHelper", Message = "Just get rid of that let statement.", Timestamp = new DateTime(2020, 7, 14, 22, 3, 15)},
+                        new Seen() { Channel = "#leets", Name = "ThePlague", Message = "Which one of you losers thinks you can beat me?", Timestamp = new DateTime(1995, 9, 15, 22, 3, 15)},
+                        new Seen() { Channel = "#superherohigh", Name = "Themyscira", Message = "Hey everyone, come visit!", Timestamp = new DateTime(2020, 7, 20, 5, 6, 7)},
+                        new Seen() { Channel = "#TheMatrix", Name = "TheOne", Message = "Whoah", Timestamp = new DateTime(1999, 3, 31, 14, 0, 0)},
+                        new Seen() { Channel = "#reprap", Name = "TheOwner", Message = "Don't make me kick you.", Timestamp = new DateTime(2020, 7, 17, 13, 31, 32)},
                     };
             }
 

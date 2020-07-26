@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Gthx.Core.Interfaces
+namespace Gthx.Bot.Interfaces
 {
     public interface IIrcClient
     {

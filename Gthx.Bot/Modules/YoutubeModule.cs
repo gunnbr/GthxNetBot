@@ -1,15 +1,16 @@
-﻿using Gthx.Core.Interfaces;
+﻿using Gthx.Bot.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Gthx.Core.Modules
+namespace Gthx.Bot.Modules
 {
-    public class ThingiverseModule : IGthxModule
+    public class YoutubeModule : IGthxModule
     {
-        private readonly Regex _thingiRegex = new Regex(@$"http(s)?:\/\/www.thingiverse.com\/thing:(?'id'\d+)");
+        private readonly Regex _youtubeRegex = new Regex(@$"http(s)?:\/\/(?'url'www\.youtube\.com\/watch\?v=|youtu\.be\/)(?'id'[\w\-]*)(\S*)");
         private readonly Regex _titleRegex = new Regex(@"<title>(?'title'.*) - .*<\/title>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
         private readonly Regex _metaRegex = new Regex("<meta name=\"title\" content=\"(?'title'.*)\"", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
@@ -17,7 +18,7 @@ namespace Gthx.Core.Modules
         private readonly IIrcClient _IrcClient;
         private readonly IWebReader _WebReader;
 
-        public ThingiverseModule(IGthxData data, IIrcClient ircClient, IWebReader webReader)
+        public YoutubeModule(IGthxData data, IIrcClient ircClient, IWebReader webReader)
         {
             this._Data = data;
             this._IrcClient = ircClient;
@@ -26,7 +27,7 @@ namespace Gthx.Core.Modules
 
         public void ProcessMessage(string channel, string user, string message)
         {
-            var youtubeMatch = _thingiRegex.Match(message);
+            var youtubeMatch = _youtubeRegex.Match(message);
             if (!youtubeMatch.Success)
             {
                 return;
@@ -34,27 +35,21 @@ namespace Gthx.Core.Modules
 
             var url = youtubeMatch.Groups[0].Value;
             var id = youtubeMatch.Groups["id"].Value;
-            Console.WriteLine($"Checking for Thingiverse title for '{id}'");
-            var referenceData = _Data.AddThingiverseReference(id);
+            Console.WriteLine($"Checking for Youtube title for '{id}'");
+            var referenceData = _Data.AddYoutubeReference(id);
             if (referenceData.Title != null)
             {
-                Console.WriteLine($"Already have a title for Thingiverse item {referenceData.Id}:{referenceData.Title}");
-                _IrcClient.SendMessage(channel, $"{user} linked to \"{referenceData.Title}\" on thingiverse => {referenceData.ReferenceCount} IRC mentions");
+                Debug.WriteLine($"Already have a title for youtube item {referenceData.Id}:{referenceData.Title}");
+                _IrcClient.SendMessage(channel, $"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.ReferenceCount} IRC mentions");
                 return;
             }
 
             GetAndSaveTitle(url, id, channel, user, referenceData?.ReferenceCount ?? 1);
         }
 
-        // TODO: Move this to the Util class once a DI solution is found that
-        //       works with unit tests so the WebReader can be mocked
         private async Task<string> GetTitle(string url, string id)
         {
-            Console.WriteLine($"Getting thingiverse title for '{id}'");
-
             var webStream = await _WebReader.GetStreamFromUrlAsync(url);
-
-            Console.WriteLine("Finished waiting for the web stream...");
 
             using (var reader = new StreamReader(webStream))
             {
@@ -79,23 +74,19 @@ namespace Gthx.Core.Modules
             }
 
             return null;
-        }
+        } 
 
         public async void GetAndSaveTitle(string url, string id, string channel, string user, int referenceCount)
         {
             var title = await GetTitle(url, id);
-            Console.WriteLine($"Got the title for ID {id} as '{title}'");
-            _Data.AddThingiverseTitle(id, title);
-
+            _Data.AddYoutubeTitle(id, title);
             if (string.IsNullOrEmpty(title))
             {
-                _IrcClient.SendMessage(channel, $"{user} linked to thing {id} on thingiverse => {referenceCount} IRC mentions");
+                _IrcClient.SendMessage(channel, $"{user} linked to a YouTube video with an unknown title => {referenceCount} IRC mentions");
             }
             else
             {
-                Console.WriteLine($"Sending reply about the title");
-                _IrcClient.SendMessage(channel, $"{user} linked to \"{title}\" on thingiverse => {referenceCount} IRC mentions");
-                Console.WriteLine("Done sending reply about the title");
+                _IrcClient.SendMessage(channel, $"{user} linked to YouTube video \"{title}\" => 1 IRC mentions");
             }
         }
     }

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Gthx.Core;
+using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace Gthx.Core.Interfaces
+namespace Gthx.Bot.Interfaces
 {
     public class ReferenceData
     {
@@ -24,17 +24,9 @@ namespace Gthx.Core.Interfaces
         public List<FactoidInfo> InfoList;
     }
 
-    public class SeenData
-    {
-        public string Channel;
-        public string User;
-        public string Message;
-        public DateTime LastSeenTime;
-    }
-
     public interface IGthxData
     {
-        public List<SeenData> GetLastSeen(string user);
+        public List<Seen> GetLastSeen(string user);
         public void UpdateLastSeen(string channel, string user, string message);
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting);
         public bool IsFactoidLocked(string factoid);

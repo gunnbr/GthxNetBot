@@ -1,9 +1,9 @@
-﻿using Gthx.Core.Interfaces;
+﻿using Gthx.Bot.Interfaces;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Gthx.Core
+namespace Gthx.Bot
 {
     public class WebReader : IWebReader
     {

@@ -1,4 +1,4 @@
-﻿using Gthx.Core.Interfaces;
+﻿using Gthx.Bot.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Gthx.Core.Modules
+namespace Gthx.Bot.Modules
 {
     public class SeenModule : IGthxModule
     {
@@ -46,7 +46,8 @@ namespace Gthx.Core.Modules
 
             foreach (var info in seenList.Take(3))
             {
-                _IrcClient.SendMessage(channel, $"{info.User} was last seen in {info.Channel} {Util.TimeBetweenString(info.LastSeenTime)} ago saying '{info.Message}'.");
+                var timeSince = info.Timestamp == null ? "<Unknown>" : Util.TimeBetweenString(info.Timestamp.Value);
+                _IrcClient.SendMessage(channel, $"{info.Name} was last seen in {info.Channel} {timeSince} ago saying '{info.Message}'.");
             }
         }
 

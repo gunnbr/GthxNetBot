@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Gthx.Core
 {
-    public class Tell
+    public partial class Tell
     {
-        public string FromUser { get; set; }
-        public string ToUser { get; set; }
+        public int Id { get; set; }
+        public string Author { get; set; }
+        public string Recipient { get; set; }
+        public DateTime? Timestamp { get; set; }
         public string Message { get; set; }
-        public DateTime TimeSet { get; set; }
-    
-        public Tell(string fromUser, string toUser, string message, DateTime timeSet)
+        public bool? InTracked { get; set; }
+
+        public Tell(string from, string to, string message, DateTime timestamp)
         {
-            FromUser = fromUser;
-            ToUser = toUser;
+            Author = from;
+            Recipient = to;
             Message = message;
-            TimeSet = timeSet;
+            Timestamp = timestamp;
         }
     }
 }

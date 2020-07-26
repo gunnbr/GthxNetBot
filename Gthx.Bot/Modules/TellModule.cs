@@ -1,11 +1,11 @@
-﻿using Gthx.Core.Interfaces;
+﻿using Gthx.Bot.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Gthx.Core.Modules
+namespace Gthx.Bot.Modules
 {
     public class TellModule : IGthxModule
     {
@@ -24,9 +24,9 @@ namespace Gthx.Core.Modules
             var waitingMessages = _Data.GetTell(user);
             foreach (var waitingMessage in waitingMessages)
             {
-                Debug.WriteLine($"Found tell for '{user}' from '{waitingMessage.FromUser}");
-                var timeSince = Util.TimeBetweenString(waitingMessage.TimeSet);
-                var reply = $"{user}: {timeSince} ago {waitingMessage.FromUser} tell {waitingMessage.ToUser} {waitingMessage.Message}";
+                Debug.WriteLine($"Found tell for '{user}' from '{waitingMessage.Author}");
+                var timeSince = Util.TimeBetweenString(waitingMessage.Timestamp);
+                var reply = $"{user}: {timeSince} ago {waitingMessage.Author} tell {waitingMessage.Recipient} {waitingMessage.Message}";
                 _IrcClient.SendMessage(channel, reply);
             }
 
