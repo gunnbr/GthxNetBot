@@ -59,31 +59,37 @@ namespace Gthx.Test.Mocks
             return true;
         }
 
-        public ReferenceData AddThingiverseReference(string item)
+        public ThingiverseRefs AddThingiverseReference(string item)
         {
+            var success = int.TryParse(item, out var intItem);
+            if (!success)
+            {
+                return null;
+            }
+
             switch (item)
             {
                 case "2823006":
-                    return new ReferenceData
+                    return new ThingiverseRefs
                     {
-                        Id = item,
-                        ReferenceCount = 42,
+                        Item = intItem,
+                        Count = 42,
                         Title = "Air Spinner"
                     };
 
                 case "1276095":
-                    return new ReferenceData
+                    return new ThingiverseRefs
                     {
-                        Id = item,
-                        ReferenceCount = 23,
+                        Item = intItem,
+                        Count = 23,
                         Title = "Flexifish 🦈🌊"
                     };
             }
 
-            return new ReferenceData
+            return new ThingiverseRefs
             {
-                Id = item,
-                ReferenceCount = 1
+                Item = intItem,
+                Count = 1
             };
         }
 
@@ -93,31 +99,31 @@ namespace Gthx.Test.Mocks
             AddedThingiverseTitle = title;
         }
 
-        public ReferenceData AddYoutubeReference(string item)
+        public YoutubeRefs AddYoutubeReference(string item)
         {
             switch (item)
             {
                 case "ykKIZQKaT5c":
-                    return new ReferenceData
+                    return new YoutubeRefs
                     {
-                        Id = item,
-                        ReferenceCount = 42,
+                        Item = item,
+                        Count = 42,
                         Title = "Spinner"
                     };
 
                 case "W3B2C0nNpFU":
-                    return new ReferenceData
+                    return new YoutubeRefs
                     {
-                        Id = item,
-                        ReferenceCount = 83,
+                        Item = item,
+                        Count = 83,
                         Title = "Best relaxing piano studio ghibli complete collection ピアノスタジオジブリコレクション"
                     };
             }
 
-            return new ReferenceData
+            return new YoutubeRefs
             {
-                Id = item,
-                ReferenceCount = 1
+                Item = item,
+                Count = 1
             };
         }
 

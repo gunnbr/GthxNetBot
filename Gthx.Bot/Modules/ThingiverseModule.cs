@@ -38,12 +38,12 @@ namespace Gthx.Bot.Modules
             var referenceData = _Data.AddThingiverseReference(id);
             if (referenceData.Title != null)
             {
-                Console.WriteLine($"Already have a title for Thingiverse item {referenceData.Id}:{referenceData.Title}");
-                _IrcClient.SendMessage(channel, $"{user} linked to \"{referenceData.Title}\" on thingiverse => {referenceData.ReferenceCount} IRC mentions");
+                Console.WriteLine($"Already have a title for Thingiverse item {referenceData.Item}:{referenceData.Title}");
+                _IrcClient.SendMessage(channel, $"{user} linked to \"{referenceData.Title}\" on thingiverse => {referenceData.Count} IRC mentions");
                 return;
             }
 
-            GetAndSaveTitle(url, id, channel, user, referenceData?.ReferenceCount ?? 1);
+            GetAndSaveTitle(url, id, channel, user, referenceData?.Count ?? 1);
         }
 
         // TODO: Move this to the Util class once a DI solution is found that

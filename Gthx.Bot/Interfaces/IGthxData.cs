@@ -4,13 +4,6 @@ using System.Collections.Generic;
 
 namespace Gthx.Bot.Interfaces
 {
-    public class ReferenceData
-    {
-        public string Id;
-        public string Title;
-        public int ReferenceCount;
-    }
-
     public class FactoidInfo
     {
         public string User;
@@ -35,9 +28,9 @@ namespace Gthx.Bot.Interfaces
         public FactoidInfoReply GetFactoidInfo(string factoid);
         public bool AddTell(string fromUser, string toUser, string message);
         public List<Tell> GetTell(string forUser);
-        public ReferenceData AddThingiverseReference(string item);
+        public ThingiverseRefs AddThingiverseReference(string item);
         public void AddThingiverseTitle(string item, string title);
-        public ReferenceData AddYoutubeReference(string item);
+        public YoutubeRefs AddYoutubeReference(string item);
         public void AddYoutubeTitle(string item, string title);
         public int GetMood();
     }

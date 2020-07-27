@@ -39,12 +39,12 @@ namespace Gthx.Bot.Modules
             var referenceData = _Data.AddYoutubeReference(id);
             if (referenceData.Title != null)
             {
-                Debug.WriteLine($"Already have a title for youtube item {referenceData.Id}:{referenceData.Title}");
-                _IrcClient.SendMessage(channel, $"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.ReferenceCount} IRC mentions");
+                Debug.WriteLine($"Already have a title for youtube item {referenceData.Item}:{referenceData.Title}");
+                _IrcClient.SendMessage(channel, $"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.Count} IRC mentions");
                 return;
             }
 
-            GetAndSaveTitle(url, id, channel, user, referenceData?.ReferenceCount ?? 1);
+            GetAndSaveTitle(url, id, channel, user, referenceData?.Count ?? 1);
         }
 
         private async Task<string> GetTitle(string url, string id)
