@@ -1,8 +1,6 @@
 ﻿using Gthx.Bot.Interfaces;
+using Gthx.Data;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Gthx.Bot.Modules
 {

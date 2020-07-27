@@ -2,7 +2,6 @@ using Gthx.Test.Mocks;
 using NUnit.Framework;
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Gthx.Test

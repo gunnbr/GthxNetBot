@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Gthx.Core
 {
-    public partial class ThingiverseRefs
+    public partial class ThingiverseRef
     {
         public int Item { get; set; }
         public string Title { get; set; }

@@ -1,5 +1,5 @@
 ﻿using Gthx.Core;
-using Gthx.Bot.Interfaces;
+using Gthx.Data;
 using System;
 using System.Collections.Generic;
 
@@ -59,7 +59,7 @@ namespace Gthx.Test.Mocks
             return true;
         }
 
-        public ThingiverseRefs AddThingiverseReference(string item)
+        public ThingiverseRef AddThingiverseReference(string item)
         {
             var success = int.TryParse(item, out var intItem);
             if (!success)
@@ -70,7 +70,7 @@ namespace Gthx.Test.Mocks
             switch (item)
             {
                 case "2823006":
-                    return new ThingiverseRefs
+                    return new ThingiverseRef
                     {
                         Item = intItem,
                         Count = 42,
@@ -78,7 +78,7 @@ namespace Gthx.Test.Mocks
                     };
 
                 case "1276095":
-                    return new ThingiverseRefs
+                    return new ThingiverseRef
                     {
                         Item = intItem,
                         Count = 23,
@@ -86,7 +86,7 @@ namespace Gthx.Test.Mocks
                     };
             }
 
-            return new ThingiverseRefs
+            return new ThingiverseRef
             {
                 Item = intItem,
                 Count = 1
@@ -99,12 +99,12 @@ namespace Gthx.Test.Mocks
             AddedThingiverseTitle = title;
         }
 
-        public YoutubeRefs AddYoutubeReference(string item)
+        public YoutubeRef AddYoutubeReference(string item)
         {
             switch (item)
             {
                 case "ykKIZQKaT5c":
-                    return new YoutubeRefs
+                    return new YoutubeRef
                     {
                         Item = item,
                         Count = 42,
@@ -112,7 +112,7 @@ namespace Gthx.Test.Mocks
                     };
 
                 case "W3B2C0nNpFU":
-                    return new YoutubeRefs
+                    return new YoutubeRef
                     {
                         Item = item,
                         Count = 83,
@@ -120,7 +120,7 @@ namespace Gthx.Test.Mocks
                     };
             }
 
-            return new YoutubeRefs
+            return new YoutubeRef
             {
                 Item = item,
                 Count = 1
@@ -149,11 +149,11 @@ namespace Gthx.Test.Mocks
         {
             return new Factoid
             {
-                Name = factoid,
+                Item = factoid,
                 Value = value,
-                IsAre = isAre,
-                SetByUser = "MockData",
-                Timestamp = DateTime.UtcNow
+                Are = isAre,
+                Nick = "MockData",
+                Dateset = DateTime.UtcNow
             };
         }
 

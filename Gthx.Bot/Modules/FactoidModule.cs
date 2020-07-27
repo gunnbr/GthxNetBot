@@ -1,8 +1,8 @@
 ﻿using Gthx.Bot.Interfaces;
+using Gthx.Data;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace Gthx.Bot.Modules
 {
@@ -196,7 +196,7 @@ namespace Gthx.Bot.Modules
             }
 
             var factoidValue = string.Join(" and also ", factoidValueList.Select(f => f.Value));
-            var article = factoidValueList[0].IsAre ? "are" : "is";
+            var article = factoidValueList[0].Are ? "are" : "is";
             factoidValue = factoidValue.Replace("!who", user);
             factoidValue = factoidValue.Replace("!channel", channel);
 

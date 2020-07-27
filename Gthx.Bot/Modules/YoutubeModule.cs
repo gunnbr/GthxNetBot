@@ -1,6 +1,6 @@
 ﻿using Gthx.Bot.Interfaces;
+using Gthx.Data;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;

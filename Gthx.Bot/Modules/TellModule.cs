@@ -1,9 +1,7 @@
 ﻿using Gthx.Bot.Interfaces;
-using System;
-using System.Collections.Generic;
+using Gthx.Data;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Gthx.Bot.Modules
 {

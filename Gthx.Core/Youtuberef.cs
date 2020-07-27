@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Gthx.Core
 {
-    public partial class YoutubeRefs
+    public partial class YoutubeRef
     {
         public string Item { get; set; }
         public string Title { get; set; }

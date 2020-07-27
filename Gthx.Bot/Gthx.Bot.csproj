@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Gthx.Core\Gthx.Core.csproj" />
+    <ProjectReference Include="..\Gthx.Data\Gthx.Data.csproj" />
   </ItemGroup>
 
 </Project>
