@@ -49,8 +49,13 @@ namespace Gthx.Bot
                 module.ProcessMessage(channel, user, message);
             }
         }
+
         public void HandleReceivedAction(string channel, string user, string action)
         {
+            foreach (var module in _Modules)
+            {
+                module.ProcessAction(channel, user, action);
+            }
         }
     }
 }

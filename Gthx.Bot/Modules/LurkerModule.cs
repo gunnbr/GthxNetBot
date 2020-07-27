@@ -8,6 +8,10 @@ namespace Gthx.Bot.Modules
 {
     public class LurkerModule : IGthxModule
     {
+        public void ProcessAction(string channel, string user, string message)
+        {
+        }
+
         public void ProcessMessage(string channel, string user, string message)
         {
             // TODO: Implement lurker module

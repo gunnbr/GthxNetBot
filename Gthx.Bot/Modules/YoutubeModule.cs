@@ -25,6 +25,10 @@ namespace Gthx.Bot.Modules
             this._WebReader = webReader;
         }
 
+        public void ProcessAction(string channel, string user, string message)
+        {
+        }
+
         public void ProcessMessage(string channel, string user, string message)
         {
             var youtubeMatch = _youtubeRegex.Match(message);

@@ -1,6 +1,5 @@
 ﻿using Gthx.Bot.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -22,6 +21,10 @@ namespace Gthx.Bot.Modules
             this._Data = data;
             this._IrcClient = ircClient;
             this._WebReader = webReader;
+        }
+
+        public void ProcessAction(string channel, string user, string message)
+        {
         }
 
         public void ProcessMessage(string channel, string user, string message)

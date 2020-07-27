@@ -19,6 +19,10 @@ namespace Gthx.Bot.Modules
             this._IrcClient = ircClient;
         }
 
+        public void ProcessAction(string channel, string user, string message)
+        {
+        }
+
         public void ProcessMessage(string channel, string user, string message)
         {
             var waitingMessages = _Data.GetTell(user);

@@ -8,13 +8,19 @@ namespace Gthx.Bot.Interfaces
     interface IGthxModule
     {
         /// <summary>
-        /// Evaluate a received message and return a response if the module
-        /// is able to handle the message.
+        /// Evaluate a received message and act of it if necessary.
         /// </summary>
         /// <param name="channel">Channel the message was received on</param>
         /// <param name="user">Nick of the user who sent the message</param>
         /// <param name="message">Text of the message that was sent</param>
-        /// <returns>IrcResponse to reply if the message was handled or null otherwise</returns>
         public void ProcessMessage(string channel, string user, string message);
+
+        /// <summary>
+        /// Evaluate a received action and act on it if necessary
+        /// </summary>
+        /// <param name="channel">Channel the message was received on</param>
+        /// <param name="user">Nick of the user who sent the message</param>
+        /// <param name="message">Text of the action message that was sent</param>
+        public void ProcessAction(string channel, string user, string message);
     }
 }

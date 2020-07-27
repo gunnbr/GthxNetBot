@@ -51,8 +51,13 @@ namespace Gthx.Bot.Modules
             }
         }
 
-        // TODO: Add ProcessAction to do:
-        // self.db.updateSeen(sender, channel, "* %s %s" % (sender, message))
-
+        public void ProcessAction(string channel, string user, string message)
+        {
+            // Update the seen database, but only if it's not a private message
+            if (channel.StartsWith("#"))
+            {
+                _Data.UpdateLastSeen(channel, user, $"* {user} {message}");
+            }
+        }
     }
 }

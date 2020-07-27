@@ -17,6 +17,10 @@ namespace Gthx.Bot.Modules
             _IrcClient = ircClient;
         }
 
+        public void ProcessAction(string channel, string user, string message)
+        {
+        }
+
         public void ProcessMessage(string channel, string user, string message)
         {
             var googleMatch = _GoogleRegex.Match(message);
