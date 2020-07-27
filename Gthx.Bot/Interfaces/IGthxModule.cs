@@ -5,36 +5,6 @@ using System.Threading.Tasks;
 
 namespace Gthx.Bot.Interfaces
 {
-    /// <summary>
-    /// Response types: Normal messages or actions
-    /// </summary>
-    public enum ResponseType
-    {
-        Normal,
-        Action
-    }
-
-    /// <summary>
-    /// Response to an incoming message
-    /// </summary>
-    public class IrcResponse
-    {
-        public IrcResponse(string message, ResponseType type = ResponseType.Normal, bool isFinalResponse = true)
-        {
-            Message = message;
-            Type = type;
-            IsFinalResponse = isFinalResponse;
-        }
-
-        public ResponseType Type { get; set; }
-        public string Message { get; set; }
-        /// <summary>
-        /// If false, keep processing to look for additional responses.
-        /// If true, stop processing and send all replies.
-        /// </summary>
-        public bool IsFinalResponse { get; set; }
-    }
-
     interface IGthxModule
     {
         /// <summary>

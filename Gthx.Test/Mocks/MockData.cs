@@ -219,12 +219,12 @@ namespace Gthx.Test.Mocks
                     return new FactoidInfoReply()
                     {
                         RefCount = 176,
-                        InfoList = new List<FactoidInfo>
+                        InfoList = new List<FactoidHistory>
                         {
-                            new FactoidInfo() { User = "GLaDOS", Value = "delicious", Timestamp = new DateTime(2007, 10, 10, 8, 0, 0)},
-                            new FactoidInfo() { User = "Chell", Value = null, Timestamp = new DateTime(2007, 10, 10, 14, 34, 53)},
-                            new FactoidInfo() { User = "UnknownEntity", Value = "a lie!", Timestamp = new DateTime(2007, 10, 10, 14, 34, 53)},
-                            new FactoidInfo() { User = null, Value = "delicious", Timestamp = new DateTime(2007, 10, 10, 14, 34, 55)},
+                            new FactoidHistory() { Nick = "GLaDOS", Value = "delicious", Dateset = new DateTime(2007, 10, 10, 8, 0, 0)},
+                            new FactoidHistory() { Nick = "Chell", Value = null, Dateset = new DateTime(2007, 10, 10, 14, 34, 53)},
+                            new FactoidHistory() { Nick = "UnknownEntity", Value = "a lie!", Dateset = new DateTime(2007, 10, 10, 14, 34, 53)},
+                            new FactoidHistory() { Nick = null, Value = "delicious", Dateset = new DateTime(2007, 10, 10, 14, 34, 55)},
                         }
                     };
             }

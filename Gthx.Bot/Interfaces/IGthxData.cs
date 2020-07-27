@@ -4,17 +4,10 @@ using System.Collections.Generic;
 
 namespace Gthx.Bot.Interfaces
 {
-    public class FactoidInfo
-    {
-        public string User;
-        public string Value;
-        public DateTime Timestamp;
-    }
-
     public class FactoidInfoReply
     {
         public int RefCount;
-        public List<FactoidInfo> InfoList;
+        public List<FactoidHistory> InfoList;
     }
 
     public interface IGthxData
