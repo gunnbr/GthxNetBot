@@ -151,9 +151,9 @@ namespace Gthx.Test.Mocks
             {
                 Item = factoid,
                 Value = value,
-                Are = isAre,
-                Nick = "MockData",
-                Dateset = DateTime.UtcNow
+                IsAre = isAre,
+                User = "MockData",
+                Timestamp = DateTime.UtcNow
             };
         }
 
@@ -221,10 +221,10 @@ namespace Gthx.Test.Mocks
                         RefCount = 176,
                         InfoList = new List<FactoidHistory>
                         {
-                            new FactoidHistory() { Nick = "GLaDOS", Value = "delicious", Dateset = new DateTime(2007, 10, 10, 8, 0, 0)},
-                            new FactoidHistory() { Nick = "Chell", Value = null, Dateset = new DateTime(2007, 10, 10, 14, 34, 53)},
-                            new FactoidHistory() { Nick = "UnknownEntity", Value = "a lie!", Dateset = new DateTime(2007, 10, 10, 14, 34, 53)},
-                            new FactoidHistory() { Nick = null, Value = "delicious", Dateset = new DateTime(2007, 10, 10, 14, 34, 55)},
+                            new FactoidHistory() { User = "GLaDOS", Value = "delicious", Timestamp = new DateTime(2007, 10, 10, 8, 0, 0)},
+                            new FactoidHistory() { User = "Chell", Value = null, Timestamp = new DateTime(2007, 10, 10, 14, 34, 53)},
+                            new FactoidHistory() { User = "UnknownEntity", Value = "a lie!", Timestamp = new DateTime(2007, 10, 10, 14, 34, 53)},
+                            new FactoidHistory() { User = null, Value = "delicious", Timestamp = new DateTime(2007, 10, 10, 14, 34, 55)},
                         }
                     };
             }
@@ -241,22 +241,22 @@ namespace Gthx.Test.Mocks
                 case "gunnbr":
                     return new List<Seen>()
                     {
-                        new Seen() { Channel = "#gthxtest", Name = "gunnbr", Message = "gthx: status?", Timestamp = new DateTime(2020, 7, 23, 8, 23, 43)},
-                        new Seen() { Channel = "#reprap", Name = "gunnbr_", Message = "Yeah, I'm trying to fix that.", Timestamp = new DateTime(2020, 2, 3, 13, 44, 1)}
+                        new Seen() { Channel = "#gthxtest", User = "gunnbr", Message = "gthx: status?", Timestamp = new DateTime(2020, 7, 23, 8, 23, 43)},
+                        new Seen() { Channel = "#reprap", User = "gunnbr_", Message = "Yeah, I'm trying to fix that.", Timestamp = new DateTime(2020, 2, 3, 13, 44, 1)}
                     };
                 case "Razor":
                     return new List<Seen>()
                     {
-                        new Seen() { Channel = "#twitch", Name = "Razor", Message = "Stream is starting NOW! Tune in!", Timestamp = new DateTime(2020, 7, 24, 6, 52, 11)},
+                        new Seen() { Channel = "#twitch", User = "Razor", Message = "Stream is starting NOW! Tune in!", Timestamp = new DateTime(2020, 7, 24, 6, 52, 11)},
                     };
                 case "The":
                     return new List<Seen>()
                     {
-                        new Seen() { Channel = "#openscad", Name = "TheHelper", Message = "Just get rid of that let statement.", Timestamp = new DateTime(2020, 7, 14, 22, 3, 15)},
-                        new Seen() { Channel = "#leets", Name = "ThePlague", Message = "Which one of you losers thinks you can beat me?", Timestamp = new DateTime(1995, 9, 15, 22, 3, 15)},
-                        new Seen() { Channel = "#superherohigh", Name = "Themyscira", Message = "Hey everyone, come visit!", Timestamp = new DateTime(2020, 7, 20, 5, 6, 7)},
-                        new Seen() { Channel = "#TheMatrix", Name = "TheOne", Message = "Whoah", Timestamp = new DateTime(1999, 3, 31, 14, 0, 0)},
-                        new Seen() { Channel = "#reprap", Name = "TheOwner", Message = "Don't make me kick you.", Timestamp = new DateTime(2020, 7, 17, 13, 31, 32)},
+                        new Seen() { Channel = "#openscad", User = "TheHelper", Message = "Just get rid of that let statement.", Timestamp = new DateTime(2020, 7, 14, 22, 3, 15)},
+                        new Seen() { Channel = "#leets", User = "ThePlague", Message = "Which one of you losers thinks you can beat me?", Timestamp = new DateTime(1995, 9, 15, 22, 3, 15)},
+                        new Seen() { Channel = "#superherohigh", User = "Themyscira", Message = "Hey everyone, come visit!", Timestamp = new DateTime(2020, 7, 20, 5, 6, 7)},
+                        new Seen() { Channel = "#TheMatrix", User = "TheOne", Message = "Whoah", Timestamp = new DateTime(1999, 3, 31, 14, 0, 0)},
+                        new Seen() { Channel = "#reprap", User = "TheOwner", Message = "Don't make me kick you.", Timestamp = new DateTime(2020, 7, 17, 13, 31, 32)},
                     };
             }
 
@@ -276,14 +276,14 @@ namespace Gthx.Test.Mocks
                 case "CrashOverride":
                     return new List<Tell> 
                     {
-                        new Tell("AcidBurn", "CrashOverride", "Mess with the best, die like the rest.", new DateTime(1995, 11, 4, 23, 49, 13)) 
+                        new Tell() { Author = "AcidBurn", Recipient = "CrashOverride", Message = "Mess with the best, die like the rest.", Timestamp = new DateTime(1995, 11, 4, 23, 49, 13)}
                     };
 
                 case "gunnbr":
                     return new List<Tell>
                     {
-                        new Tell("JimmyRockets", "gunnbr", "Can you fix a gthx bug?", new DateTime(2015, 10, 8, 12, 30, 32)),
-                        new Tell("PaulBunyan", "gunnbr", "Do you need any help with emoji 🧑🏿😨🍦?", new DateTime(2015, 10, 9, 3, 34, 43)),
+                        new Tell() { Author = "JimmyRockets", Recipient = "gunnbr", Message = "Can you fix a gthx bug?", Timestamp = new DateTime(2015, 10, 8, 12, 30, 32) },
+                        new Tell() { Author = "PaulBunyan", Recipient = "gunnbr", Message = "Do you need any help with emoji 🧑🏿😨🍦?", Timestamp = new DateTime(2015, 10, 9, 3, 34, 43) },
                     };
             }
 

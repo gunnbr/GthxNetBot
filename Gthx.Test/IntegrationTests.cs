@@ -1,4 +1,5 @@
 ﻿using Gthx.Bot;
+using Gthx.Data;
 using Gthx.Test.Mocks;
 using NUnit.Framework;
 using System;
@@ -12,7 +13,9 @@ namespace Gthx.Test
     public class IntegrationTests
     {
         // TODO: Add integration test for "seen user*" to verify the asterisk is handled correctly
-
+        // TODO: Add tests on factoid history, including delete factoid
+        // TODO: OR add unit tests for GthxSqlData
+        // TODO: Add test for incrementing factoid count when a factoid is referenced
 
         [Test]
         public async Task TestLiveYoutubeReferences()
@@ -64,6 +67,35 @@ namespace Gthx.Test
             Assert.AreEqual("2810756", data.AddedThingiverseId);
             Assert.AreEqual("Articulated Butterfly by 8ran", data.AddedThingiverseTitle);
             Assert.AreEqual($"{testUser} linked to \"Articulated Butterfly by 8ran\" on thingiverse => 1 IRC mentions", replies.Messages[0]);
+        }
+
+        [Test]
+        public void TestFactoidSetAndGet()
+        {
+            var client = new MockIrcClient();
+            var context = new GthxData.GthxDataContext();
+            context.Database.EnsureCreated();
+            var data = new GthxSqlData(context);
+            var mockReader = new MockWebReader();
+            var gthx = new Bot.Gthx(client, data, mockReader);
+
+            
+            var testFactoid = "testFactoid";
+            var testValue = "working";
+            var testChannel = "#reprap";
+            var testUser = "SomeUser";
+
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid} is {testValue}");
+            var replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser}: Okay.", replies.Messages[0]);
+
+            gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
+            replies = client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testFactoid} is {testValue}", replies.Messages[0]);
         }
     }
 }

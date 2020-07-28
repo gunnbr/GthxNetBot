@@ -47,8 +47,8 @@ namespace Gthx.Bot.Modules
 
             foreach (var info in seenList.Take(3))
             {
-                var timeSince = info.Timestamp == null ? "<Unknown>" : Util.TimeBetweenString(info.Timestamp.Value);
-                _IrcClient.SendMessage(channel, $"{info.Name} was last seen in {info.Channel} {timeSince} ago saying '{info.Message}'.");
+                var timeSince = Util.TimeBetweenString(info.Timestamp);
+                _IrcClient.SendMessage(channel, $"{info.User} was last seen in {info.Channel} {timeSince} ago saying '{info.Message}'.");
             }
         }
 

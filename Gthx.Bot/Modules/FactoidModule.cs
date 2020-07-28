@@ -106,20 +106,20 @@ namespace Gthx.Bot.Modules
             _IrcClient.SendMessage(channel, $"Factoid '{factoid}' has been referenced {info.RefCount} times");
             foreach (var data in info.InfoList)
             {
-                if (string.IsNullOrWhiteSpace(data.Nick))
+                if (string.IsNullOrWhiteSpace(data.User))
                 {
-                    data.Nick = "Unknown";
+                    data.User = "Unknown";
                 }
 
                 if (data.Value == null)
                 {
-                    Console.WriteLine($"At {data.Dateset}, {data.Nick} deleted this item");
-                    _IrcClient.SendMessage(channel, $"At {data.Dateset:R}, {data.Nick} deleted this item");
+                    Console.WriteLine($"At {data.Timestamp}, {data.User} deleted this item");
+                    _IrcClient.SendMessage(channel, $"At {data.Timestamp:R}, {data.User} deleted this item");
                 }
                 else
                 {
-                    Console.WriteLine($"At {data.Dateset}, {data.Nick} set to: {data.Value}");
-                    _IrcClient.SendMessage(channel, $"At {data.Dateset:R}, {data.Nick} set to: {data.Value}");
+                    Console.WriteLine($"At {data.Timestamp}, {data.User} set to: {data.Value}");
+                    _IrcClient.SendMessage(channel, $"At {data.Timestamp:R}, {data.User} set to: {data.Value}");
                 }
             }
 
@@ -196,7 +196,7 @@ namespace Gthx.Bot.Modules
             }
 
             var factoidValue = string.Join(" and also ", factoidValueList.Select(f => f.Value));
-            var article = factoidValueList[0].Are ? "are" : "is";
+            var article = factoidValueList[0].IsAre ? "are" : "is";
             factoidValue = factoidValue.Replace("!who", user);
             factoidValue = factoidValue.Replace("!channel", channel);
 
