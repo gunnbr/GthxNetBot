@@ -9,32 +9,24 @@ namespace Gthx.Bot
     {
         public readonly static string Version = "0.8 2020-07-24";
 
-        private readonly IIrcClient _IrcClient;
-        private readonly IGthxData _Data;
-        private readonly IWebReader _WebReader;
-
         private readonly List<IGthxModule> _Modules;
 
         public Gthx(IIrcClient ircClient, IGthxData data, IWebReader webReader)
         {
-            _IrcClient = ircClient;
-            _Data = data;
-            _WebReader = webReader;
-
             _Modules = new List<IGthxModule>
             {
-                new StatusModule(data, _IrcClient),
-                new FactoidModule(data, _IrcClient),
-                new TellModule(data, _IrcClient),
-                new SeenModule(data, _IrcClient),
+                new StatusModule(data, ircClient),
+                new FactoidModule(data, ircClient),
+                new TellModule(data, ircClient),
+                new SeenModule(data, ircClient),
                 // new LurkerModule(data, _IrcClient),
-                new GoogleModule(_IrcClient),
+                new GoogleModule(ircClient),
 
                 // Reference and title checkers come last because their
                 // responses should come after any responses from the above
                 // modules, if any.
-                new ThingiverseModule(data, _IrcClient, _WebReader),
-                new YoutubeModule(data, _IrcClient, _WebReader),
+                new ThingiverseModule(data, ircClient, webReader),
+                new YoutubeModule(data, ircClient, webReader),
             };
         }
 
@@ -43,6 +35,9 @@ namespace Gthx.Bot
             // TODO: Handle some messages directly addressed to gthx differently than
             //       the same message not addressed to gthx.
 
+            // TODO: Add return value from modules so some can stop further processing.
+            //       For instance: "seen gunnbr?" should not run a factoid check
+            //       and "status?" also should not run a factoid check.
             foreach (var module in _Modules)
             {
                 module.ProcessMessage(channel, user, message);

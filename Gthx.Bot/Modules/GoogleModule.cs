@@ -8,7 +8,7 @@ namespace Gthx.Bot.Modules
 {
     public class GoogleModule : IGthxModule
     {
-        private IIrcClient _IrcClient;
+        private readonly IIrcClient _IrcClient;
 
         private readonly Regex _GoogleRegex = new Regex(@$"\s*google\s+(?'search'.*?)\s+for\s+(?'nick'{Util.NickMatch})");
 

@@ -2,9 +2,6 @@
 using Gthx.Data;
 using Gthx.Test.Mocks;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Gthx.Test
@@ -13,9 +10,6 @@ namespace Gthx.Test
     public class IntegrationTests
     {
         // TODO: Add integration test for "seen user*" to verify the asterisk is handled correctly
-        // TODO: Add tests on factoid history, including delete factoid
-        // TODO: OR add unit tests for GthxSqlData
-        // TODO: Add test for incrementing factoid count when a factoid is referenced
 
         [Test]
         public async Task TestLiveYoutubeReferences()

@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Gthx.Bot\Gthx.Bot.csproj" />
     <ProjectReference Include="..\Gthx.Data\Gthx.Data.csproj" />
   </ItemGroup>
 

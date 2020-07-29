@@ -11,7 +11,7 @@ namespace Gthx.Bot.Modules
         private readonly Regex _FactoidSet = new Regex(@"(?'factoid'.+?)\s(?'isAre'is|are)(?'hasAlso'\salso)?\s(?'value'.+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex _InvalidRegex = new Regex(@"(here|how|it|something|that|this|what|when|where|which|who|why|you)", RegexOptions.IgnoreCase);
         private readonly Regex _FactoidGet = new Regex(@$"(?'factoid'.+)[?!](?'hasPipe'\s*$|\s*\|\s*(?'pipeToUser'{Util.NickMatch})$)", RegexOptions.Compiled);
-        private IGthxData _Data;
+        private readonly IGthxData _Data;
         private readonly IIrcClient _IrcClient;
 
         public FactoidModule(IGthxData data, IIrcClient ircClient)
@@ -32,7 +32,7 @@ namespace Gthx.Bot.Modules
                 return;
             }
 
-            wasProcessed = ProcessFactoidInfo(channel, user, message);
+            wasProcessed = ProcessFactoidInfo(channel, message);
             if (wasProcessed)
             {
                 return;
@@ -81,10 +81,9 @@ namespace Gthx.Bot.Modules
         /// Handles factoid info
         /// </summary>
         /// <param name="channel"></param>
-        /// <param name="user"></param>
         /// <param name="message"></param>
         /// <returns>True if a command was found to get info for a factoid, false otherwise</returns>
-        private bool ProcessFactoidInfo(string channel, string user, string message)
+        private bool ProcessFactoidInfo(string channel, string message)
         {
             if (!message.StartsWith("info "))
             {

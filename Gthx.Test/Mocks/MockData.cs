@@ -67,29 +67,25 @@ namespace Gthx.Test.Mocks
                 return null;
             }
 
-            switch (item)
+            return item switch
             {
-                case "2823006":
-                    return new ThingiverseRef
-                    {
-                        Item = intItem,
-                        Count = 42,
-                        Title = "Air Spinner"
-                    };
-
-                case "1276095":
-                    return new ThingiverseRef
-                    {
-                        Item = intItem,
-                        Count = 23,
-                        Title = "Flexifish 🦈🌊"
-                    };
-            }
-
-            return new ThingiverseRef
-            {
-                Item = intItem,
-                Count = 1
+                "2823006" => new ThingiverseRef
+                {
+                    Item = intItem,
+                    Count = 42,
+                    Title = "Air Spinner"
+                },
+                "1276095" => new ThingiverseRef
+                {
+                    Item = intItem,
+                    Count = 23,
+                    Title = "Flexifish 🦈🌊"
+                },
+                _ => new ThingiverseRef
+                {
+                    Item = intItem,
+                    Count = 1
+                },
             };
         }
 
@@ -101,29 +97,25 @@ namespace Gthx.Test.Mocks
 
         public YoutubeRef AddYoutubeReference(string item)
         {
-            switch (item)
+            return item switch
             {
-                case "ykKIZQKaT5c":
-                    return new YoutubeRef
-                    {
-                        Item = item,
-                        Count = 42,
-                        Title = "Spinner"
-                    };
-
-                case "W3B2C0nNpFU":
-                    return new YoutubeRef
-                    {
-                        Item = item,
-                        Count = 83,
-                        Title = "Best relaxing piano studio ghibli complete collection ピアノスタジオジブリコレクション"
-                    };
-            }
-
-            return new YoutubeRef
-            {
-                Item = item,
-                Count = 1
+                "ykKIZQKaT5c" => new YoutubeRef
+                {
+                    Item = item,
+                    Count = 42,
+                    Title = "Spinner"
+                },
+                "W3B2C0nNpFU" => new YoutubeRef
+                {
+                    Item = item,
+                    Count = 83,
+                    Title = "Best relaxing piano studio ghibli complete collection ピアノスタジオジブリコレクション"
+                },
+                _ => new YoutubeRef
+                {
+                    Item = item,
+                    Count = 1
+                },
             };
         }
 
@@ -161,106 +153,91 @@ namespace Gthx.Test.Mocks
         {
             FactoidGotten = factoid;
 
-            switch (factoid)
+            return factoid switch
             {
-                case "reprap":
-                    return new List<Factoid>
+                "reprap" => new List<Factoid>
                     {
                         CreateFactoid("reprap", "the best way to learn about 3D printing")
-                    };
-                case "cake":
-                    return new List<Factoid>
+                    },
+                "cake" => new List<Factoid>
                     {
                         CreateFactoid("cake", "really yummy"),
                         CreateFactoid("cake", "a lie")
-                    };
-                case "emoji":
-                    return new List<Factoid>
+                    },
+                "emoji" => new List<Factoid>
                     {
                         CreateFactoid("emoji","handled well: 😍🍕🎉💪")
-                    };
-                case "other languages":
-                    return new List<Factoid>
+                    },
+                "other languages" => new List<Factoid>
                     {
                         CreateFactoid("other languages","このアプリケーションで十分にサポートされています", true)
-                    };
-                case "pennies":
-                    return new List<Factoid>
+                    },
+                "pennies" => new List<Factoid>
                     {
                         CreateFactoid("pennies", "small coins", true)
-                    };
-                case "botsmack":
-                    return new List<Factoid>
+                    },
+                "botsmack" => new List<Factoid>
                     {
                         CreateFactoid("botsmack","<reply>!who, stop that!")
-                    };
-                case "lost":
-                    return new List<Factoid>
+                    },
+                "lost" => new List<Factoid>
                     {
                         CreateFactoid("lost","<reply>!who, you're in !channel")
-                    };
-                case "dance":
-                    return new List<Factoid>
+                    },
+                "dance" => new List<Factoid>
                     {
                         CreateFactoid("dance","<action>dances a little jig around !who.")
-                    };
-            }
-
-            return null;
+                    },
+                _ => null,
+            };
         }
 
         public FactoidInfoReply GetFactoidInfo(string factoid)
         {
             InfoFactoid = factoid;
 
-            switch (factoid)
+            return factoid switch
             {
-                case "cake":
-                    return new FactoidInfoReply()
-                    {
-                        RefCount = 176,
-                        InfoList = new List<FactoidHistory>
+                "cake" => new FactoidInfoReply()
+                {
+                    RefCount = 176,
+                    InfoList = new List<FactoidHistory>
                         {
                             new FactoidHistory() { User = "GLaDOS", Value = "delicious", Timestamp = new DateTime(2007, 10, 10, 8, 0, 0)},
                             new FactoidHistory() { User = "Chell", Value = null, Timestamp = new DateTime(2007, 10, 10, 14, 34, 53)},
                             new FactoidHistory() { User = "UnknownEntity", Value = "a lie!", Timestamp = new DateTime(2007, 10, 10, 14, 34, 53)},
                             new FactoidHistory() { User = null, Value = "delicious", Timestamp = new DateTime(2007, 10, 10, 14, 34, 55)},
                         }
-                    };
-            }
-
-            return null;
+                },
+                _ => null,
+            };
         }
 
         public List<Seen> GetLastSeen(string user)
         {
             LastSeenUserQuery = user;
 
-            switch (user)
+            return user switch
             {
-                case "gunnbr":
-                    return new List<Seen>()
+                "gunnbr" => new List<Seen>()
                     {
                         new Seen() { Channel = "#gthxtest", User = "gunnbr", Message = "gthx: status?", Timestamp = new DateTime(2020, 7, 23, 8, 23, 43)},
                         new Seen() { Channel = "#reprap", User = "gunnbr_", Message = "Yeah, I'm trying to fix that.", Timestamp = new DateTime(2020, 2, 3, 13, 44, 1)}
-                    };
-                case "Razor":
-                    return new List<Seen>()
+                    },
+                "Razor" => new List<Seen>()
                     {
                         new Seen() { Channel = "#twitch", User = "Razor", Message = "Stream is starting NOW! Tune in!", Timestamp = new DateTime(2020, 7, 24, 6, 52, 11)},
-                    };
-                case "The":
-                    return new List<Seen>()
+                    },
+                "The" => new List<Seen>()
                     {
                         new Seen() { Channel = "#openscad", User = "TheHelper", Message = "Just get rid of that let statement.", Timestamp = new DateTime(2020, 7, 14, 22, 3, 15)},
                         new Seen() { Channel = "#leets", User = "ThePlague", Message = "Which one of you losers thinks you can beat me?", Timestamp = new DateTime(1995, 9, 15, 22, 3, 15)},
                         new Seen() { Channel = "#superherohigh", User = "Themyscira", Message = "Hey everyone, come visit!", Timestamp = new DateTime(2020, 7, 20, 5, 6, 7)},
                         new Seen() { Channel = "#TheMatrix", User = "TheOne", Message = "Whoah", Timestamp = new DateTime(1999, 3, 31, 14, 0, 0)},
                         new Seen() { Channel = "#reprap", User = "TheOwner", Message = "Don't make me kick you.", Timestamp = new DateTime(2020, 7, 17, 13, 31, 32)},
-                    };
-            }
-
-            return null;
+                    },
+                _ => null,
+            };
         }
 
         public int GetMood()
@@ -271,23 +248,19 @@ namespace Gthx.Test.Mocks
         public List<Tell> GetTell(string forUser)
         {
             TellCheckUser = forUser;
-            switch (forUser)
+            return forUser switch
             {
-                case "CrashOverride":
-                    return new List<Tell> 
+                "CrashOverride" => new List<Tell>
                     {
                         new Tell() { Author = "AcidBurn", Recipient = "CrashOverride", Message = "Mess with the best, die like the rest.", Timestamp = new DateTime(1995, 11, 4, 23, 49, 13)}
-                    };
-
-                case "gunnbr":
-                    return new List<Tell>
+                    },
+                "gunnbr" => new List<Tell>
                     {
                         new Tell() { Author = "JimmyRockets", Recipient = "gunnbr", Message = "Can you fix a gthx bug?", Timestamp = new DateTime(2015, 10, 8, 12, 30, 32) },
                         new Tell() { Author = "PaulBunyan", Recipient = "gunnbr", Message = "Do you need any help with emoji 🧑🏿😨🍦?", Timestamp = new DateTime(2015, 10, 9, 3, 34, 43) },
-                    };
-            }
-
-            return new List<Tell>();
+                    },
+                _ => new List<Tell>(),
+            };
         }
 
         public void UpdateLastSeen(string channel, string user, string message)

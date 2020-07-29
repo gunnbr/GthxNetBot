@@ -51,7 +51,7 @@ namespace Gthx.Bot.Modules
             GetAndSaveTitle(url, id, channel, user, referenceData?.Count ?? 1);
         }
 
-        private async Task<string> GetTitle(string url, string id)
+        private async Task<string> GetTitle(string url)
         {
             var webStream = await _WebReader.GetStreamFromUrlAsync(url);
 
@@ -82,7 +82,7 @@ namespace Gthx.Bot.Modules
 
         public async void GetAndSaveTitle(string url, string id, string channel, string user, int referenceCount)
         {
-            var title = await GetTitle(url, id);
+            var title = await GetTitle(url);
             _Data.AddYoutubeTitle(id, title);
             if (string.IsNullOrEmpty(title))
             {
