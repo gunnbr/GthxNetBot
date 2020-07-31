@@ -1,21 +1,38 @@
 ﻿using Gthx.Bot;
+using Gthx.Bot.Interfaces;
 using Gthx.Data;
+using GthxData;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace GthxNetBot
 {
-    class Program
+    public class ConsoleTestBot
     {
-        static void Main(string[] args)
+        private readonly IIrcClient _ircClient;
+        private readonly ILogger<ConsoleTestBot> _logger;
+        private readonly IConfiguration _configuration;
+        private readonly IServiceProvider _services;
+
+        public ConsoleTestBot(IIrcClient ircClient, ILogger<ConsoleTestBot> logger, IConfiguration configuration, IServiceProvider services)
+        {
+            _ircClient = ircClient;
+            _logger = logger;
+            _configuration = configuration;
+            _services = services;
+            _logger.LogInformation("ConsoleTestBot constructor: Logging enabled");
+        }
+
+        public void Run()
         {
             Console.WriteLine("Welcome to Gthx");
+            _logger.LogInformation($"irc client is {_ircClient}");
 
-            var client = new ConsoleIrcClient();
-            var context = new GthxData.GthxDataContext();
+            var context = _services.GetRequiredService<GthxDataContext>();
             context.Database.EnsureCreated();
-            var data = new GthxSqlData(context);
-            var mockReader = new WebReader();
-            var gthx = new Gthx.Bot.Gthx(client, data, mockReader);
+            var gthx = _services.GetRequiredService<Gthx.Bot.Gthx>();
 
             var done = false;
             while (!done)
@@ -24,12 +41,12 @@ namespace GthxNetBot
                 try
                 {
                     var input = Console.ReadLine();
-                    if (input == null)
+                    if (input == null || input == "quit")
                     {
                         done = true;
                         continue;
                     }
-                    if (input.StartsWith("/me "))
+                    else if (input.StartsWith("/me "))
                     {
                         gthx.HandleReceivedAction("#reprap", "gunnbr", input[4..]);
                     }
@@ -40,9 +57,55 @@ namespace GthxNetBot
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Caught exception: {ex}; {ex.Message}");
+                    _logger.LogError(ex, "Exception in gthx program");
                     done = true;
                 }
+            }
+        }
+    }
+
+    class Program
+    {
+        private static ServiceProvider _serviceProvider;
+        private static IConfiguration _configuration;
+
+        static void Main(string[] args)
+        {
+            _configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            RegisterServices();
+            IServiceScope scope = _serviceProvider.CreateScope();
+            scope.ServiceProvider.GetRequiredService<ConsoleTestBot>().Run();
+            DisposeServices();
+        }
+
+        private static void RegisterServices()
+        {
+            var services = new ServiceCollection();
+            services.AddLogging(configure => configure.AddConsole()).AddTransient<ConsoleTestBot>();
+            services.AddSingleton<IIrcClient, ConsoleIrcClient>();
+            services.AddSingleton<IGthxData, GthxSqlData>();
+            services.AddSingleton<IWebReader, WebReader>();
+            services.AddSingleton(_configuration);
+            services.AddSingleton<GthxDataContext>();
+            services.AddSingleton<ConsoleTestBot>();
+            services.AddSingleton<Gthx.Bot.Gthx>();
+            _serviceProvider = services.BuildServiceProvider(true);
+        }
+
+        private static void DisposeServices()
+        {
+            if (_serviceProvider == null)
+            {
+                return;
+            }
+
+            if (_serviceProvider is IDisposable disposable)
+            {
+                disposable.Dispose();
             }
         }
     }
