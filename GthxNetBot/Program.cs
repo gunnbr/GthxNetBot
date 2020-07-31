@@ -5,6 +5,7 @@ using GthxData;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 
 namespace GthxNetBot
@@ -76,7 +77,15 @@ namespace GthxNetBot
                 .AddEnvironmentVariables()
                 .Build();
 
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(_configuration)
+                .CreateLogger();
+
             RegisterServices();
+
+            Log.Information("Serilog enabled: {args}", args);
+            Log.Warning("Emoji text: 🍕🍛👧🧑🏼🎎");
+
             IServiceScope scope = _serviceProvider.CreateScope();
             scope.ServiceProvider.GetRequiredService<ConsoleTestBot>().Run();
             DisposeServices();
@@ -85,7 +94,7 @@ namespace GthxNetBot
         private static void RegisterServices()
         {
             var services = new ServiceCollection();
-            services.AddLogging(configure => configure.AddConsole()).AddTransient<ConsoleTestBot>();
+            services.AddLogging(configure => configure.AddConsole().AddSerilog()).AddTransient<ConsoleTestBot>();
             services.AddSingleton<IIrcClient, ConsoleIrcClient>();
             services.AddSingleton<IGthxData, GthxSqlData>();
             services.AddSingleton<IWebReader, WebReader>();
