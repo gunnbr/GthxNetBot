@@ -1,4 +1,10 @@
+using Gthx.Bot.Interfaces;
+using Gthx.Data;
 using Gthx.Test.Mocks;
+using GthxData;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using System;
 using System.Diagnostics;
@@ -9,18 +15,30 @@ namespace Gthx.Test
     [TestFixture]
     public class GthxTests
     {
+        protected readonly TestServer server;
+        protected readonly Gthx.Bot.Gthx _gthx;
+        private readonly IIrcClient _client;
+        private readonly IGthxData _data;
+
+        public GthxTests()
+        {
+            this.server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            _data = server.Host.Services.GetService<IGthxData>();
+            this._client = server.Host.Services.GetService<IIrcClient>();
+            Console.WriteLine($"Constructor using client {_client.Key}");
+            this._gthx = server.Host.Services.GetRequiredService<Gthx.Bot.Gthx>();
+        }
+
         [Test]
         public void TestGenericResponse()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
 
             // Test channel message
             var testChannel = "#reprap";
             var testUser = "SomeUser";
-            gthx.HandleReceivedMessage(testChannel, testUser, "Which printer is best?");
+            _gthx.HandleReceivedMessage(testChannel, testUser, "Which printer is best?");
 
             var replies = client.GetReplies();
             Assert.AreEqual(0, replies.Messages.Count);
@@ -28,7 +46,7 @@ namespace Gthx.Test
             // Test DM
             testChannel = "gthx";
             testUser = "SomeOtherUser";
-            gthx.HandleReceivedMessage(testChannel, testUser, "Hey, can you help me?");
+            _gthx.HandleReceivedMessage(testChannel, testUser, "Hey, can you help me?");
 
             replies = client.GetReplies();
             Assert.AreEqual(0, replies.Messages.Count);
@@ -37,10 +55,9 @@ namespace Gthx.Test
         [Test]
         public void TestFactoidSetting()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testFactoid = "testFactoid";
             var testValue = "working";
@@ -77,10 +94,9 @@ namespace Gthx.Test
         [Test]
         public void TestLockedFactoidSetting()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testFactoid = "locked factoid";
             var testValue = "something that can't be changed.";
@@ -98,10 +114,9 @@ namespace Gthx.Test
         [Test]
         public void TestFactoidGetting()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             // Test "is"
             var testChannel = "#reprap";
@@ -169,10 +184,9 @@ namespace Gthx.Test
         [Test]
         public void TestAdvancedFactoidGetting()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             // Test "<reply>" and "!who"
             var testChannel = "#reprap";
@@ -184,8 +198,8 @@ namespace Gthx.Test
             var replies = client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
-            Assert.AreEqual(testFactoid, data.FactoidGotten);
             Assert.AreEqual($"{testUser}, stop that!", replies.Messages[0]);
+            Assert.AreEqual(testFactoid, data.FactoidGotten);
 
             // Test "!who" and "!channel"
             testFactoid = "lost";
@@ -212,10 +226,9 @@ namespace Gthx.Test
         [Test]
         public void TestFactoidForgetting()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testFactoid = "testFactoid";
             var testChannel = "#reprap";
@@ -243,10 +256,9 @@ namespace Gthx.Test
         [Test]
         public void TestFactoidInfo()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testFactoid = "makers";
             var testChannel = "#reprap";
@@ -279,10 +291,9 @@ namespace Gthx.Test
         [Test]
         public void TestTellSetting()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testChannel = "#reprap";
             var testUser = "AcidBurn";
@@ -304,10 +315,9 @@ namespace Gthx.Test
         [Test]
         public void TestTellGetting()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testChannel = "#reprap";
             var testUser = "CrashOverride";
@@ -373,10 +383,9 @@ namespace Gthx.Test
         [Test]
         public void TestGoogleForSomeone()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testChannel = "#reprap";
             var testUser = "CerealKiller";
@@ -398,10 +407,9 @@ namespace Gthx.Test
         [Test]
         public async Task TestYoutubeReferences()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testChannel = "#reprap";
             var testUser = "BobYourUncle";
@@ -450,10 +458,9 @@ namespace Gthx.Test
         [Test]
         public async Task TestThingiverseReferences()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testChannel = "#reprap";
             var testUser = "BobYourUncle";
@@ -502,10 +509,9 @@ namespace Gthx.Test
         [Test]
         public async Task TestThingiverseInTell()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testChannel = "#reprap";
             var testUser = "CerealKiller";
@@ -541,10 +547,9 @@ namespace Gthx.Test
         [Test]
         public void TestSeenRequests()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testChannel = "#reprap";
             var testUser = "PhantomPhreak";
@@ -581,10 +586,9 @@ namespace Gthx.Test
         {
             // Test that only 3 replies are returned to seen queries, no matter how many data returns
 
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testChannel = "#reprap";
             var testUser = "someone";
@@ -603,10 +607,9 @@ namespace Gthx.Test
         [Test]
         public void TestSeenUpdates()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testChannel = "#reprap";
             var testUser = "Joey";
@@ -623,10 +626,9 @@ namespace Gthx.Test
         [Test]
         public void TestSeenUpdateOnAction()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testChannel = "#reprap";
             var testUser = "PhantomPhreak";
@@ -644,10 +646,9 @@ namespace Gthx.Test
         public void TestSeenInPM()
         {
             // Verify that private messages don't update the seen info
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testChannel = "gthx";
             var testUser = "Joey";
@@ -662,10 +663,9 @@ namespace Gthx.Test
         [Test]
         public void TestStatus()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new MockWebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testChannel = "#reprap";
             var testUser = "admin";

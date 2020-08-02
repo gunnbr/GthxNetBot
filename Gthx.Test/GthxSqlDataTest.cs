@@ -18,7 +18,7 @@ namespace Gthx.Test
             var connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=GthxSqlData.UnitTest;Integrated Security=True;";
             var optionsBuilder = new DbContextOptionsBuilder<GthxDataContext>();
             optionsBuilder.UseSqlServer(connectionString);
-            _Db = new GthxDataContext(optionsBuilder.Options);
+//            _Db = new GthxDataContext(optionsBuilder.Options);
             _Db.Database.EnsureCreated();
             _Data = new GthxSqlData(_Db);
         }

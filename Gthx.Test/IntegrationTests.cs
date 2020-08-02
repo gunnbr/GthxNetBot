@@ -1,6 +1,11 @@
 ﻿using Gthx.Bot;
+using Gthx.Bot.Interfaces;
 using Gthx.Data;
 using Gthx.Test.Mocks;
+using GthxData;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using System.Threading.Tasks;
 
@@ -9,15 +14,41 @@ namespace Gthx.Test
     [TestFixture]
     public class IntegrationTests
     {
+        protected readonly TestServer server;
+        protected readonly GthxDataContext _dataContext;
+        protected readonly Gthx.Bot.Gthx _gthx;
+        private readonly IIrcClient _client;
+        private readonly IGthxData _data;
+
+        public IntegrationTests(IIrcClient client, IGthxData data)
+        {
+            this.server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            this._dataContext = this.server.Host.Services.GetRequiredService<GthxDataContext>();
+            this._gthx = server.Host.Services.GetRequiredService<Gthx.Bot.Gthx>();
+            this._client = client;
+            this._data = data;
+        }
+
+        [OneTimeSetUp]
+        public void TestInitialise()
+        {
+            this._dataContext.Database.EnsureCreated();
+        }
+
+        [OneTimeTearDown]
+        public void TestTearDown()
+        {
+            this._dataContext.Database.EnsureDeleted();
+        }
+
         // TODO: Add integration test for "seen user*" to verify the asterisk is handled correctly
 
         [Test]
         public async Task TestLiveYoutubeReferences()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var webReader = new WebReader();
-            var gthx = new Bot.Gthx(client, data, webReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             var testChannel = "#reprap";
             var testUser = "BobYourUncle";
@@ -45,10 +76,9 @@ namespace Gthx.Test
         [Test]
         public async Task TestLiveThingiverseReferences()
         {
-            var client = new MockIrcClient();
-            var data = new MockData();
-            var mockReader = new WebReader();
-            var gthx = new Bot.Gthx(client, data, mockReader);
+            var client = (MockIrcClient)_client;
+            var data = (MockData)_data;
+            var gthx = _gthx;
 
             // Test fetching a new title that uses the <title> element
             var testChannel = "#reprap";

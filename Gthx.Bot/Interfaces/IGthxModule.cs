@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Gthx.Bot.Interfaces
 {
-    interface IGthxModule
+    public interface IGthxModule
     {
         /// <summary>
         /// Evaluate a received message and act of it if necessary.

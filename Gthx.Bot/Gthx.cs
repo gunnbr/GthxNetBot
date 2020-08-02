@@ -1,7 +1,11 @@
 ﻿using Gthx.Bot.Interfaces;
 using Gthx.Bot.Modules;
 using Gthx.Data;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Gthx.Bot
 {
@@ -11,23 +15,34 @@ namespace Gthx.Bot
 
         private readonly List<IGthxModule> _Modules;
 
-        public Gthx(IIrcClient ircClient, IGthxData data, IWebReader webReader)
+        public static void RegisterServices(ServiceCollection services)
         {
-            _Modules = new List<IGthxModule>
+            // This seems a little strange to have this class register for all
+            // the services it needs, but I think they have to be registered
+            // this way to get DI to work correctly and the Microsoft DI container
+            // won't automatically register all these for us.
+            // But it seems wrong for something outside of Gthx to have to specify
+            // what modules are needed, so I'll try this for now.
+            services.TryAddEnumerable(new[]
             {
-                new StatusModule(data, ircClient),
-                new FactoidModule(data, ircClient),
-                new TellModule(data, ircClient),
-                new SeenModule(data, ircClient),
-                // new LurkerModule(data, _IrcClient),
-                new GoogleModule(ircClient),
+                ServiceDescriptor.Singleton<IGthxModule, StatusModule>(),
+                ServiceDescriptor.Singleton<IGthxModule, FactoidModule>(),
+                ServiceDescriptor.Singleton<IGthxModule, TellModule>(),
+                ServiceDescriptor.Singleton<IGthxModule, SeenModule>(),
+                //ServiceDescriptor.Singleton<IGthxModule, LurkerModule>(),
+                ServiceDescriptor.Singleton<IGthxModule, GoogleModule>(),
 
                 // Reference and title checkers come last because their
                 // responses should come after any responses from the above
                 // modules, if any.
-                new ThingiverseModule(data, ircClient, webReader),
-                new YoutubeModule(data, ircClient, webReader),
-            };
+                ServiceDescriptor.Singleton<IGthxModule, ThingiverseModule>(),
+                ServiceDescriptor.Singleton<IGthxModule, YoutubeModule>(),
+            });
+        }
+
+        public Gthx(IEnumerable<IGthxModule> modules)
+        {
+            _Modules = modules.ToList();
         }
 
         public void HandleReceivedMessage(string channel, string user, string message)
