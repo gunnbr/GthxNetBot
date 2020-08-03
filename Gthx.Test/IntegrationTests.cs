@@ -53,7 +53,7 @@ namespace Gthx.Test
     public class IntegrationTests
     {
         protected readonly TestServer _server;
-        protected readonly GthxDataContext _dataContext;
+        protected readonly GthxDataContext _Db;
         protected readonly GthxBot _gthx;
         private readonly MockIrcClient _client;
         private readonly GthxSqlData _data;
@@ -61,10 +61,22 @@ namespace Gthx.Test
         public IntegrationTests()
         {
             _server = new TestServer(new WebHostBuilder().UseStartup<IntegrationTestsStartup>());
-            _dataContext = _server.Host.Services.GetRequiredService<GthxDataContext>();
+            _Db = _server.Host.Services.GetRequiredService<GthxDataContext>();
             _data = _server.Host.Services.GetService<IGthxData>() as GthxSqlData;
             _client = _server.Host.Services.GetService<IIrcClient>() as MockIrcClient;
             _gthx = _server.Host.Services.GetRequiredService<GthxBot>();
+        }
+
+        [OneTimeSetUp]
+        public void TestInitialise()
+        {
+            _Db.Database.EnsureCreated();
+        }
+
+        [OneTimeTearDown]
+        public void TestTearDown()
+        {
+            _Db.Database.EnsureDeleted();
         }
 
         // TODO: Add integration test for "seen user*" to verify the asterisk is handled correctly
