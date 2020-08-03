@@ -33,7 +33,7 @@ namespace GthxNetBot
 
             var context = _services.GetRequiredService<GthxDataContext>();
             context.Database.EnsureCreated();
-            var gthx = _services.GetRequiredService<Gthx.Bot.Gthx>();
+            var gthx = _services.GetRequiredService<Gthx.Bot.GthxBot>();
 
             var done = false;
             while (!done)
@@ -101,8 +101,8 @@ namespace GthxNetBot
             services.AddSingleton(_configuration);
             services.AddSingleton<GthxDataContext>();
             services.AddSingleton<ConsoleTestBot>();
-            Gthx.Bot.Gthx.RegisterServices(services);
-            services.AddSingleton<Gthx.Bot.Gthx>();
+            GthxBot.RegisterServices(services);
+            services.AddSingleton<GthxBot>();
             _serviceProvider = services.BuildServiceProvider(true);
         }
 

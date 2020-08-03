@@ -29,7 +29,7 @@ namespace Gthx.Bot.Modules
 
             var moodValue = _Data.GetMood();
             var moodString = MoodToString(moodValue);
-            _IrcClient.SendMessage(channel, $"{Gthx.Version}: OK; Up for {Util.TimeBetweenString(_StartTime)}; mood: {moodString}");
+            _IrcClient.SendMessage(channel, $"{GthxBot.Version}: OK; Up for {Util.TimeBetweenString(_StartTime)}; mood: {moodString}");
         }
 
         private string MoodToString(int mood)

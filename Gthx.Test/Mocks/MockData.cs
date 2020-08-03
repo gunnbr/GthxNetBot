@@ -31,7 +31,7 @@ namespace Gthx.Test.Mocks
         public string LastSeenChannel { get; private set; }
         public string LastSeenUser { get; private set; }
         public string LastSeenMessage { get; private set; }
-        public DateTime LastSeenTimestamp { get; private set; }
+        public DateTime? LastSeenTimestamp { get; private set; }
         public string LastSeenUserQuery { get; private set; }
         public string AddedThingiverseId { get; private set; }
         public string AddedThingiverseTitle { get; private set; }
@@ -269,6 +269,14 @@ namespace Gthx.Test.Mocks
             LastSeenUser = user;
             LastSeenMessage = message;
             LastSeenTimestamp = DateTime.UtcNow;
+        }
+
+        internal void ResetLastSeen()
+        {
+            LastSeenChannel = null;
+            LastSeenUser = null;
+            LastSeenMessage = null;
+            LastSeenTimestamp = null;
         }
     }
 }

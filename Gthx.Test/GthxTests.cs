@@ -1,10 +1,14 @@
+using Gthx.Bot;
 using Gthx.Bot.Interfaces;
 using Gthx.Data;
 using Gthx.Test.Mocks;
 using GthxData;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using System;
 using System.Diagnostics;
@@ -12,21 +16,50 @@ using System.Threading.Tasks;
 
 namespace Gthx.Test
 {
+    public class GthxTestsStartup
+    {
+        private readonly IConfiguration config;
+
+        public GthxTestsStartup(IConfiguration config)
+        {
+            this.config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+        }
+
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddSingleton<IIrcClient, MockIrcClient>();
+            services.AddSingleton<IGthxData, MockData>();
+            services.AddSingleton<IWebReader, MockWebReader>();
+            services.AddSingleton<GthxDataContext>();
+            GthxBot.RegisterServices(services as ServiceCollection);
+            var sc = services as ServiceCollection;
+            sc.AddLogging(configure => configure.AddConsole()).AddTransient<GthxTests>();
+            services.AddSingleton(config);
+            services.AddSingleton<GthxBot>();
+        }
+    }
+
     [TestFixture]
     public class GthxTests
     {
-        protected readonly TestServer server;
-        protected readonly Gthx.Bot.Gthx _gthx;
+        protected readonly TestServer _server;
+        protected readonly GthxBot _gthx;
         private readonly IIrcClient _client;
         private readonly IGthxData _data;
 
         public GthxTests()
         {
-            this.server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
-            _data = server.Host.Services.GetService<IGthxData>();
-            this._client = server.Host.Services.GetService<IIrcClient>();
-            Console.WriteLine($"Constructor using client {_client.Key}");
-            this._gthx = server.Host.Services.GetRequiredService<Gthx.Bot.Gthx>();
+            _server = new TestServer(new WebHostBuilder().UseStartup<GthxTestsStartup>());
+            _data = _server.Host.Services.GetService<IGthxData>();
+            _client = _server.Host.Services.GetService<IIrcClient>();
+            _gthx = _server.Host.Services.GetRequiredService<GthxBot>();
         }
 
         [Test]
@@ -646,9 +679,10 @@ namespace Gthx.Test
         public void TestSeenInPM()
         {
             // Verify that private messages don't update the seen info
-            var client = (MockIrcClient)_client;
             var data = (MockData)_data;
             var gthx = _gthx;
+
+            data.ResetLastSeen();
 
             var testChannel = "gthx";
             var testUser = "Joey";

@@ -1,28 +1,86 @@
-﻿using Gthx.Data;
+﻿using Gthx.Bot;
+using Gthx.Bot.Interfaces;
+using Gthx.Data;
+using Gthx.Test.Mocks;
 using GthxData;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using System.Linq;
 
 namespace Gthx.Test
 {
+    public class SqlDataTestsStartup
+    {
+        private readonly IConfiguration config;
+
+        public SqlDataTestsStartup(IConfiguration config)
+        {
+            this.config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+        }
+
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            var cstr = config.GetConnectionString("GthxTestDb");
+            services.AddDbContext<GthxDataContext>(
+                options => options.UseSqlServer(config.GetConnectionString("GthxTestDb")),
+                ServiceLifetime.Singleton);
+            services.AddSingleton<IIrcClient, MockIrcClient>();
+            services.AddSingleton<IGthxData, GthxSqlData>();
+            services.AddSingleton<IWebReader, MockWebReader>();
+            services.AddSingleton<GthxDataContext>();
+            GthxBot.RegisterServices(services as ServiceCollection);
+            var sc = services as ServiceCollection;
+            sc.AddLogging(configure => configure.AddConsole()).AddTransient<GthxTests>();
+            services.AddSingleton(config);
+            services.AddSingleton<GthxBot>();
+            //services.AddScoped<IGthxData>(provider => (IGthxData)provider.GetService<GthxDataContext>());
+        }
+    }
+
     [TestFixture]
     public class GthxSqlDataTest
     {
-        private GthxSqlData _Data;
+        private TestServer _server;
         private GthxDataContext _Db;
+        private GthxSqlData _Data;
+        private IIrcClient _client;
+        private GthxBot _gthx;
 
-        [SetUp]
-        public void Init()
+        public GthxSqlDataTest()
         {
-            var connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=GthxSqlData.UnitTest;Integrated Security=True;";
-            var optionsBuilder = new DbContextOptionsBuilder<GthxDataContext>();
-            optionsBuilder.UseSqlServer(connectionString);
-//            _Db = new GthxDataContext(optionsBuilder.Options);
-            _Db.Database.EnsureCreated();
-            _Data = new GthxSqlData(_Db);
+            _server = new TestServer(new WebHostBuilder().UseStartup<SqlDataTestsStartup>());
+            _Db = _server.Host.Services.GetRequiredService<GthxDataContext>();
+            _Data = (GthxSqlData)_server.Host.Services.GetService<IGthxData>();
+            _client = _server.Host.Services.GetService<IIrcClient>();
+            _gthx = _server.Host.Services.GetRequiredService<GthxBot>();
         }
 
+        [OneTimeSetUp]
+        public void TestInitialise()
+        {
+            _Db.Database.EnsureCreated();
+        }
+
+        [OneTimeTearDown]
+        public void TestTearDown()
+        {
+            _Db.Database.EnsureDeleted();
+        }
+
+#if false
         [TearDown]
         public void Cleanup()
         {
@@ -33,7 +91,7 @@ namespace Gthx.Test
 
             _Data = null;
         }
-
+#endif
         [Test]
         public void GthxData_TestRefCount()
         {

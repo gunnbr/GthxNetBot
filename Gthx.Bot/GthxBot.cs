@@ -1,15 +1,13 @@
 ﻿using Gthx.Bot.Interfaces;
 using Gthx.Bot.Modules;
-using Gthx.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Gthx.Bot
 {
-    public class Gthx
+    public class GthxBot
     {
         public readonly static string Version = "0.8 2020-07-24";
 
@@ -40,7 +38,7 @@ namespace Gthx.Bot
             });
         }
 
-        public Gthx(IEnumerable<IGthxModule> modules)
+        public GthxBot(IEnumerable<IGthxModule> modules)
         {
             _Modules = modules.ToList();
         }
