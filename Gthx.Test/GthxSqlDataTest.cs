@@ -11,19 +11,21 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
+using Serilog;
+using Serilog.Formatting.Json;
+using System;
+using System.IO;
 using System.Linq;
 
 namespace Gthx.Test
 {
     public class SqlDataTestsStartup
     {
-        private readonly IConfiguration config;
+        private readonly IConfiguration _config;
 
         public SqlDataTestsStartup(IConfiguration config)
         {
-            this.config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
+            this._config = config;
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -33,18 +35,25 @@ namespace Gthx.Test
 
         public void ConfigureServices(IServiceCollection services)
         {
-            var cstr = config.GetConnectionString("GthxTestDb");
-            services.AddDbContext<GthxDataContext>(
-                options => options.UseSqlServer(config.GetConnectionString("GthxTestDb")),
-                ServiceLifetime.Singleton);
+            services.AddLogging(configure => configure.AddConsole().AddSerilog()).AddTransient<GthxBot>();
+
+            services.AddDbContextPool<GthxDataContext>(options =>
+            {
+                options.UseSqlServer(_config.GetConnectionString("GthxTestDb"));
+            });
+
+            //services.AddDbContext<GthxDataContext>(options => options.UseSqlServer(_config.GetConnectionString("GthxTestDb")),
+            //    ServiceLifetime.Singleton);
+
+            services.AddScoped<GthxDataContext>();
             services.AddSingleton<IIrcClient, MockIrcClient>();
             services.AddSingleton<IGthxData, GthxSqlData>();
             services.AddSingleton<IWebReader, MockWebReader>();
             services.AddSingleton<GthxDataContext>();
             GthxBot.RegisterServices(services as ServiceCollection);
-            var sc = services as ServiceCollection;
-            sc.AddLogging(configure => configure.AddConsole()).AddTransient<GthxTests>();
-            services.AddSingleton(config);
+            //var sc = services as ServiceCollection;
+            //sc.AddLogging(configure => configure.AddConsole()).AddTransient<GthxTests>();
+            services.AddSingleton(_config);
             services.AddSingleton<GthxBot>();
             //services.AddScoped<IGthxData>(provider => (IGthxData)provider.GetService<GthxDataContext>());
         }
@@ -58,14 +67,40 @@ namespace Gthx.Test
         private GthxSqlData _Data;
         private IIrcClient _client;
         private GthxBot _gthx;
+        private readonly IConfiguration _config;
 
         public GthxSqlDataTest()
         {
-            _server = new TestServer(new WebHostBuilder().UseStartup<SqlDataTestsStartup>());
-            _Db = _server.Host.Services.GetRequiredService<GthxDataContext>();
-            _Data = (GthxSqlData)_server.Host.Services.GetService<IGthxData>();
-            _client = _server.Host.Services.GetService<IIrcClient>();
-            _gthx = _server.Host.Services.GetRequiredService<GthxBot>();
+            _config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
+
+            // TODO:
+            // * Use this logger to get the correct DB loaded from appsettings.json
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(_config)
+                .WriteTo.File(new JsonFormatter(), @"c:\tmp\GthxSqlTests.json", shared: true)
+                .CreateLogger();
+
+            try
+            {
+                Log.Information("------------------------------------------Serilog enabled for GthxSqlDataTests");
+
+                _server = new TestServer(new WebHostBuilder().UseStartup<SqlDataTestsStartup>().UseSerilog());
+                _Db = _server.Host.Services.GetRequiredService<GthxDataContext>();
+                _Data = (GthxSqlData)_server.Host.Services.GetService<IGthxData>();
+                _client = _server.Host.Services.GetService<IIrcClient>();
+                _gthx = _server.Host.Services.GetRequiredService<GthxBot>();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "TestHost terminated unexpectedly");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         [OneTimeSetUp]
@@ -80,18 +115,6 @@ namespace Gthx.Test
             _Db.Database.EnsureDeleted();
         }
 
-#if false
-        [TearDown]
-        public void Cleanup()
-        {
-            _Db.Ref.RemoveRange(_Db.Ref.Where(f => true));
-            _Db.Factoid.RemoveRange(_Db.Factoid.Where(f => true));
-            _Db.FactoidHistory.RemoveRange(_Db.FactoidHistory.Where(f => true));
-            _Db.SaveChanges();
-
-            _Data = null;
-        }
-#endif
         [Test]
         public void GthxData_TestRefCount()
         {
