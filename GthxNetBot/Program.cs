@@ -101,7 +101,7 @@ namespace GthxNetBot
             services.AddSingleton(_configuration);
             services.AddSingleton<GthxDataContext>();
             services.AddSingleton<ConsoleTestBot>();
-            GthxBot.RegisterServices(services);
+            services.AddGthxBot();
             services.AddSingleton<GthxBot>();
             _serviceProvider = services.BuildServiceProvider(true);
         }

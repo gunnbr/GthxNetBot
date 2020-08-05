@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Gthx.Bot
 {
@@ -12,31 +13,6 @@ namespace Gthx.Bot
         public readonly static string Version = "0.8 2020-07-24";
 
         private readonly List<IGthxModule> _Modules;
-
-        public static void RegisterServices(ServiceCollection services)
-        {
-            // This seems a little strange to have this class register for all
-            // the services it needs, but I think they have to be registered
-            // this way to get DI to work correctly and the Microsoft DI container
-            // won't automatically register all these for us.
-            // But it seems wrong for something outside of Gthx to have to specify
-            // what modules are needed, so I'll try this for now.
-            services.TryAddEnumerable(new[]
-            {
-                ServiceDescriptor.Singleton<IGthxModule, StatusModule>(),
-                ServiceDescriptor.Singleton<IGthxModule, FactoidModule>(),
-                ServiceDescriptor.Singleton<IGthxModule, TellModule>(),
-                ServiceDescriptor.Singleton<IGthxModule, SeenModule>(),
-                //ServiceDescriptor.Singleton<IGthxModule, LurkerModule>(),
-                ServiceDescriptor.Singleton<IGthxModule, GoogleModule>(),
-
-                // Reference and title checkers come last because their
-                // responses should come after any responses from the above
-                // modules, if any.
-                ServiceDescriptor.Singleton<IGthxModule, ThingiverseModule>(),
-                ServiceDescriptor.Singleton<IGthxModule, YoutubeModule>(),
-            });
-        }
 
         public GthxBot(IEnumerable<IGthxModule> modules)
         {

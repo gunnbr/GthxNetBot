@@ -36,37 +36,26 @@ namespace Gthx.Test
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging(configure => configure.AddConsole().AddSerilog()).AddTransient<GthxBot>();
+            //services.AddSingleton(_config);
 
-            services.AddDbContextPool<GthxDataContext>(options =>
+            services.AddDbContext<GthxDataContext>(options =>
             {
+                // This just doesn't work at all and appears useless, perhaps
+                // because of DI.
                 options.UseSqlServer(_config.GetConnectionString("GthxTestDb"));
             });
 
-            //services.AddDbContext<GthxDataContext>(options => options.UseSqlServer(_config.GetConnectionString("GthxTestDb")),
-            //    ServiceLifetime.Singleton);
-
-            services.AddScoped<GthxDataContext>();
-            services.AddSingleton<IIrcClient, MockIrcClient>();
             services.AddSingleton<IGthxData, GthxSqlData>();
             services.AddSingleton<IWebReader, MockWebReader>();
-            services.AddSingleton<GthxDataContext>();
-            GthxBot.RegisterServices(services as ServiceCollection);
-            //var sc = services as ServiceCollection;
-            //sc.AddLogging(configure => configure.AddConsole()).AddTransient<GthxTests>();
-            services.AddSingleton(_config);
-            services.AddSingleton<GthxBot>();
-            //services.AddScoped<IGthxData>(provider => (IGthxData)provider.GetService<GthxDataContext>());
         }
     }
 
     [TestFixture]
     public class GthxSqlDataTest
     {
-        private TestServer _server;
-        private GthxDataContext _Db;
-        private GthxSqlData _Data;
-        private IIrcClient _client;
-        private GthxBot _gthx;
+        private readonly TestServer _server;
+        private readonly GthxDataContext _Db;
+        private readonly GthxSqlData _Data;
         private readonly IConfiguration _config;
 
         public GthxSqlDataTest()
@@ -77,7 +66,8 @@ namespace Gthx.Test
                 .Build();
 
             // TODO:
-            // * Use this logger to get the correct DB loaded from appsettings.json
+            // * Figure out why the GthxDataContext logger doesn't work in OnConfiguring
+            // * Change Program.cs to configure SQL before starting Gthx.
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_config)
                 .WriteTo.File(new JsonFormatter(), @"c:\tmp\GthxSqlTests.json", shared: true)
@@ -86,12 +76,9 @@ namespace Gthx.Test
             try
             {
                 Log.Information("------------------------------------------Serilog enabled for GthxSqlDataTests");
-
-                _server = new TestServer(new WebHostBuilder().UseStartup<SqlDataTestsStartup>().UseSerilog());
+                _server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup<SqlDataTestsStartup>().UseSerilog());
                 _Db = _server.Host.Services.GetRequiredService<GthxDataContext>();
                 _Data = (GthxSqlData)_server.Host.Services.GetService<IGthxData>();
-                _client = _server.Host.Services.GetService<IIrcClient>();
-                _gthx = _server.Host.Services.GetRequiredService<GthxBot>();
             }
             catch (Exception ex)
             {
@@ -112,7 +99,14 @@ namespace Gthx.Test
         [OneTimeTearDown]
         public void TestTearDown()
         {
-            _Db.Database.EnsureDeleted();
+            try
+            {
+                _Db.Database.EnsureDeleted();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to delete the DB: {ex.Message}");
+            }
         }
 
         [Test]

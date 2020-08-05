@@ -38,7 +38,7 @@ namespace Gthx.Test
             services.AddSingleton<IGthxData, MockData>();
             services.AddSingleton<IWebReader, MockWebReader>();
             services.AddSingleton<GthxDataContext>();
-            GthxBot.RegisterServices(services as ServiceCollection);
+            services.AddGthxBot();
             var sc = services as ServiceCollection;
             sc.AddLogging(configure => configure.AddConsole()).AddTransient<GthxTests>();
             services.AddSingleton(config);
