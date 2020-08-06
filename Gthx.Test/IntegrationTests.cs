@@ -33,8 +33,10 @@ namespace Gthx.Test
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // TODO: Fix this to more closely match GthxSqlDataTest as that's
+            //       been much more thoroughly tested.
             services.AddDbContext<GthxDataContext>(
-                options => options.UseSqlServer(this.config.GetConnectionString("GthxTestDb")),
+                options => options.UseSqlServer(this.config.GetConnectionString("GthxDb")),
                 ServiceLifetime.Singleton);
             services.AddSingleton<IIrcClient, MockIrcClient>();
             services.AddSingleton<IGthxData, GthxSqlData>();

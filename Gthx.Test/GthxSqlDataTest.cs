@@ -36,13 +36,10 @@ namespace Gthx.Test
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging(configure => configure.AddConsole().AddSerilog()).AddTransient<GthxBot>();
-            //services.AddSingleton(_config);
 
             services.AddDbContext<GthxDataContext>(options =>
             {
-                // This just doesn't work at all and appears useless, perhaps
-                // because of DI.
-                options.UseSqlServer(_config.GetConnectionString("GthxTestDb"));
+                options.UseSqlServer(_config.GetConnectionString("GthxDb"));
             });
 
             services.AddSingleton<IGthxData, GthxSqlData>();
@@ -65,9 +62,6 @@ namespace Gthx.Test
                 .AddJsonFile("appsettings.json", optional: false)
                 .Build();
 
-            // TODO:
-            // * Figure out why the GthxDataContext logger doesn't work in OnConfiguring
-            // * Change Program.cs to configure SQL before starting Gthx.
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_config)
                 .WriteTo.File(new JsonFormatter(), @"c:\tmp\GthxSqlTests.json", shared: true)
@@ -93,7 +87,14 @@ namespace Gthx.Test
         [OneTimeSetUp]
         public void TestInitialise()
         {
-            _Db.Database.EnsureCreated();
+            try
+            {
+                _Db.Database.EnsureCreated();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to create the DB: {ex.Message}");
+            }
         }
 
         [OneTimeTearDown]

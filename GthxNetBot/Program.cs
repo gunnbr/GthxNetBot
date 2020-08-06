@@ -2,6 +2,7 @@
 using Gthx.Bot.Interfaces;
 using Gthx.Data;
 using GthxData;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -33,7 +34,7 @@ namespace GthxNetBot
 
             var context = _services.GetRequiredService<GthxDataContext>();
             context.Database.EnsureCreated();
-            var gthx = _services.GetRequiredService<Gthx.Bot.GthxBot>();
+            var gthx = _services.GetRequiredService<GthxBot>();
 
             var done = false;
             while (!done)
@@ -90,16 +91,31 @@ namespace GthxNetBot
             scope.ServiceProvider.GetRequiredService<ConsoleTestBot>().Run();
             DisposeServices();
         }
+        
+        public static readonly ILoggerFactory ConsoleLoggerFactory
+             = LoggerFactory.Create(builder =>
+             {
+                 builder.AddFilter((category, level) =>
+                   category == DbLoggerCategory.Database.Command.Name
+                   && level == LogLevel.Information)
+               .AddConsole();
+             });
 
         private static void RegisterServices()
         {
             var services = new ServiceCollection();
-            services.AddLogging(configure => configure.AddConsole().AddSerilog()).AddTransient<ConsoleTestBot>();
+            // Note: .AddConsole() here also logs SQL statements into the console, even if the
+            //       LoggerFactory above isn't used.
+            // TODO: Add something to filter out those and only display warning or above in the console.
+            services.AddLogging(configure => configure.AddSerilog()).AddTransient<ConsoleTestBot>();
             services.AddSingleton<IIrcClient, ConsoleIrcClient>();
             services.AddSingleton<IGthxData, GthxSqlData>();
             services.AddSingleton<IWebReader, WebReader>();
             services.AddSingleton(_configuration);
-            services.AddSingleton<GthxDataContext>();
+            services.AddDbContext<GthxDataContext>(options =>
+            {
+                options.UseSqlServer(_configuration.GetConnectionString("GthxDb"));//.UseLoggerFactory(ConsoleLoggerFactory);
+            }, ServiceLifetime.Singleton);
             services.AddSingleton<ConsoleTestBot>();
             services.AddGthxBot();
             services.AddSingleton<GthxBot>();
