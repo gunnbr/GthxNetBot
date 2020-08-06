@@ -1,5 +1,6 @@
 ﻿using Gthx.Bot.Interfaces;
 using Gthx.Data;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -13,11 +14,13 @@ namespace Gthx.Bot.Modules
         private readonly Regex _FactoidGet = new Regex(@$"(?'factoid'.+)[?!](?'hasPipe'\s*$|\s*\|\s*(?'pipeToUser'{Util.NickMatch})$)", RegexOptions.Compiled);
         private readonly IGthxData _Data;
         private readonly IIrcClient _IrcClient;
+        private readonly ILogger<FactoidModule> _Logger;
 
-        public FactoidModule(IGthxData data, IIrcClient ircClient)
+        public FactoidModule(IGthxData data, IIrcClient ircClient, ILogger<FactoidModule> logger)
         {
             _Data = data;
-            this._IrcClient = ircClient;
+            _IrcClient = ircClient;
+            _Logger = logger;
         }
 
         public void ProcessAction(string channel, string user, string message)
@@ -62,7 +65,7 @@ namespace Gthx.Bot.Modules
             }
 
             var factoid = message.Remove(0, 7);
-            Console.WriteLine($"forget request for '{factoid}'");
+            _Logger.LogInformation("forget request for '{factoid}'", factoid);
 
             var isForgotten = _Data.ForgetFactoid(user, factoid);
             if (isForgotten)
@@ -91,17 +94,17 @@ namespace Gthx.Bot.Modules
             }
 
             var factoid = message.Remove(0, 5);
-            Console.WriteLine($"info request for '{factoid}' in {channel}");
+            _Logger.LogInformation("info request for '{factoid}' in {channel}", factoid, channel);
 
             var info = _Data.GetFactoidInfo(factoid);
             if (info == null)
             {
-                Console.WriteLine($"No info for factoid '{factoid}'");
+                _Logger.LogInformation("No info for factoid '{factoid}'", factoid);
                 _IrcClient.SendMessage(channel, $"Sorry, I couldn't find an entry for {factoid}");
                 return true;
             }
 
-            Console.WriteLine($"Factoid '{factoid}' has been referenced {info.RefCount} times");
+            _Logger.LogInformation("Factoid '{factoid}' has been referenced {info.RefCount} times", factoid, info.RefCount);
             _IrcClient.SendMessage(channel, $"Factoid '{factoid}' has been referenced {info.RefCount} times");
             foreach (var data in info.InfoList)
             {
@@ -112,12 +115,12 @@ namespace Gthx.Bot.Modules
 
                 if (data.Value == null)
                 {
-                    Console.WriteLine($"At {data.Timestamp}, {data.User} deleted this item");
+                    _Logger.LogInformation("At {Timestamp}, {User} deleted this item", data.Timestamp, data.User);
                     _IrcClient.SendMessage(channel, $"At {data.Timestamp:R}, {data.User} deleted this item");
                 }
                 else
                 {
-                    Console.WriteLine($"At {data.Timestamp}, {data.User} set to: {data.Value}");
+                    _Logger.LogInformation("At {Timestamp}, {User} set to: {Value}", data.Timestamp, data.User, data.Value);
                     _IrcClient.SendMessage(channel, $"At {data.Timestamp:R}, {data.User} set to: {data.Value}");
                 }
             }
@@ -186,7 +189,7 @@ namespace Gthx.Bot.Modules
             }
 
             var factoid = factoidMatch.Groups["factoid"].Value;
-            Console.WriteLine($"Factoid query from {user}:{channel} for '{factoid}'");
+            _Logger.LogInformation("Factoid query from {user}:{channel} for '{factoid}'", user, channel, factoid);
 
             var factoidValueList = _Data.GetFactoid(factoid);
             if (factoidValueList == null)

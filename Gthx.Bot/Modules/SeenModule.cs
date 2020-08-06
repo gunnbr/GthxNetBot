@@ -1,5 +1,6 @@
 ﻿using Gthx.Bot.Interfaces;
 using Gthx.Data;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +14,14 @@ namespace Gthx.Bot.Modules
     {
         private readonly IGthxData _Data;
         private readonly IIrcClient _IrcClient;
-
+        private readonly ILogger<SeenModule> _Logger;
         private readonly Regex _SeenRegex = new Regex(@$"\s*seen\s+(?'nick'{Util.NickMatch})[\s\?]*");
 
-        public SeenModule(IGthxData data, IIrcClient ircClient)
+        public SeenModule(IGthxData data, IIrcClient ircClient, ILogger<SeenModule> logger)
         {
-            this._Data = data;
-            this._IrcClient = ircClient;
+            _Data = data;
+            _IrcClient = ircClient;
+            _Logger = logger;
         }
 
         public void ProcessMessage(string channel, string user, string message)
@@ -37,7 +39,7 @@ namespace Gthx.Bot.Modules
             }
 
             var nick = seenMatch.Groups["nick"].Value;
-            Console.WriteLine($"{user} asked about '{nick}'");
+            _Logger.LogInformation("{user} asked about '{nick}'", user, nick);
             var seenList = _Data.GetLastSeen(nick);
             if (seenList == null)
             {

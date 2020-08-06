@@ -1,5 +1,6 @@
 ﻿using Gthx.Bot.Interfaces;
 using Gthx.Data;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -17,12 +18,14 @@ namespace Gthx.Bot.Modules
         private readonly IGthxData _Data;
         private readonly IIrcClient _IrcClient;
         private readonly IWebReader _WebReader;
+        private readonly ILogger<YoutubeModule> _Logger;
 
-        public YoutubeModule(IGthxData data, IIrcClient ircClient, IWebReader webReader)
+        public YoutubeModule(IGthxData data, IIrcClient ircClient, IWebReader webReader, ILogger<YoutubeModule> logger)
         {
-            this._Data = data;
-            this._IrcClient = ircClient;
-            this._WebReader = webReader;
+            _Data = data;
+            _IrcClient = ircClient;
+            _WebReader = webReader;
+            _Logger = logger;
         }
 
         public void ProcessAction(string channel, string user, string message)
@@ -39,7 +42,7 @@ namespace Gthx.Bot.Modules
 
             var url = youtubeMatch.Groups[0].Value;
             var id = youtubeMatch.Groups["id"].Value;
-            Console.WriteLine($"Checking for Youtube title for '{id}'");
+            _Logger.LogInformation("Checking for Youtube title for '{id}'", id);
             var referenceData = _Data.AddYoutubeReference(id);
             if (referenceData.Title != null)
             {
@@ -64,14 +67,14 @@ namespace Gthx.Bot.Modules
                     var titleMatch = _titleRegex.Match(line);
                     if (titleMatch.Success)
                     {
-                        Console.WriteLine($"Found title: {titleMatch.Groups["title"].Value}");
+                        _Logger.LogInformation("Found title: {Title}", titleMatch.Groups["title"].Value);
                         return titleMatch.Groups["title"].Value;
                     }
 
                     var metaMatch = _metaRegex.Match(line);
                     if (metaMatch.Success)
                     {
-                        Console.WriteLine($"Found title: {metaMatch.Groups["title"].Value}");
+                        _Logger.LogInformation("Found meta title: {Title}", metaMatch.Groups["title"].Value);
                         return metaMatch.Groups["title"].Value;
                     }
                 }

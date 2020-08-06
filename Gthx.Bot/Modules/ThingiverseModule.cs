@@ -1,5 +1,6 @@
 ﻿using Gthx.Bot.Interfaces;
 using Gthx.Data;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -16,12 +17,14 @@ namespace Gthx.Bot.Modules
         private readonly IGthxData _Data;
         private readonly IIrcClient _IrcClient;
         private readonly IWebReader _WebReader;
+        private readonly ILogger<ThingiverseModule> _Logger;
 
-        public ThingiverseModule(IGthxData data, IIrcClient ircClient, IWebReader webReader)
+        public ThingiverseModule(IGthxData data, IIrcClient ircClient, IWebReader webReader, ILogger<ThingiverseModule> logger)
         {
-            this._Data = data;
-            this._IrcClient = ircClient;
-            this._WebReader = webReader;
+            _Data = data;
+            _IrcClient = ircClient;
+            _WebReader = webReader;
+            _Logger = logger;
         }
 
         public void ProcessAction(string channel, string user, string message)
@@ -38,11 +41,11 @@ namespace Gthx.Bot.Modules
 
             var url = youtubeMatch.Groups[0].Value;
             var id = youtubeMatch.Groups["id"].Value;
-            Console.WriteLine($"Checking for Thingiverse title for '{id}'");
+            _Logger.LogInformation("Checking for Thingiverse title for '{id}'", id);
             var referenceData = _Data.AddThingiverseReference(id);
             if (referenceData.Title != null)
             {
-                Console.WriteLine($"Already have a title for Thingiverse item {referenceData.Item}:{referenceData.Title}");
+                _Logger.LogInformation("Already have a title for Thingiverse {Item}: {Title}", referenceData.Item, referenceData.Title);
                 _IrcClient.SendMessage(channel, $"{user} linked to \"{referenceData.Title}\" on thingiverse => {referenceData.Count} IRC mentions");
                 return;
             }
@@ -54,11 +57,11 @@ namespace Gthx.Bot.Modules
         //       works with unit tests so the WebReader can be mocked
         private async Task<string> GetTitle(string url, string id)
         {
-            Console.WriteLine($"Getting thingiverse title for '{id}'");
+            _Logger.LogInformation("Getting thingiverse title for '{id}'", id);
 
             var webStream = await _WebReader.GetStreamFromUrlAsync(url);
 
-            Console.WriteLine("Finished waiting for the web stream...");
+            _Logger.LogInformation("Finished waiting for the web stream...");
 
             using (var reader = new StreamReader(webStream))
             {
@@ -69,14 +72,14 @@ namespace Gthx.Bot.Modules
                     var titleMatch = _titleRegex.Match(line);
                     if (titleMatch.Success)
                     {
-                        Console.WriteLine($"Found title: {titleMatch.Groups["title"].Value}");
+                        _Logger.LogInformation("Found title: {Title}", titleMatch.Groups["title"].Value);
                         return titleMatch.Groups["title"].Value;
                     }
 
                     var metaMatch = _metaRegex.Match(line);
                     if (metaMatch.Success)
                     {
-                        Console.WriteLine($"Found title: {metaMatch.Groups["title"].Value}");
+                        _Logger.LogInformation("Found meta title: {Title}", metaMatch.Groups["title"].Value);
                         return metaMatch.Groups["title"].Value;
                     }
                 }
@@ -88,7 +91,7 @@ namespace Gthx.Bot.Modules
         public async void GetAndSaveTitle(string url, string id, string channel, string user, int referenceCount)
         {
             var title = await GetTitle(url, id);
-            Console.WriteLine($"Got the title for ID {id} as '{title}'");
+            _Logger.LogInformation("Got the title for ID {id} as '{title}'", id, title);
             _Data.AddThingiverseTitle(id, title);
 
             if (string.IsNullOrEmpty(title))
@@ -97,9 +100,7 @@ namespace Gthx.Bot.Modules
             }
             else
             {
-                Console.WriteLine($"Sending reply about the title");
                 _IrcClient.SendMessage(channel, $"{user} linked to \"{title}\" on thingiverse => {referenceCount} IRC mentions");
-                Console.WriteLine("Done sending reply about the title");
             }
         }
     }
