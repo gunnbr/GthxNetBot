@@ -69,7 +69,7 @@ namespace Gthx.Test
 
             try
             {
-                Log.Information("------------------------------------------Serilog enabled for GthxSqlDataTests");
+                Log.Information("Serilog enabled for GthxSqlDataTests");
                 _server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup<SqlDataTestsStartup>().UseSerilog());
                 _Db = _server.Host.Services.GetRequiredService<GthxDataContext>();
                 _Data = (GthxSqlData)_server.Host.Services.GetService<IGthxData>();
@@ -93,7 +93,7 @@ namespace Gthx.Test
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to create the DB: {ex.Message}");
+                Log.Fatal(ex, "TestInitialize failed to create the DB: {Message}", ex.Message);
             }
         }
 
@@ -106,7 +106,7 @@ namespace Gthx.Test
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to delete the DB: {ex.Message}");
+                Log.Fatal("Failed to delete the DB: {Message}", ex.Message);
             }
         }
 

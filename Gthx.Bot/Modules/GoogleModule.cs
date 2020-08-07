@@ -23,6 +23,7 @@ namespace Gthx.Bot.Modules
 
         public void ProcessMessage(string channel, string user, string message)
         {
+            // TODO: Only handle this if the message was directly addressed to us.
             var googleMatch = _GoogleRegex.Match(message);
             if (!googleMatch.Success)
             {

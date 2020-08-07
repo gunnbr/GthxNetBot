@@ -59,6 +59,7 @@ namespace Gthx.Bot.Modules
         /// <returns>True if a command was found to set a message, false otherwise</returns>
         private bool ProcessFactoidForget(string channel, string user, string message)
         {
+            // TODO: Only handle this if the message was directly addressed to us.
             if (!message.StartsWith("forget "))
             {
                 return false;
@@ -137,6 +138,7 @@ namespace Gthx.Bot.Modules
         /// <returns>True if a command was found to set a message, false otherwise</returns>
         private bool ProcessFactoidSet(string channel, string user, string message)
         {
+            // TODO: Only handle this if the message was directly addressed to us.
             var factoidMatch = _FactoidSet.Match(message);
             if (!factoidMatch.Success)
             {

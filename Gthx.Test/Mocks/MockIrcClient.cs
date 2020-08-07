@@ -21,6 +21,8 @@ namespace Gthx.Test.Mocks
 
         private List<string> SentMessages { get; set; } = new List<string>();
 
+        public string BotNick => "gthxbot";
+
         public bool SendAction(string channel, string action)
         {
             SentToChannel = channel;

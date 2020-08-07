@@ -23,6 +23,8 @@ namespace Gthx.Bot
         {
             // TODO: Handle some messages directly addressed to gthx differently than
             //       the same message not addressed to gthx.
+            // Set based on the nickname received once we sign on to the server
+            // matchNick = "(%s)(:|;|,|-|\s)+(.+)" % (self.nickname)
 
             // TODO: Add return value from modules so some can stop further processing.
             //       For instance: "seen gunnbr?" should not run a factoid check
