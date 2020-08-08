@@ -12,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Serilog;
-using Serilog.Formatting.Json;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -69,7 +68,7 @@ namespace Gthx.Test
 
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_config)
-                .WriteTo.File(new JsonFormatter(), @"c:\tmp\GthxSqlTests.json", shared: true)
+                .WriteTo.Console()
                 .CreateLogger();
 
             try
