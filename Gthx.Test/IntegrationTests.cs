@@ -11,62 +11,87 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
+using Serilog;
+using Serilog.Formatting.Json;
+using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Gthx.Test
 {
     public class IntegrationTestsStartup
     {
-        private readonly IConfiguration config;
+        private readonly IConfiguration _config;
 
         public IntegrationTestsStartup(IConfiguration config)
         {
-            this.config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
+            _config = config;
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // TODO: Fix this to more closely match GthxSqlDataTest as that's
-            //       been much more thoroughly tested.
-            services.AddDbContext<GthxDataContext>(
-                options => options.UseSqlServer(this.config.GetConnectionString("GthxDb")),
-                ServiceLifetime.Singleton);
-            services.AddSingleton<IIrcClient, MockIrcClient>();
+            services.AddLogging(configure => configure.AddConsole().AddSerilog()).AddTransient<GthxBot>();
+
+            services.AddDbContext<GthxDataContext>(options =>
+            {
+                options.UseSqlServer(_config.GetConnectionString("GthxDb"));
+            });
+
             services.AddSingleton<IGthxData, GthxSqlData>();
             services.AddSingleton<IWebReader, WebReader>();
-            services.AddSingleton<GthxDataContext>();
+            services.AddSingleton<IIrcClient, MockIrcClient>();
             services.AddGthxBot();
-            var sc = services as ServiceCollection;
-            sc.AddLogging(configure => configure.AddConsole()).AddTransient<GthxTests>();
-            services.AddSingleton(config);
             services.AddSingleton<GthxBot>();
-            //services.AddScoped<IGthxData>(provider => (IGthxData)provider.GetService<GthxDataContext>());
+            services.AddSingleton(_config);
         }
     }
 
     [TestFixture]
     public class IntegrationTests
     {
-        protected readonly TestServer _server;
-        protected readonly GthxDataContext _Db;
-        protected readonly GthxBot _gthx;
+        private readonly TestServer _server;
+        private readonly GthxDataContext _Db;
+        private readonly GthxBot _gthx;
         private readonly MockIrcClient _client;
         private readonly GthxSqlData _data;
+        private readonly IConfigurationRoot _config;
 
         public IntegrationTests()
         {
-            _server = new TestServer(new WebHostBuilder().UseStartup<IntegrationTestsStartup>());
-            _Db = _server.Host.Services.GetRequiredService<GthxDataContext>();
-            _data = _server.Host.Services.GetService<IGthxData>() as GthxSqlData;
-            _client = _server.Host.Services.GetService<IIrcClient>() as MockIrcClient;
-            _gthx = _server.Host.Services.GetRequiredService<GthxBot>();
+            _config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
+
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(_config)
+                .WriteTo.File(new JsonFormatter(), @"c:\tmp\GthxSqlTests.json", shared: true)
+                .CreateLogger();
+
+            try
+            {
+                Log.Information("Serilog enabled for IntegrationTests");
+                _server = new TestServer(new WebHostBuilder()
+                    .UseConfiguration(_config)
+                    .UseStartup<IntegrationTestsStartup>()
+                    .UseSerilog());
+                _Db = _server.Host.Services.GetRequiredService<GthxDataContext>();
+                _data = _server.Host.Services.GetService<IGthxData>() as GthxSqlData;
+                _client = _server.Host.Services.GetService<IIrcClient>() as MockIrcClient;
+                _gthx = _server.Host.Services.GetRequiredService<GthxBot>();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "TestHost terminated unexpectedly");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         [OneTimeSetUp]

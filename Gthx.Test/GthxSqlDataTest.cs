@@ -30,7 +30,6 @@ namespace Gthx.Test
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-
         }
 
         public void ConfigureServices(IServiceCollection services)
