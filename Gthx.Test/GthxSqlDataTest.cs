@@ -218,5 +218,30 @@ namespace Gthx.Test
             tellData = _Data.GetTell(toUser);
             Assert.AreEqual(0, tellData.Count(), "Tell Data still exists after being returned");
         }
+
+        [Test]
+        public void GthxData_TestSeenRequests()
+        {
+            var testChannel = "#reprap";
+
+            _Data.UpdateLastSeen(testChannel, "gunnbr", "message 1");
+            _Data.UpdateLastSeen(testChannel, "gunnbr_", "message 2");
+            _Data.UpdateLastSeen(testChannel, "gunner", "message 3");
+
+            var lastSeen = _Data.GetLastSeen("gunn");
+            Assert.AreEqual(3, lastSeen.Count);
+            var names = lastSeen.Select(s => s.User).ToList();
+            Assert.IsTrue(names.Contains("gunnbr"));
+            Assert.IsTrue(names.Contains("gunnbr_"));
+            Assert.IsTrue(names.Contains("gunner"));
+
+            // Test also with an asterisk cause people use that.
+            lastSeen = _Data.GetLastSeen("gunn*");
+            Assert.AreEqual(3, lastSeen.Count);
+            names = lastSeen.Select(s => s.User).ToList();
+            Assert.IsTrue(names.Contains("gunnbr"));
+            Assert.IsTrue(names.Contains("gunnbr_"));
+            Assert.IsTrue(names.Contains("gunner"));
+        }
     }
 }
