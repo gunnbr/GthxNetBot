@@ -1,5 +1,7 @@
 ﻿using Gthx.Bot.Interfaces;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GthxNetBot
 {
@@ -12,6 +14,20 @@ namespace GthxNetBot
         {
             Console.WriteLine($"{channel}: * {BotNick} {message}");
             return true;
+        }
+
+        public Task<List<string>> GetUsersInChannelAsync(string channel)
+        {
+            return Task.Run(() =>
+            {
+                var users = new List<string>
+                {
+                    "gunnbr",
+                    BotNick,
+                    "LurkerBot"
+                };
+                return users;
+            });
         }
 
         public bool SendMessage(string channel, string message)

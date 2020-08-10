@@ -23,7 +23,7 @@ namespace Gthx.Bot
                 ServiceDescriptor.Singleton<IGthxModule, StatusModule>(),
                 ServiceDescriptor.Singleton<IGthxModule, SeenModule>(),
                 ServiceDescriptor.Singleton<IGthxModule, GoogleModule>(),
-                //ServiceDescriptor.Singleton<IGthxModule, LurkerModule>(),
+                ServiceDescriptor.Singleton<IGthxModule, LurkerModule>(),
 
                 ServiceDescriptor.Singleton<IGthxModule, ThingiverseModule>(),
                 ServiceDescriptor.Singleton<IGthxModule, YoutubeModule>(),

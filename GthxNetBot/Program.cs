@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace GthxNetBot
 {
@@ -27,6 +28,8 @@ namespace GthxNetBot
             _logger.LogInformation("ConsoleTestBot constructor: Logging enabled");
         }
 
+        // TODO: Refactor this to work like the unit tests now that I know more about
+        //       how to make the DI work.
         public void Run()
         {
             Console.WriteLine("Welcome to Gthx");
@@ -108,7 +111,9 @@ namespace GthxNetBot
             //       LoggerFactory above isn't used.
             // TODO: Add something to filter out those and only display warning or above in the console.
             services.AddLogging(configure => configure.AddSerilog()).AddTransient<ConsoleTestBot>();
-            services.AddSingleton<IIrcClient, ConsoleIrcClient>();
+            services.TryAddSingleton<ConsoleIrcClient>();
+            services.AddSingleton<IIrcClient>(sp => sp.GetRequiredService<ConsoleIrcClient>());
+            services.AddSingleton<IBotNick>(sp => sp.GetRequiredService<ConsoleIrcClient>());
             services.AddSingleton<IGthxData, GthxSqlData>();
             services.AddSingleton<IWebReader, WebReader>();
             services.AddSingleton(_configuration);

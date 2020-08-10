@@ -691,5 +691,19 @@ namespace Gthx.Test
             // attempt to find a factoid named "status"
             Assert.AreEqual(null, _data.FactoidGotten);
         }
+
+        [Test]
+        public async Task TestLurkers()
+        {
+            var testChannel = "#reprap";
+            var testUser = "CuriousKitty";
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"lurkers?");
+            await Task.Delay(5000);
+            var replies = _client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"2 of the 5 users in {testChannel} right now have never said anything.", replies.Messages[0]);
+        }
     }
 }

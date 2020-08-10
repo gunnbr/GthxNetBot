@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Gthx.Test.Mocks
 {
@@ -40,6 +41,22 @@ namespace Gthx.Test.Mocks
             //       that unit tests can use longer timeouts but still complete as soon
             //       as a message is sent..
             return true;
+        }
+
+        public Task<List<string>> GetUsersInChannelAsync(string channel)
+        {
+            return Task.Run(() =>
+            {
+                var users = new List<string>
+                {
+                    "gunnbr",
+                    "Razor",
+                    "LameLurker",
+                    BotNick,
+                    "SomeOtherBot"
+                };
+                return users;
+            });
         }
 
         #region Methods for testing
