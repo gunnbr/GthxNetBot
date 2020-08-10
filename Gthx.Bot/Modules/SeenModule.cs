@@ -12,16 +12,18 @@ namespace Gthx.Bot.Modules
 {
     public class SeenModule : IGthxModule
     {
-        private readonly IGthxData _Data;
-        private readonly IIrcClient _IrcClient;
-        private readonly ILogger<SeenModule> _Logger;
-        private readonly Regex _SeenRegex = new Regex(@$"\s*seen\s+(?'nick'{Util.NickMatch})[\s\?]*");
+        private readonly IGthxData _data;
+        private readonly IIrcClient _client;
+        private readonly IGthxUtil _util;
+        private readonly ILogger<SeenModule> _logger;
+        private readonly Regex _seenRegex = new Regex(@$"\s*seen\s+(?'nick'{GthxUtil.NickMatch})[\s\?]*");
 
-        public SeenModule(IGthxData data, IIrcClient ircClient, ILogger<SeenModule> logger)
+        public SeenModule(IGthxData data, IIrcClient ircClient, IGthxUtil util, ILogger<SeenModule> logger)
         {
-            _Data = data;
-            _IrcClient = ircClient;
-            _Logger = logger;
+            _data = data;
+            _client = ircClient;
+            _util = util;
+            _logger = logger;
         }
 
         public bool ProcessMessage(string channel, string user, string message, bool wasDirectlyAddressed)
@@ -29,28 +31,28 @@ namespace Gthx.Bot.Modules
             // Update the seen database, but only if it's not a private message
             if (channel.StartsWith("#")) 
             {
-                _Data.UpdateLastSeen(channel, user, message);
+                _data.UpdateLastSeen(channel, user, message);
             }
 
-            var seenMatch = _SeenRegex.Match(message);
+            var seenMatch = _seenRegex.Match(message);
             if (!seenMatch.Success)
             {
                 return false;
             }
 
             var nick = seenMatch.Groups["nick"].Value;
-            _Logger.LogInformation("{user} asked about '{nick}'", user, nick);
-            var seenList = _Data.GetLastSeen(nick);
+            _logger.LogInformation("{user} asked about '{nick}'", user, nick);
+            var seenList = _data.GetLastSeen(nick);
             if (seenList == null)
             {
-                _IrcClient.SendMessage(channel, $"Sorry, I haven't seen {nick}.");
+                _client.SendMessage(channel, $"Sorry, I haven't seen {nick}.");
                 return true;
             }
 
             foreach (var info in seenList.Take(3))
             {
-                var timeSince = Util.TimeBetweenString(info.Timestamp);
-                _IrcClient.SendMessage(channel, $"{info.User} was last seen in {info.Channel} {timeSince} ago saying '{info.Message}'.");
+                var timeSince = _util.TimeBetweenString(info.Timestamp);
+                _client.SendMessage(channel, $"{info.User} was last seen in {info.Channel} {timeSince} ago saying '{info.Message}'.");
             }
 
             return true;
@@ -61,7 +63,7 @@ namespace Gthx.Bot.Modules
             // Update the seen database, but only if it's not a private message
             if (channel.StartsWith("#"))
             {
-                _Data.UpdateLastSeen(channel, user, $"* {user} {message}");
+                _data.UpdateLastSeen(channel, user, $"* {user} {message}");
             }
 
             return false;

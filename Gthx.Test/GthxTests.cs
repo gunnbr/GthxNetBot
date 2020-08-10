@@ -27,7 +27,7 @@ namespace Gthx.Test
             _config = config;
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 
         }
@@ -41,6 +41,7 @@ namespace Gthx.Test
             services.AddSingleton<IBotNick>(sp => sp.GetRequiredService<MockIrcClient>());
             services.AddSingleton<IGthxData, MockData>();
             services.AddSingleton<IWebReader, MockWebReader>();
+            services.AddSingleton<IGthxUtil, GthxUtil>();
             services.AddSingleton<GthxDataContext>();
             services.AddGthxBot();
             services.AddSingleton(_config);

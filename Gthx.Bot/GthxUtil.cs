@@ -1,10 +1,26 @@
 ﻿using System;
+using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Gthx.Bot.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Gthx.Bot
 {
-    public class Util
+    public class GthxUtil : IGthxUtil
     {
+        private readonly IWebReader _webReader;
+        private readonly ILogger<GthxUtil> _logger;
+        private readonly Regex _titleRegex = new Regex(@"<title>(?'title'.*) - .*<\/title>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private readonly Regex _metaRegex = new Regex("<meta name=\"title\" content=\"(?'title'.*)\"", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
+        public GthxUtil(IWebReader webReader, ILogger<GthxUtil> logger)
+        {
+            _webReader = webReader;
+            _logger = logger;
+        }
+
         /// <summary>
         /// Regex string to match IRC nicknames
         /// </summary>
@@ -16,7 +32,7 @@ namespace Gthx.Bot
         /// <param name="firstTime">UTC DateTime of the first time to compare against <paramref name="secondTime"/></param>
         /// <param name="secondTime">UTC DateTime of the first time to compare against <paramref name="firstTime"/></param>
         /// <returns>A string in user readable format between the times passed in</returns>
-        public static string TimeBetweenString(DateTime? firstTime, DateTime? secondTime = null)
+        public string TimeBetweenString(DateTime? firstTime, DateTime? secondTime = null)
         {
             if (firstTime == null)
             {
@@ -98,5 +114,47 @@ namespace Gthx.Bot
 
             return replyString.ToString();
         }
+
+        /// <summary>
+        /// Gets the title from a given URL from either the title element
+        /// or the 'meta title' element.
+        /// </summary>
+        /// <param name="url">URL to load</param>
+        /// <returns></returns>
+        public async Task<string> GetTitle(string url)
+        {
+            _logger.LogInformation("Getting title from {URL}", url);
+
+            var webStream = await _webReader.GetStreamFromUrlAsync(url);
+
+            _logger.LogInformation("Finished waiting for the web stream...");
+
+            using var reader = new StreamReader(webStream);
+            while (!reader.EndOfStream)
+            {
+                var line = await reader.ReadLineAsync();
+                if (line == null)
+                {
+                    break;
+                }
+
+                var titleMatch = _titleRegex.Match(line);
+                if (titleMatch.Success)
+                {
+                    _logger.LogInformation("Found title: {Title}", titleMatch.Groups["title"].Value);
+                    return titleMatch.Groups["title"].Value;
+                }
+
+                var metaMatch = _metaRegex.Match(line);
+                if (metaMatch.Success)
+                {
+                    _logger.LogInformation("Found meta title: {Title}", metaMatch.Groups["title"].Value);
+                    return metaMatch.Groups["title"].Value;
+                }
+            }
+
+            return null;
+        }
+
     }
 }

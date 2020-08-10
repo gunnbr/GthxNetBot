@@ -15,17 +15,19 @@ namespace Gthx.Bot.Modules
         private readonly Regex _titleRegex = new Regex(@"<title>(?'title'.*) - .*<\/title>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
         private readonly Regex _metaRegex = new Regex("<meta name=\"title\" content=\"(?'title'.*)\"", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
-        private readonly IGthxData _Data;
-        private readonly IIrcClient _IrcClient;
-        private readonly IWebReader _WebReader;
-        private readonly ILogger<YoutubeModule> _Logger;
+        private readonly IGthxData _data;
+        private readonly IIrcClient _client;
+        private readonly IWebReader _webReader;
+        private readonly IGthxUtil _util;
+        private readonly ILogger<YoutubeModule> _logger;
 
-        public YoutubeModule(IGthxData data, IIrcClient ircClient, IWebReader webReader, ILogger<YoutubeModule> logger)
+        public YoutubeModule(IGthxData data, IIrcClient ircClient, IWebReader webReader, IGthxUtil util, ILogger<YoutubeModule> logger)
         {
-            _Data = data;
-            _IrcClient = ircClient;
-            _WebReader = webReader;
-            _Logger = logger;
+            _data = data;
+            _client = ircClient;
+            _webReader = webReader;
+            _util = util;
+            _logger = logger;
         }
 
         public bool ProcessAction(string channel, string user, string message)
@@ -44,12 +46,12 @@ namespace Gthx.Bot.Modules
 
             var url = youtubeMatch.Groups[0].Value;
             var id = youtubeMatch.Groups["id"].Value;
-            _Logger.LogInformation("Checking for Youtube title for '{id}'", id);
-            var referenceData = _Data.AddYoutubeReference(id);
+            _logger.LogInformation("Checking for Youtube title for '{id}'", id);
+            var referenceData = _data.AddYoutubeReference(id);
             if (referenceData.Title != null)
             {
                 Debug.WriteLine($"Already have a title for youtube item {referenceData.Item}:{referenceData.Title}");
-                _IrcClient.SendMessage(channel, $"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.Count} IRC mentions");
+                _client.SendMessage(channel, $"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.Count} IRC mentions");
                 return false;
             }
 
@@ -57,47 +59,18 @@ namespace Gthx.Bot.Modules
             return false;
         }
 
-        // TODO: Move this to the Util class now that DI is working with unit tests
-        private async Task<string> GetTitle(string url)
-        {
-            var webStream = await _WebReader.GetStreamFromUrlAsync(url);
-
-            using (var reader = new StreamReader(webStream))
-            {
-                while (!reader.EndOfStream)
-                {
-                    var line = await reader.ReadLineAsync();
-
-                    var titleMatch = _titleRegex.Match(line);
-                    if (titleMatch.Success)
-                    {
-                        _Logger.LogInformation("Found title: {Title}", titleMatch.Groups["title"].Value);
-                        return titleMatch.Groups["title"].Value;
-                    }
-
-                    var metaMatch = _metaRegex.Match(line);
-                    if (metaMatch.Success)
-                    {
-                        _Logger.LogInformation("Found meta title: {Title}", metaMatch.Groups["title"].Value);
-                        return metaMatch.Groups["title"].Value;
-                    }
-                }
-            }
-
-            return null;
-        } 
-
         public async void GetAndSaveTitle(string url, string id, string channel, string user, int referenceCount)
         {
-            var title = await GetTitle(url);
-            _Data.AddYoutubeTitle(id, title);
+            var title = await _util.GetTitle(url);
+            _logger.LogInformation("Got the title for ID {id} as '{title}'", id, title);
+            _data.AddYoutubeTitle(id, title);
             if (string.IsNullOrEmpty(title))
             {
-                _IrcClient.SendMessage(channel, $"{user} linked to a YouTube video with an unknown title => {referenceCount} IRC mentions");
+                _client.SendMessage(channel, $"{user} linked to a YouTube video with an unknown title => {referenceCount} IRC mentions");
             }
             else
             {
-                _IrcClient.SendMessage(channel, $"{user} linked to YouTube video \"{title}\" => 1 IRC mentions");
+                _client.SendMessage(channel, $"{user} linked to YouTube video \"{title}\" => 1 IRC mentions");
             }
         }
     }

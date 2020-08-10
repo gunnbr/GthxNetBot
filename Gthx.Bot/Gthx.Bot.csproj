@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Gthx.Core\Gthx.Core.csproj" />
     <ProjectReference Include="..\Gthx.Data\Gthx.Data.csproj" />
   </ItemGroup>

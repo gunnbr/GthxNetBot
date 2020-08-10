@@ -7,14 +7,16 @@ namespace Gthx.Bot.Modules
 {
     public class TellModule : IGthxModule
     {
-        private readonly Regex _TellRegex = new Regex(@$"\s*tell\s+(?'nick'{Util.NickMatch})\s*(?'message'.+)");
-        private readonly IGthxData _Data;
-        private readonly IIrcClient _IrcClient;
+        private readonly Regex _tellRegex = new Regex(@$"\s*tell\s+(?'nick'{GthxUtil.NickMatch})\s*(?'message'.+)");
+        private readonly IGthxData _data;
+        private readonly IIrcClient _client;
+        private readonly IGthxUtil _util;
 
-        public TellModule(IGthxData data, IIrcClient ircClient)
+        public TellModule(IGthxData data, IIrcClient ircClient, IGthxUtil util)
         {
-            this._Data = data;
-            this._IrcClient = ircClient;
+            this._data = data;
+            this._client = ircClient;
+            _util = util;
         }
 
         public bool ProcessAction(string channel, string user, string message)
@@ -24,16 +26,16 @@ namespace Gthx.Bot.Modules
 
         public bool ProcessMessage(string channel, string user, string message, bool wasDirectlyAddressed)
         {
-            var waitingMessages = _Data.GetTell(user);
+            var waitingMessages = _data.GetTell(user);
             foreach (var waitingMessage in waitingMessages)
             {
                 Debug.WriteLine($"Found tell for '{user}' from '{waitingMessage.Author}");
-                var timeSince = Util.TimeBetweenString(waitingMessage.Timestamp);
+                var timeSince = _util.TimeBetweenString(waitingMessage.Timestamp);
                 var reply = $"{user}: {timeSince} ago {waitingMessage.Author} tell {waitingMessage.Recipient} {waitingMessage.Message}";
-                _IrcClient.SendMessage(channel, reply);
+                _client.SendMessage(channel, reply);
             }
 
-            var tellMatch = _TellRegex.Match(message);
+            var tellMatch = _tellRegex.Match(message);
             if (!tellMatch.Success)
             {
                 return false;
@@ -42,14 +44,14 @@ namespace Gthx.Bot.Modules
             var nick = tellMatch.Groups["nick"].Value;
             var tellMessage = tellMatch.Groups["message"].Value;
 
-            var success = _Data.AddTell(user, nick, tellMessage);
+            var success = _data.AddTell(user, nick, tellMessage);
             if (success)
             {
-                _IrcClient.SendMessage(channel, $"{user}: Okay.");
+                _client.SendMessage(channel, $"{user}: Okay.");
             }
             else
             {
-                _IrcClient.SendMessage(channel, $"I'm sorry, {user}. I'm afraid I can't do that.");
+                _client.SendMessage(channel, $"I'm sorry, {user}. I'm afraid I can't do that.");
             }
 
             return true;

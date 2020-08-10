@@ -28,7 +28,7 @@ namespace Gthx.Test
             this._config = config;
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
         }
 

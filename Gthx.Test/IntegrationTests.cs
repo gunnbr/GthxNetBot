@@ -28,7 +28,7 @@ namespace Gthx.Test
             _config = config;
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
         }
 
@@ -41,8 +41,9 @@ namespace Gthx.Test
                 options.UseSqlServer(_config.GetConnectionString("GthxDb"));
             });
 
-            services.AddSingleton<IGthxData, GthxSqlData>();
-            services.AddSingleton<IWebReader, WebReader>();
+            services.TryAddSingleton<IGthxData, GthxSqlData>();
+            services.TryAddSingleton<IWebReader, WebReader>();
+            services.TryAddSingleton<IGthxUtil, GthxUtil>();
             services.TryAddSingleton<MockIrcClient>();
             services.AddSingleton<IIrcClient>(sp => sp.GetRequiredService<MockIrcClient>());
             services.AddSingleton<IBotNick>(sp => sp.GetRequiredService<MockIrcClient>());

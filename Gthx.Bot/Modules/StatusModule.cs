@@ -6,14 +6,16 @@ namespace Gthx.Bot.Modules
 {
     public class StatusModule : IGthxModule
     {
-        private readonly IGthxData _Data;
-        private readonly IIrcClient _IrcClient;
-        private readonly DateTime _StartTime = DateTime.UtcNow;
+        private readonly IGthxData _data;
+        private readonly IIrcClient _client;
+        private readonly IGthxUtil _util;
+        private readonly DateTime _startTime = DateTime.UtcNow;
 
-        public StatusModule(IGthxData data, IIrcClient ircClient)
+        public StatusModule(IGthxData data, IIrcClient ircClient, IGthxUtil util)
         {
-            this._Data = data;
-            this._IrcClient = ircClient;
+            _data = data;
+            _client = ircClient;
+            _util = util;
         }
 
         public bool ProcessAction(string channel, string user, string message)
@@ -28,9 +30,9 @@ namespace Gthx.Bot.Modules
                 return false;
             }
 
-            var moodValue = _Data.GetMood();
+            var moodValue = _data.GetMood();
             var moodString = MoodToString(moodValue);
-            _IrcClient.SendMessage(channel, $"{GthxBot.Version}: OK; Up for {Util.TimeBetweenString(_StartTime)}; mood: {moodString}");
+            _client.SendMessage(channel, $"{GthxBot.Version}: OK; Up for {_util.TimeBetweenString(_startTime)}; mood: {moodString}");
             return true;
         }
 
