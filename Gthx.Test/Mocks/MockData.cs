@@ -278,5 +278,12 @@ namespace Gthx.Test.Mocks
             LastSeenMessage = null;
             LastSeenTimestamp = null;
         }
+
+        internal void ResetFactoid()
+        {
+            FactoidGotten = null;
+            FactoidUser = null;
+            FactoidValue = null;
+        }
     }
 }

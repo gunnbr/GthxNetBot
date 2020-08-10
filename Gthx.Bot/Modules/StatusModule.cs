@@ -16,20 +16,22 @@ namespace Gthx.Bot.Modules
             this._IrcClient = ircClient;
         }
 
-        public void ProcessAction(string channel, string user, string message)
+        public bool ProcessAction(string channel, string user, string message)
         {
+            return false;
         }
 
-        public void ProcessMessage(string channel, string user, string message)
+        public bool ProcessMessage(string channel, string user, string message, bool wasDirectlyAddressed)
         {
             if (message != "status?")
             {
-                return;
+                return false;
             }
 
             var moodValue = _Data.GetMood();
             var moodString = MoodToString(moodValue);
             _IrcClient.SendMessage(channel, $"{GthxBot.Version}: OK; Up for {Util.TimeBetweenString(_StartTime)}; mood: {moodString}");
+            return true;
         }
 
         private string MoodToString(int mood)

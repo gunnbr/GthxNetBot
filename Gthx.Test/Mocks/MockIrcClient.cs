@@ -13,7 +13,7 @@ namespace Gthx.Test.Mocks
         public List<string> Messages;
     }
 
-    public class MockIrcClient : IIrcClient
+    public class MockIrcClient : IIrcClient, IBotNick
     {
         private string SentToChannel { get; set; }
 
@@ -22,6 +22,8 @@ namespace Gthx.Test.Mocks
         private List<string> SentMessages { get; set; } = new List<string>();
 
         public string BotNick => "gthxbot";
+
+        public event EventHandler BotNickChangedEvent;
 
         public bool SendAction(string channel, string action)
         {

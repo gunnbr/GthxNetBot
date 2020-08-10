@@ -12,21 +12,19 @@ using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Serilog;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Gthx.Test
 {
     public class GthxTestsStartup
     {
-        private readonly IConfiguration config;
+        private readonly IConfiguration _config;
 
         public GthxTestsStartup(IConfiguration config)
         {
-            this.config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
+            _config = config;
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -36,14 +34,16 @@ namespace Gthx.Test
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IIrcClient, MockIrcClient>();
+            services.AddLogging(configure => configure.AddConsole().AddSerilog()).AddTransient<GthxTests>();
+
+            services.TryAddSingleton<MockIrcClient>();
+            services.AddSingleton<IIrcClient>(sp => sp.GetRequiredService<MockIrcClient>());
+            services.AddSingleton<IBotNick>(sp => sp.GetRequiredService<MockIrcClient>());
             services.AddSingleton<IGthxData, MockData>();
             services.AddSingleton<IWebReader, MockWebReader>();
             services.AddSingleton<GthxDataContext>();
             services.AddGthxBot();
-            var sc = services as ServiceCollection;
-            sc.AddLogging(configure => configure.AddConsole()).AddTransient<GthxTests>();
-            services.AddSingleton(config);
+            services.AddSingleton(_config);
             services.AddSingleton<GthxBot>();
         }
     }
@@ -120,8 +120,11 @@ namespace Gthx.Test
             var testUser2 = "AnotherUser";
 
             _gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid} is {testValue}");
-
             var replies = _client.GetReplies();
+            Assert.AreEqual(0, replies.Messages.Count);
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: {testFactoid} is {testValue}");
+            replies = _client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testUser}: Okay.", replies.Messages[0]);
@@ -131,7 +134,7 @@ namespace Gthx.Test
             Assert.AreEqual(testUser, _data.FactoidUser);
             Assert.IsTrue(_data.FactoidReplaceExisting);
 
-            _gthx.HandleReceivedMessage(testChannel, testUser2, $"{testFactoid} are also {testValue2}");
+            _gthx.HandleReceivedMessage(testChannel, testUser2, $"{_client.BotNick}: {testFactoid} are also {testValue2}");
 
             replies = _client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -152,7 +155,7 @@ namespace Gthx.Test
             var testChannel = "#reprap";
             var testUser = "MaliciousUser";
 
-            _gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid} is {testValue}");
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick} {testFactoid} is {testValue}");
 
             var replies = _client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -177,6 +180,7 @@ namespace Gthx.Test
             Assert.AreEqual($"{testFactoid} is the best way to learn about 3D printing", replies.Messages[0]);
 
             // Same test with an exclamation point!
+            _data.ResetFactoid();
             _gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}!");
 
             replies = _client.GetReplies();
@@ -271,9 +275,17 @@ namespace Gthx.Test
             var testChannel = "#reprap";
             var testUser = "SomeUser";
 
+            /* Don't forget unless directly addressed */
             _gthx.HandleReceivedMessage(testChannel, testUser, $"forget {testFactoid}");
 
             var replies = _client.GetReplies();
+            Assert.AreEqual(0, replies.Messages.Count);
+            Assert.AreEqual(null, _data.ForgottenFactoid);
+            Assert.AreEqual(null, _data.ForgettingUser);
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: forget {testFactoid}");
+
+            replies = _client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testUser}: I've forgotten about {testFactoid}", replies.Messages[0]);
@@ -282,7 +294,7 @@ namespace Gthx.Test
 
             var testUser2 = "MaliciousUser";
             var lockedFactoid = "locked factoid";
-            _gthx.HandleReceivedMessage(testChannel, testUser2, $"forget {lockedFactoid}");
+            _gthx.HandleReceivedMessage(testChannel, testUser2, $"{_client.BotNick}: forget {lockedFactoid}");
 
             replies = _client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
@@ -414,11 +426,15 @@ namespace Gthx.Test
 
             _gthx.HandleReceivedMessage(testChannel, testUser, $"google plastic for {testGoogleUser}");
             var replies = _client.GetReplies();
+            Assert.AreEqual(0, replies.Messages.Count);
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: google plastic for {testGoogleUser}");
+            replies = _client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testGoogleUser}: http://lmgtfy.com/?q=plastic", replies.Messages[0]);
 
-            _gthx.HandleReceivedMessage(testChannel, testUser, $"google does 3=4? for {testGoogleUser}");
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}, google does 3=4? for {testGoogleUser}");
             replies = _client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -560,6 +576,10 @@ namespace Gthx.Test
             var testUser = "PhantomPhreak";
             var testSeenUser = "gunnbr";
 
+            // TODO: Use data as a transient service and request it in each test
+            //       to avoid having tests affect each other which requires this.
+            _data.ResetFactoid();
+
             _gthx.HandleReceivedMessage(testChannel, testUser, $"seen {testSeenUser}?");
             var replies = _client.GetReplies();
             Assert.AreEqual(2, replies.Messages.Count);
@@ -569,6 +589,10 @@ namespace Gthx.Test
             Assert.AreEqual(" ago saying 'gthx: status?'.", replies.Messages[0].Substring(replies.Messages[0].Length - 28, 28));
             Assert.AreEqual("gunnbr_ was last seen in #reprap ", replies.Messages[1].Substring(0, 33));
             Assert.AreEqual(" ago saying 'Yeah, I'm trying to fix that.'.", replies.Messages[1].Substring(replies.Messages[1].Length - 44, 44));
+
+            // Also make sure that asking about seen stops processing so it doesn't
+            // attempt to find a factoid named "seen gunnbr"
+            Assert.AreEqual(null, _data.FactoidGotten);
 
             // Test without the question mark at the end
             testChannel = "#openscad";
@@ -657,10 +681,15 @@ namespace Gthx.Test
             var testChannel = "#reprap";
             var testUser = "admin";
 
+            _data.ResetFactoid();
             _gthx.HandleReceivedMessage(testChannel, testUser, $"status?");
             var replies = _client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.IsTrue(replies.Messages[0].Contains(": OK; Up for "), "Invalid status reply");
+
+            // Also make sure that asking about status stops processing so it doesn't
+            // attempt to find a factoid named "status"
+            Assert.AreEqual(null, _data.FactoidGotten);
         }
     }
 }

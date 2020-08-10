@@ -17,17 +17,23 @@ namespace Gthx.Bot.Modules
             _IrcClient = ircClient;
         }
 
-        public void ProcessAction(string channel, string user, string message)
+        public bool ProcessAction(string channel, string user, string message)
         {
+            return false;
         }
 
-        public void ProcessMessage(string channel, string user, string message)
+        public bool ProcessMessage(string channel, string user, string message, bool wasDirectlyAddressed)
         {
-            // TODO: Only handle this if the message was directly addressed to us.
+            if (!wasDirectlyAddressed)
+            {
+                // Only handle Google requests if the message was directly addressed to us.
+                return false;
+            }
+
             var googleMatch = _GoogleRegex.Match(message);
             if (!googleMatch.Success)
             {
-                return;
+                return false;
             }
 
             var nick = googleMatch.Groups["nick"].Value;
@@ -35,6 +41,7 @@ namespace Gthx.Bot.Modules
             search = HttpUtility.UrlEncode(search);
             Debug.WriteLine($"{channel}:{user} asked to google '{search}' for {nick}");
             _IrcClient.SendMessage(channel,$"{nick}: http://lmgtfy.com/?q={search}");
+            return true;
         }
     }
 }

@@ -23,31 +23,32 @@ namespace Gthx.Bot.Modules
             _Logger = logger;
         }
 
-        public void ProcessAction(string channel, string user, string message)
+        public bool ProcessAction(string channel, string user, string message)
         {
+            return false;
         }
 
-        public void ProcessMessage(string channel, string user, string message)
+        public bool ProcessMessage(string channel, string user, string message, bool wasDirectlyAddressed)
         {
             var wasProcessed = ProcessFactoidGet(channel, user, message);
             if (wasProcessed)
             {
-                return;
+                return true;
             }
 
             wasProcessed = ProcessFactoidInfo(channel, message);
             if (wasProcessed)
             {
-                return;
+                return true;
             }
 
-            wasProcessed = ProcessFactoidForget(channel, user, message);
+            wasProcessed = ProcessFactoidForget(channel, user, message, wasDirectlyAddressed);
             if (wasProcessed)
             {
-                return;
+                return true;
             }
 
-            ProcessFactoidSet(channel, user, message);
+            return ProcessFactoidSet(channel, user, message, wasDirectlyAddressed);
         }
 
         /// <summary>
@@ -56,10 +57,16 @@ namespace Gthx.Bot.Modules
         /// <param name="channel"></param>
         /// <param name="user"></param>
         /// <param name="message"></param>
+        /// <param name="wasDirectlyAddressed">True if the bot was directly addressed for this message</param>
         /// <returns>True if a command was found to set a message, false otherwise</returns>
-        private bool ProcessFactoidForget(string channel, string user, string message)
+        private bool ProcessFactoidForget(string channel, string user, string message, bool wasDirectlyAddressed)
         {
-            // TODO: Only handle this if the message was directly addressed to us.
+            if (!wasDirectlyAddressed)
+            {
+                // Only forget factoids if the message was directly addressed to the bot.
+                return false;
+            }
+
             if (!message.StartsWith("forget "))
             {
                 return false;
@@ -135,10 +142,16 @@ namespace Gthx.Bot.Modules
         /// <param name="channel"></param>
         /// <param name="user"></param>
         /// <param name="message"></param>
+        /// <param name="wasDirectlyAddressed">True if the bot was directly addressed for this message</param>
         /// <returns>True if a command was found to set a message, false otherwise</returns>
-        private bool ProcessFactoidSet(string channel, string user, string message)
+        private bool ProcessFactoidSet(string channel, string user, string message, bool wasDirectlyAddressed)
         {
-            // TODO: Only handle this if the message was directly addressed to us.
+            if (!wasDirectlyAddressed)
+            {
+                // Only set factoids if the message was directly addressed to the bot.
+                return false;
+            }
+
             var factoidMatch = _FactoidSet.Match(message);
             if (!factoidMatch.Success)
             {

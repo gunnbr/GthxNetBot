@@ -28,16 +28,18 @@ namespace Gthx.Bot.Modules
             _Logger = logger;
         }
 
-        public void ProcessAction(string channel, string user, string message)
+        public bool ProcessAction(string channel, string user, string message)
         {
+            // TODO: Process links posted in actions too?
+            return false;
         }
 
-        public void ProcessMessage(string channel, string user, string message)
+        public bool ProcessMessage(string channel, string user, string message, bool wasDirectlyAddressed)
         {
             var youtubeMatch = _youtubeRegex.Match(message);
             if (!youtubeMatch.Success)
             {
-                return;
+                return false;
             }
 
             var url = youtubeMatch.Groups[0].Value;
@@ -48,12 +50,14 @@ namespace Gthx.Bot.Modules
             {
                 Debug.WriteLine($"Already have a title for youtube item {referenceData.Item}:{referenceData.Title}");
                 _IrcClient.SendMessage(channel, $"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.Count} IRC mentions");
-                return;
+                return false;
             }
 
             GetAndSaveTitle(url, id, channel, user, referenceData?.Count ?? 1);
+            return false;
         }
 
+        // TODO: Move this to the Util class now that DI is working with unit tests
         private async Task<string> GetTitle(string url)
         {
             var webStream = await _WebReader.GetStreamFromUrlAsync(url);

@@ -3,9 +3,10 @@ using System;
 
 namespace GthxNetBot
 {
-    public class ConsoleIrcClient : IIrcClient
+    public class ConsoleIrcClient : IIrcClient, IBotNick
     {
         public string BotNick => "consolebot";
+        public event EventHandler BotNickChangedEvent;
 
         public bool SendAction(string channel, string message)
         {

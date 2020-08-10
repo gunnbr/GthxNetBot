@@ -15,6 +15,7 @@ using Serilog;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Gthx.Test
 {
@@ -42,7 +43,9 @@ namespace Gthx.Test
 
             services.AddSingleton<IGthxData, GthxSqlData>();
             services.AddSingleton<IWebReader, WebReader>();
-            services.AddSingleton<IIrcClient, MockIrcClient>();
+            services.TryAddSingleton<MockIrcClient>();
+            services.AddSingleton<IIrcClient>(sp => sp.GetRequiredService<MockIrcClient>());
+            services.AddSingleton<IBotNick>(sp => sp.GetRequiredService<MockIrcClient>());
             services.AddGthxBot();
             services.AddSingleton<GthxBot>();
             services.AddSingleton(_config);
@@ -105,8 +108,6 @@ namespace Gthx.Test
             _Db.Database.EnsureDeleted();
         }
 
-        // TODO: Add integration test for "seen user*" to verify the asterisk is handled correctly
-
         [Test]
         public async Task TestLiveYoutubeReferences()
         {
@@ -155,7 +156,7 @@ namespace Gthx.Test
             var testChannel = "#reprap";
             var testUser = "SomeUser";
 
-            _gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid} is {testValue}");
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: {testFactoid} is {testValue}");
             var replies = _client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
@@ -167,5 +168,9 @@ namespace Gthx.Test
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testFactoid} is {testValue}", replies.Messages[0]);
         }
+
+        // TODO: Add integration test for "seen user*" to verify the asterisk is handled correctly
+        // TODO: Add test that changes the BotNick to verify that GthxBot correctly detects "wasDirectlyAddressed"
+        //       using the new name.
     }
 }

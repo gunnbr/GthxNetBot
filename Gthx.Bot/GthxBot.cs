@@ -5,33 +5,61 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace Gthx.Bot
 {
     public class GthxBot
     {
-        public readonly static string Version = "0.8 2020-07-24";
+        public static readonly string Version = "0.8 2020-07-24";
 
         private readonly List<IGthxModule> _Modules;
-
-        public GthxBot(IEnumerable<IGthxModule> modules)
+        private readonly IBotNick _botNick;
+        private readonly ILogger<GthxBot> _logger;
+        private Regex _matchNick;
+        
+        public GthxBot(IEnumerable<IGthxModule> modules, IBotNick botNick, ILogger<GthxBot> logger)
         {
             _Modules = modules.ToList();
+            _botNick = botNick;
+            _logger = logger;
+
+            _botNick.BotNickChangedEvent += BotNick_NickChangedEvent;
+            _matchNick = new Regex($@"{_botNick.BotNick}(:|;|,|-|\s)+(?'message'.+)");
+        }
+
+        private void BotNick_NickChangedEvent(object sender, System.EventArgs e)
+        {
+            _logger.LogInformation("Bot nick changed to {nick}", _botNick.BotNick);
+            _matchNick = new Regex($@"{_botNick.BotNick}(:|;|,|-|\s)+(?'message'.+)");
         }
 
         public void HandleReceivedMessage(string channel, string user, string message)
         {
-            // TODO: Handle some messages directly addressed to gthx differently than
-            //       the same message not addressed to gthx.
-            // Set based on the nickname received once we sign on to the server
-            // matchNick = "(%s)(:|;|,|-|\s)+(.+)" % (self.nickname)
+            var wasDirectlyAddressed = false;
 
-            // TODO: Add return value from modules so some can stop further processing.
-            //       For instance: "seen gunnbr?" should not run a factoid check
-            //       and "status?" also should not run a factoid check.
+            if (channel == _botNick.BotNick)
+            {
+                wasDirectlyAddressed = true;
+            }
+            else
+            {
+                var nickMatch = _matchNick.Match(message);
+                if (nickMatch.Success)
+                {
+                    wasDirectlyAddressed = true;
+                    message = nickMatch.Groups["message"].Value;
+                }
+            }
+
             foreach (var module in _Modules)
             {
-                module.ProcessMessage(channel, user, message);
+                var isDone = module.ProcessMessage(channel, user, message, wasDirectlyAddressed);
+                if (isDone)
+                {
+                    break;
+                }
             }
         }
 
@@ -39,7 +67,11 @@ namespace Gthx.Bot
         {
             foreach (var module in _Modules)
             {
-                module.ProcessAction(channel, user, action);
+                var isDone = module.ProcessAction(channel, user, action);
+                if (isDone)
+                {
+                    break;
+                }
             }
         }
     }

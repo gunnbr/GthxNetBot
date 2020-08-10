@@ -17,18 +17,22 @@ namespace Gthx.Bot
         {
             services.TryAddEnumerable(new[]
             {
+                // This group of commands shouldn't have any
+                // YouTube or Thingiverse links embedded, so they're safe
+                // to process first, before the link handling modules.
                 ServiceDescriptor.Singleton<IGthxModule, StatusModule>(),
-                ServiceDescriptor.Singleton<IGthxModule, FactoidModule>(),
-                ServiceDescriptor.Singleton<IGthxModule, TellModule>(),
                 ServiceDescriptor.Singleton<IGthxModule, SeenModule>(),
-                //ServiceDescriptor.Singleton<IGthxModule, LurkerModule>(),
                 ServiceDescriptor.Singleton<IGthxModule, GoogleModule>(),
+                //ServiceDescriptor.Singleton<IGthxModule, LurkerModule>(),
 
-                // Reference and title checkers come last because their
-                // responses should come after any responses from the above
-                // modules, if any.
                 ServiceDescriptor.Singleton<IGthxModule, ThingiverseModule>(),
                 ServiceDescriptor.Singleton<IGthxModule, YoutubeModule>(),
+
+                ServiceDescriptor.Singleton<IGthxModule, TellModule>(),
+
+                // Factoid module should be last to prevent excess queries for factoids
+                // when that wasn't the user's intention.
+                ServiceDescriptor.Singleton<IGthxModule, FactoidModule>(),
             });
 
             return services;

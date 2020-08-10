@@ -17,11 +17,12 @@ namespace Gthx.Bot.Modules
             this._IrcClient = ircClient;
         }
 
-        public void ProcessAction(string channel, string user, string message)
+        public bool ProcessAction(string channel, string user, string message)
         {
+            return false;
         }
 
-        public void ProcessMessage(string channel, string user, string message)
+        public bool ProcessMessage(string channel, string user, string message, bool wasDirectlyAddressed)
         {
             var waitingMessages = _Data.GetTell(user);
             foreach (var waitingMessage in waitingMessages)
@@ -35,7 +36,7 @@ namespace Gthx.Bot.Modules
             var tellMatch = _TellRegex.Match(message);
             if (!tellMatch.Success)
             {
-                return;
+                return false;
             }
 
             var nick = tellMatch.Groups["nick"].Value;
@@ -50,6 +51,8 @@ namespace Gthx.Bot.Modules
             {
                 _IrcClient.SendMessage(channel, $"I'm sorry, {user}. I'm afraid I can't do that.");
             }
+
+            return true;
         }
     }
 }
