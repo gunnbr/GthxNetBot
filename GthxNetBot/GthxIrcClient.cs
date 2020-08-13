@@ -4,25 +4,51 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace GthxNetBot
 {
+    public class IrcOptions
+    {
+        public const string IrcInfo = "IrcInfo";
+
+        public string? Server { get; set; }
+        public string? Channels { get; set; }
+        public string? Nick { get; set; }
+        public string? RealName { get; set; }
+    }
+
     public class GthxIrcClient : IIrcClient
     {
         private readonly IGthxMessageConduit _gthx;
         private readonly IBotNick _botNick;
         private readonly ILogger<IrcClient> _logger;
-        private StandardIrcClient _client;
+        private readonly IrcOptions _options = new IrcOptions();
 
-        public GthxIrcClient(IGthxMessageConduit sender, IBotNick botNick, ILogger<IrcClient> logger) 
+        private StandardIrcClient _client = new StandardIrcClient
+        {
+            FloodPreventer = new IrcStandardFloodPreventer(4, 2000)
+        };
+
+        public GthxIrcClient(IGthxMessageConduit sender, IBotNick botNick, ILogger<IrcClient> logger, IConfiguration config) 
         {
             _gthx = sender;
             _botNick = botNick;
             _logger = logger;
 
-            Console.WriteLine($"GThxIrcClient: Starting!");
+            config.GetSection(IrcOptions.IrcInfo).Bind(_options);
+            if (string.IsNullOrWhiteSpace(_options.Server) ||
+                string.IsNullOrWhiteSpace(_options.Channels) ||
+                string.IsNullOrWhiteSpace(_options.Nick) ||
+                string.IsNullOrWhiteSpace(_options.RealName))
+            {
+                _logger.LogWarning("Missing required IRC parameters!");
+                return;
+            }
+
             _logger.LogInformation("Starting GthxIrcClient");
             Start();
         }
@@ -31,42 +57,45 @@ namespace GthxNetBot
         {
             var info = new IrcUserRegistrationInfo()
             {
-                NickName = _botNick.BotNick,
-                UserName = _botNick.BotNick,
-                RealName = "GthxNetBot"
+                NickName = _options.Nick,
+                UserName = _options.Nick,
+                RealName = _options.RealName
             };
-            var server = "irc.freenode.net";
+
+            _botNick.BotNick = _options.Nick;
+
+            var server = _options.Server;
+            if (server == null)
+            {
+                _logger.LogError("No server specified!");
+                return;
+            }
             Connect(server, info);
         }
 
         private void Connect(string server, IrcRegistrationInfo registrationInfo)
         {
             // Create new IRC client and connect to given server.
-            var client = new StandardIrcClient
-            {
-                FloodPreventer = new IrcStandardFloodPreventer(4, 2000)
-            };
+            
 
-            client.Connected += IrcClient_Connected;
-            client.Disconnected += IrcClient_Disconnected;
-            client.Registered += IrcClient_Registered;
+            _client.Connected += IrcClient_Connected;
+            _client.Disconnected += IrcClient_Disconnected;
+            _client.Registered += IrcClient_Registered;
 
             // Wait until connection has succeeded or timed out.
             using (var connectedEvent = new ManualResetEventSlim(false))
             {
                 _logger.LogInformation("Connecting to {server}", server);
-                client.Connected += (sender2, e2) => connectedEvent.Set();
-                client.Connect(server, false, registrationInfo);
+                _client.Connected += (sender2, e2) => connectedEvent.Set();
+                _client.Connect(server, false, registrationInfo);
                 if (!connectedEvent.Wait(10000))
                 {
-                    client.Dispose();
+                    _client.Dispose();
                     _logger.LogError("Connection to '{server}' timed out.", server);
                     return;
                 }
             }
 
-            // Save the client now that we're connected
-            _client = client;
             _logger.LogInformation("Now connected to '{server}'.", server);
         }
 
@@ -84,17 +113,29 @@ namespace GthxNetBot
             //client.LocalUser.NoticeReceived += IrcClient_LocalUser_NoticeReceived;
             client.LocalUser.MessageReceived += IrcClient_LocalUser_MessageReceived;
             client.LocalUser.JoinedChannel += IrcClient_LocalUser_JoinedChannel;
+            client.LocalUser.NickNameChanged += NickNameChanged;
             //client.LocalUser.LeftChannel += IrcClient_LocalUser_LeftChannel;
 
-            client.Channels.Join("#gthxtest");
+            var channels = _options.Channels!.Split(',');
+            foreach (var channel in channels)
+            {
+                _logger.LogInformation("Joining {channel}", channel);
+                client.Channels.Join(channel);
+            }
         }
-        private void IrcClient_LocalUser_JoinedChannel(object sender, IrcChannelEventArgs e)
+
+        private void NickNameChanged(object? sender, EventArgs e)
         {
-            Console.WriteLine($"{sender}: Joined Channel: {e.Channel}:{e.Comment}");
+            _logger.LogWarning("{sender}: NickName changed to {args}", sender, e);
+        }
+
+        private void IrcClient_LocalUser_JoinedChannel(object? sender, IrcChannelEventArgs e)
+        {
+            _logger.LogInformation("{sender}: Joined Channel: {Channel}:{Comment}", sender, e.Channel, e.Comment);
             e.Channel.MessageReceived += Channel_MessageReceived;
         }
 
-        private void Channel_MessageReceived(object sender, IrcMessageEventArgs e)
+        private void Channel_MessageReceived(object? sender, IrcMessageEventArgs e)
         {
             var wasHandled = HandleCTCP(e.Source.Name, e.Text);
             if (wasHandled)

@@ -14,31 +14,23 @@ namespace GthxNetBot
 {
     class Program
     {
-        private static ServiceProvider _serviceProvider;
-        private static IConfiguration _configuration;
+        private static ServiceProvider? _serviceProvider;
+        private static IConfiguration? _configuration;
 
         static void Main(string[] args)
         {
-            Console.WriteLine("In Main...");
             _configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables()
                 .Build();
 
-            Console.WriteLine("Done reading configuration");
-
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_configuration)
                 .CreateLogger();
 
-            Console.WriteLine("Logger configured.");
+            _serviceProvider = RegisterServices();
 
-            RegisterServices();
-
-            Console.WriteLine("Services registered");
-
-            Log.Information("Serilog enabled with args: {args}", args);
-            Log.Warning("Emoji text: 🍕🍛👧🧑🏼🎎");
+            Log.Information("gthx running with: {args}", args);
 
             var scope = _serviceProvider.CreateScope();
             var myBot = scope.ServiceProvider.GetRequiredService<IBotRunner>();
@@ -55,7 +47,7 @@ namespace GthxNetBot
                .AddConsole();
              });
 
-        private static void RegisterServices()
+        private static ServiceProvider RegisterServices()
         {
             var services = new ServiceCollection();
             // Note: .AddConsole() here also logs SQL statements into the console, even if the
@@ -86,7 +78,7 @@ namespace GthxNetBot
             services.AddSingleton<IBotRunner, IrcBot>();
 #endif
 
-            _serviceProvider = services.BuildServiceProvider(true);
+            return services.BuildServiceProvider(true);
         }
 
         private static void DisposeServices()

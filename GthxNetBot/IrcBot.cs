@@ -23,8 +23,6 @@ namespace GthxNetBot
             _ircClient = ircClient;
             _configuration = configuration;
             _services = services;
-            Console.WriteLine("IrcBot constructed");
-            _logger.LogInformation("IrcBot: Logging enabled");
         }
 
         // TODO: Refactor this to work like the unit tests now that I know more about
