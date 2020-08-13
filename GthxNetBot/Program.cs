@@ -19,6 +19,10 @@ namespace GthxNetBot
 
         static void Main(string[] args)
         {
+            // From https://docs.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs, 
+            // this should display in the log.
+            System.Diagnostics.Trace.TraceError("GthxNetBot.Main is running!");
+
             _configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables()
