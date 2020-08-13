@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Gthx.Bot;
+﻿using Gthx.Bot;
 using Gthx.Bot.Interfaces;
 using GthxData;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace GthxNetBot
 {
@@ -29,7 +29,7 @@ namespace GthxNetBot
         //       how to make the DI work.
         public void Run()
         {
-            Console.WriteLine("Welcome to Gthx");
+            Debug.WriteLine("Welcome to Gthx");
             _logger.LogInformation($"irc client is {_ircClient}");
 
             var context = _services.GetRequiredService<GthxDataContext>();
@@ -39,6 +39,7 @@ namespace GthxNetBot
             var done = false;
             while (!done)
             {
+#if DEBUG
                 Console.Write("command> ");
                 try
                 {
@@ -53,7 +54,15 @@ namespace GthxNetBot
                     _logger.LogError(ex, "Exception in IrcBot program");
                     done = true;
                 }
+#else
+                WaitAWhile();
+#endif
             }
+        }
+
+        private async Task WaitAWhile()
+        {
+            await Task.Delay(5000);
         }
     }
 }
