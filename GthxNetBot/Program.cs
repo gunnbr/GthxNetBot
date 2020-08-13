@@ -12,63 +12,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace GthxNetBot
 {
-    public class ConsoleTestBot
-    {
-        private readonly IIrcClient _ircClient;
-        private readonly ILogger<ConsoleTestBot> _logger;
-        private readonly IConfiguration _configuration;
-        private readonly IServiceProvider _services;
-
-        public ConsoleTestBot(IIrcClient ircClient, ILogger<ConsoleTestBot> logger, IConfiguration configuration, IServiceProvider services)
-        {
-            _ircClient = ircClient;
-            _logger = logger;
-            _configuration = configuration;
-            _services = services;
-            _logger.LogInformation("ConsoleTestBot constructor: Logging enabled");
-        }
-
-        // TODO: Refactor this to work like the unit tests now that I know more about
-        //       how to make the DI work.
-        public void Run()
-        {
-            Console.WriteLine("Welcome to Gthx");
-            _logger.LogInformation($"irc client is {_ircClient}");
-
-            var context = _services.GetRequiredService<GthxDataContext>();
-            context.Database.EnsureCreated();
-            var gthx = _services.GetRequiredService<GthxBot>();
-
-            var done = false;
-            while (!done)
-            {
-                Console.Write("gunnbr> ");
-                try
-                {
-                    var input = Console.ReadLine();
-                    if (input == null || input == "quit")
-                    {
-                        done = true;
-                        continue;
-                    }
-                    else if (input.StartsWith("/me "))
-                    {
-                        gthx.HandleReceivedAction("#reprap", "gunnbr", input[4..]);
-                    }
-                    else
-                    {
-                        gthx.HandleReceivedMessage("#reprap", "gunnbr", input);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Exception in gthx program");
-                    done = true;
-                }
-            }
-        }
-    }
-
     class Program
     {
         private static ServiceProvider _serviceProvider;
@@ -76,22 +19,30 @@ namespace GthxNetBot
 
         static void Main(string[] args)
         {
+            Console.WriteLine("In Main...");
             _configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables()
                 .Build();
 
+            Console.WriteLine("Done reading configuration");
+
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_configuration)
                 .CreateLogger();
 
+            Console.WriteLine("Logger configured.");
+
             RegisterServices();
 
-            Log.Information("Serilog enabled: {args}", args);
+            Console.WriteLine("Services registered");
+
+            Log.Information("Serilog enabled with args: {args}", args);
             Log.Warning("Emoji text: 🍕🍛👧🧑🏼🎎");
 
-            IServiceScope scope = _serviceProvider.CreateScope();
-            scope.ServiceProvider.GetRequiredService<ConsoleTestBot>().Run();
+            var scope = _serviceProvider.CreateScope();
+            var myBot = scope.ServiceProvider.GetRequiredService<IBotRunner>();
+            myBot.Run();
             DisposeServices();
         }
         
@@ -111,19 +62,30 @@ namespace GthxNetBot
             //       LoggerFactory above isn't used.
             // TODO: Add something to filter out those and only display warning or above in the console.
             services.AddLogging(configure => configure.AddSerilog()).AddTransient<ConsoleTestBot>();
-            services.TryAddSingleton<ConsoleIrcClient>();
-            services.AddSingleton<IIrcClient>(sp => sp.GetRequiredService<ConsoleIrcClient>());
-            services.AddSingleton<IBotNick>(sp => sp.GetRequiredService<ConsoleIrcClient>());
-            services.AddSingleton<IGthxData, GthxSqlData>();
-            services.AddSingleton<IWebReader, WebReader>();
-            services.AddSingleton(_configuration);
+            services.TryAddSingleton<IGthxUtil, GthxUtil>();
+            services.TryAddSingleton<IGthxData, GthxSqlData>();
+            services.TryAddSingleton<IWebReader, WebReader>();
+            services.TryAddSingleton<IBotNick, NickManager>();
+            services.TryAddSingleton(_configuration);
+            services.TryAddSingleton<GthxMessageConduit>();
+            services.TryAddSingleton<IGthxMessageConduit>(s => s.GetRequiredService<GthxMessageConduit>());
+            services.TryAddSingleton<IGthxMessageConsumer>(s => s.GetRequiredService<GthxMessageConduit>());
             services.AddDbContext<GthxDataContext>(options =>
             {
                 options.UseSqlServer(_configuration.GetConnectionString("GthxDb"));//.UseLoggerFactory(ConsoleLoggerFactory);
             }, ServiceLifetime.Singleton);
-            services.AddSingleton<ConsoleTestBot>();
             services.AddGthxBot();
-            services.AddSingleton<GthxBot>();
+            services.TryAddSingleton<GthxBot>();
+
+#if false
+            // Use console test bot
+            services.TryAddSingleton<IIrcClient, ConsoleIrcClient>();
+            services.TryAddSingleton<IBotRunner, ConsoleTestBot>();
+#else
+            services.TryAddSingleton<IIrcClient, GthxIrcClient>();
+            services.AddSingleton<IBotRunner, IrcBot>();
+#endif
+
             _serviceProvider = services.BuildServiceProvider(true);
         }
 

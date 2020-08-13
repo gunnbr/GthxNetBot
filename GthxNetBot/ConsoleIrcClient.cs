@@ -5,14 +5,18 @@ using System.Threading.Tasks;
 
 namespace GthxNetBot
 {
-    public class ConsoleIrcClient : IIrcClient, IBotNick
+    public class ConsoleIrcClient : IIrcClient
     {
-        public string BotNick => "consolebot";
-        public event EventHandler BotNickChangedEvent;
+        private readonly IBotNick _botNick;
+
+        public ConsoleIrcClient(IBotNick botNick)
+        {
+            _botNick = botNick;
+        }
 
         public bool SendAction(string channel, string message)
         {
-            Console.WriteLine($"{channel}: * {BotNick} {message}");
+            Console.WriteLine($"{channel}: * {_botNick.BotNick} {message}");
             return true;
         }
 
@@ -23,7 +27,7 @@ namespace GthxNetBot
                 var users = new List<string>
                 {
                     "gunnbr",
-                    BotNick,
+                    _botNick.BotNick,
                     "LurkerBot"
                 };
                 return users;
@@ -32,7 +36,7 @@ namespace GthxNetBot
 
         public bool SendMessage(string channel, string message)
         {
-            Console.WriteLine($"{channel}: {BotNick}> {message}");
+            Console.WriteLine($"{channel}: {_botNick.BotNick}> {message}");
             return true;
         }
     }

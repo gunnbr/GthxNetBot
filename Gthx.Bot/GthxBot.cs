@@ -1,32 +1,54 @@
 ﻿using Gthx.Bot.Interfaces;
-using Gthx.Bot.Modules;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Logging;
 
 namespace Gthx.Bot
 {
     public class GthxBot
     {
-        public static readonly string Version = "0.8 2020-07-24";
+        public static readonly string Version = "2.0 2020-08-10";
 
         private readonly List<IGthxModule> _Modules;
         private readonly IBotNick _botNick;
         private readonly ILogger<GthxBot> _logger;
+        private readonly IGthxMessageConsumer _messageReader;
+
         private Regex _matchNick;
         
-        public GthxBot(IEnumerable<IGthxModule> modules, IBotNick botNick, ILogger<GthxBot> logger)
+        public GthxBot(IEnumerable<IGthxModule> modules, IBotNick botNick, ILogger<GthxBot> logger, IGthxMessageConsumer messageReader) 
         {
-            _Modules = modules.ToList();
             _botNick = botNick;
             _logger = logger;
+            _messageReader = messageReader;
+            
+            _logger.LogDebug("GthxBot instantiated");
+
+            _Modules = modules.ToList();
 
             _botNick.BotNickChangedEvent += BotNick_NickChangedEvent;
             _matchNick = new Regex($@"{_botNick.BotNick}(:|;|,|-|\s)+(?'message'.+)");
+
+            _messageReader.MessageProducedHandler += HandleIncomingMessage;
+        }
+
+        /// <summary>
+        /// Handle messages coming in from the IRC server
+        /// </summary>
+        /// <param name="sender">unused</param>
+        /// <param name="e">Information about the incoming message</param>
+        private void HandleIncomingMessage(object? sender, GthxMessageProducedEventArgs e)
+        {
+            _logger.LogDebug("Gthx: Incoming {Type}: {Message}", e.Type, e.Message);
+            if (e.Type == GthxMessageType.Message)
+            {
+                HandleReceivedMessage(e.Channel, e.FromUser, e.Message);
+            }
+            else
+            {
+                HandleReceivedAction(e.Channel, e.FromUser, e.Message);
+            }
         }
 
         private void BotNick_NickChangedEvent(object sender, System.EventArgs e)

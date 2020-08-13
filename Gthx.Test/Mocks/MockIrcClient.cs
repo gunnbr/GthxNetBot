@@ -22,7 +22,7 @@ namespace Gthx.Test.Mocks
 
         private List<string> SentMessages { get; set; } = new List<string>();
 
-        public string BotNick => "gthxbot";
+        public string BotNick { get; set; } = "gthxbot";
 
         public event EventHandler BotNickChangedEvent;
 
