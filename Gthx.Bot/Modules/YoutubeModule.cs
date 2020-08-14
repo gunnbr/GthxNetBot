@@ -12,20 +12,16 @@ namespace Gthx.Bot.Modules
     public class YoutubeModule : IGthxModule
     {
         private readonly Regex _youtubeRegex = new Regex(@$"http(s)?:\/\/(?'url'www\.youtube\.com\/watch\?v=|youtu\.be\/)(?'id'[\w\-]*)(\S*)");
-        private readonly Regex _titleRegex = new Regex(@"<title>(?'title'.*) - .*<\/title>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        private readonly Regex _metaRegex = new Regex("<meta name=\"title\" content=\"(?'title'.*)\"", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
         private readonly IGthxData _data;
         private readonly IIrcClient _client;
-        private readonly IWebReader _webReader;
         private readonly IGthxUtil _util;
         private readonly ILogger<YoutubeModule> _logger;
 
-        public YoutubeModule(IGthxData data, IIrcClient ircClient, IWebReader webReader, IGthxUtil util, ILogger<YoutubeModule> logger)
+        public YoutubeModule(IGthxData data, IIrcClient ircClient, IGthxUtil util, ILogger<YoutubeModule> logger)
         {
             _data = data;
             _client = ircClient;
-            _webReader = webReader;
             _util = util;
             _logger = logger;
         }

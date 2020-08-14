@@ -1,12 +1,12 @@
 ﻿using Gthx.Bot;
 using Gthx.Bot.Interfaces;
 using GthxData;
-using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace GthxNetBot
 {
@@ -14,14 +14,12 @@ namespace GthxNetBot
     {
         private readonly IIrcClient _ircClient;
         private readonly ILogger<IrcBot> _logger;
-        private readonly IConfiguration _configuration;
         private readonly IServiceProvider _services;
 
-        public IrcBot(IIrcClient ircClient, ILogger<IrcBot> logger, IConfiguration configuration, IServiceProvider services)
+        public IrcBot(IIrcClient ircClient, ILogger<IrcBot> logger, IServiceProvider services)
         {
             _logger = logger;
             _ircClient = ircClient;
-            _configuration = configuration;
             _services = services;
         }
 
@@ -29,11 +27,15 @@ namespace GthxNetBot
         //       how to make the DI work.
         public void Run()
         {
-            Debug.WriteLine("Welcome to Gthx");
+            Console.WriteLine("Welcome to Gthx");
+            
+            // Just to get some output from Azure
+            Trace.TraceError("Gthx running");
+
             _logger.LogInformation($"irc client is {_ircClient}");
 
             var context = _services.GetRequiredService<GthxDataContext>();
-            context.Database.EnsureCreated();
+            RelationalDatabaseFacadeExtensions.Migrate(context.Database);
             var gthx = _services.GetRequiredService<GthxBot>();
 
             var done = false;
@@ -55,14 +57,9 @@ namespace GthxNetBot
                     done = true;
                 }
 #else
-                WaitAWhile();
+                Thread.Sleep(5000);
 #endif
             }
-        }
-
-        private async Task WaitAWhile()
-        {
-            await Task.Delay(5000);
         }
     }
 }

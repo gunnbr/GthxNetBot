@@ -45,9 +45,9 @@ namespace Gthx.Test
     [TestFixture]
     public class UtilTests
     {
-        private IGthxUtil _util;
-        private IConfigurationRoot _config;
-        private TestServer _server;
+        private readonly IGthxUtil _util;
+        private readonly IConfigurationRoot _config;
+        private readonly TestServer _server;
 
         public UtilTests()
         {
