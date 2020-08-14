@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks.Dataflow;
-using Gthx.Bot.Interfaces;
+﻿using Gthx.Bot.Interfaces;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks.Dataflow;
 
 namespace Gthx.Bot
 {
@@ -17,7 +15,7 @@ namespace Gthx.Bot
             _logger = logger;
 
             _queue = new ActionBlock<GthxMessageProducedEventArgs>(
-                x => MessageProducedHandler?.Invoke(this, x));
+                x => MessageProducedHandler.Invoke(this, x));
         }
 
         /// <summary>
@@ -46,6 +44,6 @@ namespace Gthx.Bot
             }
         }
 
-        public EventHandler<GthxMessageProducedEventArgs> MessageProducedHandler { get; set; }
+        public EventHandler<GthxMessageProducedEventArgs> MessageProducedHandler { get; set; } = (s, e) => { };
     }
 }

@@ -153,7 +153,7 @@ namespace Gthx.Bot
                 }
             }
 
-            return null;
+            return string.Empty;
         }
 
     }

@@ -28,7 +28,7 @@ namespace GthxNetBot
         private readonly ILogger<IrcClient> _logger;
         private readonly IrcOptions _options = new IrcOptions();
 
-        private StandardIrcClient _client = new StandardIrcClient
+        private readonly StandardIrcClient _client = new StandardIrcClient
         {
             FloodPreventer = new IrcStandardFloodPreventer(4, 2000)
         };
@@ -62,7 +62,7 @@ namespace GthxNetBot
                 RealName = _options.RealName
             };
 
-            _botNick.BotNick = _options.Nick;
+            _botNick.BotNick = _options.Nick!;
 
             var server = _options.Server;
             if (server == null)
@@ -103,8 +103,7 @@ namespace GthxNetBot
         {
             _logger.LogInformation($"Registered with the IRC server.");
 
-            var client = sender as IrcClient;
-            if (client == null)
+            if (!(sender is IrcClient client))
             {
                 _logger.LogError("Registered event didn't get a client!");
                 return;
@@ -158,7 +157,7 @@ namespace GthxNetBot
             }
 
             var ctcp = message.Trim('\u0001');
-            _logger.LogInformation("Received CTCP request: {command}", ctcp);
+            _logger.LogInformation("Received CTCP request from {user}: {command}", fromUser, ctcp);
 
             // TODO: Fix handling of CTCP messages
 
@@ -194,8 +193,7 @@ namespace GthxNetBot
         {
             _logger.LogInformation("Connected to IRC server!");
 
-            var client = sender as IrcClient;
-            if (client == null)
+            if (!(sender is IrcClient client))
             {
                 _logger.LogError("Connected with no client!");
                 return;
@@ -223,13 +221,6 @@ namespace GthxNetBot
             {
                 return;
             }
-
-            var fromUser = sender as IrcLocalUser;
-            if (fromUser == null)
-            {
-                _logger.LogError("LocalUser_MessageReceived: Invalid cast of sender '{sender}", sender);
-                return;
-            } 
 
             _logger.LogInformation("LocalUser MessageReceived from {user}: {Message}", e.Source.Name, e.Text);
 

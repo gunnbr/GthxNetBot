@@ -25,6 +25,6 @@ namespace Gthx.Bot
             }
         }
 
-        public event EventHandler BotNickChangedEvent;
+        public event EventHandler? BotNickChangedEvent;
     }
 }

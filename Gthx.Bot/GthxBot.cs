@@ -51,7 +51,7 @@ namespace Gthx.Bot
             }
         }
 
-        private void BotNick_NickChangedEvent(object sender, System.EventArgs e)
+        private void BotNick_NickChangedEvent(object? sender, System.EventArgs e)
         {
             _logger.LogInformation("Bot nick changed to {nick}", _botNick.BotNick);
             _matchNick = new Regex($@"{_botNick.BotNick}(:|;|,|-|\s)+(?'message'.+)");
