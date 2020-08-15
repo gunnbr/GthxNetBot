@@ -18,6 +18,7 @@ namespace GthxNetBot
         public string? Server { get; set; }
         public string? Channels { get; set; }
         public string? Nick { get; set; }
+        public string? Password { get; set; }
         public string? RealName { get; set; }
     }
 
@@ -59,7 +60,8 @@ namespace GthxNetBot
             {
                 NickName = _options.Nick,
                 UserName = _options.Nick,
-                RealName = _options.RealName
+                RealName = _options.RealName,
+                Password = _options.Password
             };
 
             _botNick.BotNick = _options.Nick!;
