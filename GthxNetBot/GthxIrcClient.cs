@@ -138,6 +138,7 @@ namespace GthxNetBot
 
         private void Channel_MessageReceived(object? sender, IrcMessageEventArgs e)
         {
+            // TODO: Switch to using CtcpClient instead of just IrcClient so it automatically handles such things
             var wasHandled = HandleCTCP(e.Source.Name, e.Text);
             if (wasHandled)
             {
