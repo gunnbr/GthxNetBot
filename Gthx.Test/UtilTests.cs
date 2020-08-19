@@ -69,6 +69,7 @@ namespace Gthx.Test
             catch (Exception ex)
             {
                 Log.Fatal(ex, "TestHost terminated unexpectedly");
+                throw;
             }
             finally
             {

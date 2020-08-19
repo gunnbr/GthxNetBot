@@ -45,11 +45,14 @@ namespace Gthx.Test
             services.TryAddSingleton<IWebReader, WebReader>();
             services.TryAddSingleton<IGthxUtil, GthxUtil>();
             services.TryAddSingleton<MockIrcClient>();
-            services.AddSingleton<IIrcClient>(sp => sp.GetRequiredService<MockIrcClient>());
-            services.AddSingleton<IBotNick>(sp => sp.GetRequiredService<MockIrcClient>());
+            services.TryAddSingleton<IIrcClient>(sp => sp.GetRequiredService<MockIrcClient>());
+            services.TryAddSingleton<IBotNick>(sp => sp.GetRequiredService<MockIrcClient>());
+            services.TryAddSingleton<GthxMessageConduit>();
+            services.TryAddSingleton<IGthxMessageConduit>(s => s.GetRequiredService<GthxMessageConduit>());
+            services.TryAddSingleton<IGthxMessageConsumer>(s => s.GetRequiredService<GthxMessageConduit>());
             services.AddGthxBot();
-            services.AddSingleton<GthxBot>();
-            services.AddSingleton(_config);
+            services.TryAddSingleton<GthxBot>();
+            services.TryAddSingleton(_config);
         }
     }
 
@@ -60,6 +63,7 @@ namespace Gthx.Test
         private readonly GthxDataContext _Db;
         private readonly GthxBot _gthx;
         private readonly MockIrcClient _client;
+        private readonly IBotNick _botNick;
         private readonly GthxSqlData _data;
         private readonly IConfigurationRoot _config;
 
@@ -85,11 +89,13 @@ namespace Gthx.Test
                 _Db = _server.Host.Services.GetRequiredService<GthxDataContext>();
                 _data = _server.Host.Services.GetService<IGthxData>() as GthxSqlData;
                 _client = _server.Host.Services.GetService<IIrcClient>() as MockIrcClient;
+                _botNick = _server.Host.Services.GetService<IBotNick>();
                 _gthx = _server.Host.Services.GetRequiredService<GthxBot>();
             }
             catch (Exception ex)
             {
                 Log.Fatal(ex, "TestHost terminated unexpectedly");
+                throw;
             }
             finally
             {
@@ -157,7 +163,7 @@ namespace Gthx.Test
             var testChannel = "#reprap";
             var testUser = "SomeUser";
 
-            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: {testFactoid} is {testValue}");
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_botNick.BotNick}: {testFactoid} is {testValue}");
             var replies = _client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);

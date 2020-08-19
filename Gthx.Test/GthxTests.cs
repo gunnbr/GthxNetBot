@@ -45,6 +45,9 @@ namespace Gthx.Test
             services.AddSingleton<GthxDataContext>();
             services.AddGthxBot();
             services.AddSingleton(_config);
+            services.TryAddSingleton<GthxMessageConduit>();
+            services.TryAddSingleton<IGthxMessageConduit>(s => s.GetRequiredService<GthxMessageConduit>());
+            services.TryAddSingleton<IGthxMessageConsumer>(s => s.GetRequiredService<GthxMessageConduit>());
             services.AddSingleton<GthxBot>();
         }
     }
@@ -83,6 +86,7 @@ namespace Gthx.Test
             catch (Exception ex)
             {
                 Log.Fatal(ex, "TestHost terminated unexpectedly");
+                throw;
             }
             finally
             {
