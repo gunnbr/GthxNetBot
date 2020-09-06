@@ -127,7 +127,10 @@ namespace GthxNetBot
 
         private void NickNameChanged(object? sender, EventArgs e)
         {
-            _logger.LogWarning("{sender}: NickName changed to {args}", sender, e);
+            // TODO: Figure out if and when this gets called. At the moment, it isn't getting called even
+            //       when I KNOW the nickname has changed.
+            _logger.LogWarning("{sender}: NickName changed to {newNickName}", sender, _client.LocalUser.NickName);
+            _botNick.BotNick = _client.LocalUser.NickName;
         }
 
         private void IrcClient_LocalUser_JoinedChannel(object? sender, IrcChannelEventArgs e)
@@ -233,6 +236,25 @@ namespace GthxNetBot
         private void SimpleBot_ProtocolError(object? sender, IrcProtocolErrorEventArgs e)
         {
             _logger.LogError("Protocol Error {code}: {message} ({parameters})", e.Code, e.Message, e.Parameters);
+
+            if (e.Code == (int)IrcProtocolErrorEnum.NickInUse)
+            {
+                if (_botNick.BotNick.EndsWith("__"))
+                {
+                    _logger.LogError("Already tried 2 renames. Giving up.");
+                    _client.Disconnect();
+                }
+                else
+                {
+                    var newNick = _botNick.BotNick + "_";
+                    _logger.LogError($"Nickname {_botNick.BotNick} in use. Trying {newNick}");
+                    _client.LocalUser.SetNickName(newNick);
+                    // TODO: Doesn't seem like we should have to call this. I expect
+                    // that the NickChangedHandler will get called, but maybe that doesn't
+                    // work for our local user.
+                    _botNick.BotNick = newNick;
+                }
+            }
         }
 
         private void SimpleBot_RawMessageReceived(object? sender, IrcRawMessageEventArgs e)
