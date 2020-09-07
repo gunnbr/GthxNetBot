@@ -8,17 +8,32 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
+using System.Net;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Serilog.Sinks.Email;
 
 namespace GthxNetBot
 {
+    public class EmailOptions
+    {
+        public const string EmailConfiguration = "EmailConfiguration";
+
+        public string? FromName { get; set; }
+        public string? ToEmail { get; set; }
+        public string? EmailSubject { get; set; }
+        public string? UserName { get; set; }
+        public string? Password { get; set; }
+        public string? MailServer { get; set; }
+        public int? Port { get; set; }
+    }
+
     class Program
     {
         private static ServiceProvider? _serviceProvider;
         private static IConfiguration? _configuration;
 
         static void Main(string[] args)
-        {
+        { 
             // From https://docs.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs, 
             // this should display in the log.
             System.Diagnostics.Trace.TraceError("GthxNetBot.Main is running!");
@@ -28,9 +43,43 @@ namespace GthxNetBot
                 .AddEnvironmentVariables()
                 .Build();
 
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(_configuration)
-                .CreateLogger();
+            var loggerConfig = new LoggerConfiguration()
+                .ReadFrom.Configuration(_configuration);
+
+            var emailOptions = new EmailOptions();
+            _configuration.GetSection(EmailOptions.EmailConfiguration).Bind(emailOptions);
+            if (string.IsNullOrWhiteSpace(emailOptions.EmailSubject) ||
+                string.IsNullOrWhiteSpace(emailOptions.FromName) ||
+                string.IsNullOrWhiteSpace(emailOptions.MailServer) ||
+                string.IsNullOrWhiteSpace(emailOptions.Password) ||
+                string.IsNullOrWhiteSpace(emailOptions.ToEmail) ||
+                string.IsNullOrWhiteSpace(emailOptions.UserName) ||
+                emailOptions.Port == null)
+            {
+                Log.Logger = loggerConfig.CreateLogger();
+                Log.Logger.Warning("Email logging not configured");
+            }
+            else
+            {
+                loggerConfig = loggerConfig.WriteTo.Email(new EmailConnectionInfo
+                    {
+                        FromEmail = emailOptions.FromName,
+                        ToEmail = emailOptions.ToEmail,
+                        EmailSubject = emailOptions.EmailSubject,
+                        MailServer = emailOptions.MailServer,
+                        Port = emailOptions.Port.Value,
+                        EnableSsl = true,
+                        NetworkCredentials = new NetworkCredential
+                        {
+                            UserName = emailOptions.UserName,
+                            Password = emailOptions.Password
+                        },
+                    },
+                    "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] {Message}{NewLine}{Exception}",
+                    batchPostingLimit: 20,
+                    restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning);
+                Log.Logger = loggerConfig.CreateLogger();
+            }
 
             _serviceProvider = RegisterServices();
 
