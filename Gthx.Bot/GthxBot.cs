@@ -8,7 +8,7 @@ namespace Gthx.Bot
 {
     public class GthxBot
     {
-        public static readonly string Version = "2.0 2020-08-10";
+        public static readonly string Version = "2.01 2020-09-06";
 
         private readonly List<IGthxModule> _Modules;
         private readonly IBotNick _botNick;
