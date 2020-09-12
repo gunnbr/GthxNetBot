@@ -1,7 +1,7 @@
-on: [push]
 name: 'Build and Deploy to Azure'
 env:
   IMAGE_NAME: gthxnetbot
+on: [push]
 
 jobs:
     build-and-deploy:
@@ -25,7 +25,7 @@ jobs:
             login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
             username: ${{ secrets.REGISTRY_USERNAME }}
             password: ${{ secrets.REGISTRY_PASSWORD }}
-        run: |
+          run: |
             docker build . --pull -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
             docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
