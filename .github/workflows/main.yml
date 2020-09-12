@@ -9,6 +9,9 @@ jobs:
         - name: 'Checkout GitHub Action'
           uses: actions/checkout@master
           
+        - name: Initialize submodules
+          run: git submodule update --init
+
         - name: 'Login via Azure CLI'
           uses: azure/login@v1
           with:
@@ -21,7 +24,7 @@ jobs:
             username: ${{ secrets.REGISTRY_USERNAME }}
             password: ${{ secrets.REGISTRY_PASSWORD }}
         - run: |
-            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/gthxnetbot:${{ github.sha }}
+            docker build . --pull -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/gthxnetbot:${{ github.sha }}
             docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/gthxnetbot:${{ github.sha }}
 
         - name: 'Deploy to Azure Container Instances'
