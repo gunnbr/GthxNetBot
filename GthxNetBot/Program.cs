@@ -46,6 +46,8 @@ namespace GthxNetBot
             var loggerConfig = new LoggerConfiguration()
                 .ReadFrom.Configuration(_configuration);
 
+            Serilog.Core.Logger logger = null;
+
             var emailOptions = new EmailOptions();
             _configuration.GetSection(EmailOptions.EmailConfiguration).Bind(emailOptions);
             if (string.IsNullOrWhiteSpace(emailOptions.EmailSubject) ||
@@ -56,8 +58,8 @@ namespace GthxNetBot
                 string.IsNullOrWhiteSpace(emailOptions.UserName) ||
                 emailOptions.Port == null)
             {
-                Log.Logger = loggerConfig.CreateLogger();
-                Log.Logger.Warning("Email logging not configured");
+                logger = loggerConfig.CreateLogger();
+                logger.Warning("Email logging not configured");
             }
             else
             {
@@ -78,17 +80,26 @@ namespace GthxNetBot
                     "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] {Message}{NewLine}{Exception}",
                     batchPostingLimit: 20,
                     restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning);
-                Log.Logger = loggerConfig.CreateLogger();
+                 logger = loggerConfig.CreateLogger();
             }
 
-            _serviceProvider = RegisterServices();
+            Log.Logger = logger;
+            try
+            {
+                _serviceProvider = RegisterServices();
 
-            Log.Information("gthx running with: {args}", args);
+                Log.Information("gthx running with: {args}", args);
 
-            var scope = _serviceProvider.CreateScope();
-            var myBot = scope.ServiceProvider.GetRequiredService<IBotRunner>();
-            myBot.Run();
-            DisposeServices();
+                var scope = _serviceProvider.CreateScope();
+                var myBot = scope.ServiceProvider.GetRequiredService<IBotRunner>();
+                myBot.Run();
+                DisposeServices();
+            }
+            finally
+            {
+                Log.Error("GthxNetBot exiting.");
+                logger.Dispose();
+            }
         }
         
         public static readonly ILoggerFactory ConsoleLoggerFactory

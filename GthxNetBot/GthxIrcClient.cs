@@ -39,13 +39,15 @@ namespace GthxNetBot
             _botNick = botNick;
             _logger = logger;
 
+            _logger.LogError("GthxNetBot starting...");
+
             config.GetSection(IrcOptions.IrcInfo).Bind(_options);
             if (string.IsNullOrWhiteSpace(_options.Server) ||
                 string.IsNullOrWhiteSpace(_options.Channels) ||
                 string.IsNullOrWhiteSpace(_options.Nick) ||
                 string.IsNullOrWhiteSpace(_options.RealName))
             {
-                _logger.LogWarning("Missing required IRC parameters!");
+                _logger.LogError("Missing required IRC parameters!");
                 return;
             }
 
@@ -76,19 +78,19 @@ namespace GthxNetBot
 
         private void Connect(string server, IrcRegistrationInfo registrationInfo)
         {
-            // Create new IRC client and connect to given server.
-            
-
             _client.Connected += IrcClient_Connected;
             _client.Disconnected += IrcClient_Disconnected;
             _client.Registered += IrcClient_Registered;
 
-            // Wait until connection has succeeded or timed out.
             using (var connectedEvent = new ManualResetEventSlim(false))
             {
                 _logger.LogInformation("Connecting to {server}", server);
                 _client.Connected += (sender2, e2) => connectedEvent.Set();
+
+                // Connect to given server.
                 _client.Connect(server, false, registrationInfo);
+
+                // Wait until connection has succeeded or timed out.
                 if (!connectedEvent.Wait(10000))
                 {
                     _client.Dispose();
@@ -114,7 +116,10 @@ namespace GthxNetBot
             client.LocalUser.MessageReceived += IrcClient_LocalUser_MessageReceived;
             client.LocalUser.JoinedChannel += IrcClient_LocalUser_JoinedChannel;
             client.LocalUser.NickNameChanged += NickNameChanged;
-            //client.LocalUser.LeftChannel += IrcClient_LocalUser_LeftChannel;
+            client.LocalUser.Quit += IrcClient_LocalUser_OnQuit;
+            client.LocalUser.JoinedChannel += LocalUser_JoinedChannel;
+            client.LocalUser.LeftChannel += IrcClient_LocalUser_LeftChannel;
+            client.NickChanged += IrcClient_NickChanged;
 
             var channels = _options.Channels!.Split(',');
             foreach (var channel in channels)
@@ -122,6 +127,38 @@ namespace GthxNetBot
                 _logger.LogInformation("Joining {channel}", channel);
                 client.Channels.Join(channel);
             }
+        }
+
+        private void LocalUser_JoinedChannel(object? sender, IrcChannelEventArgs e)
+        {
+            _logger.LogInformation("Joined channel {channel}", e.Channel.Name);
+            e.Channel.UserJoined += Channel_UserJoined;
+            e.Channel.UserLeft += Channel_UserLeft;
+        }
+
+        private void Channel_UserLeft(object? sender, IrcChannelUserEventArgs e)
+        {
+            _logger.LogInformation("{nickname} left {channel}: {comment}", e.ChannelUser.User.NickName, e.ChannelUser.Channel.Name, e.Comment);
+        }
+
+        private void Channel_UserJoined(object? sender, IrcChannelUserEventArgs e)
+        {
+            _logger.LogInformation("{nickname} joined {channel}: {comment}", e.ChannelUser.User.NickName, e.ChannelUser.Channel.Name, e.Comment);
+        }
+
+        private void IrcClient_LocalUser_OnQuit(object? sender, IrcCommentEventArgs e)
+        {
+            _logger.LogInformation($"User quit: {e.Comment}");
+        }
+
+        private void IrcClient_NickChanged(object? sender, IrcNickChangedEventArgs e)
+        {
+            HandleNicknameChanged(e.OldNickName, e.NewNickName);
+        }
+
+        private void IrcClient_LocalUser_LeftChannel(object? sender, IrcChannelEventArgs e)
+        {
+            _logger.LogDebug("User left channel: {nickname}", e.Channel.Name);
         }
 
         private void NickNameChanged(object? sender, EventArgs e)
@@ -258,7 +295,37 @@ namespace GthxNetBot
 
         private void SimpleBot_RawMessageReceived(object? sender, IrcRawMessageEventArgs e)
         {
-            _logger.LogDebug("Raw Message Received: {RawContent} {message}", e.RawContent, e.Message);
+#if true
+            _logger.LogDebug("Raw Message Received: {RawContent} {Message}", e.RawContent, e.Message);
+#else
+            _logger.LogDebug("RawContent: {RawContent}", e.RawContent);
+            _logger.LogDebug("Message:");
+            _logger.LogDebug($"    Source: {e.Message.Source}");
+            _logger.LogDebug($"    Prefix: {e.Message.Prefix}");
+            _logger.LogDebug($"   Command: {e.Message.Command}");
+            _logger.LogDebug($"    Params: {string.Join(",",e.Message.Parameters)}");
+#endif
+        }
+
+        /// <summary>
+        /// Handles when a user in the channel changes their nickname
+        /// </summary>
+        /// <param name="fromNick">Previous nickname of a user</param>
+        /// <param name="toNick">New nickname of a user</param>
+        private void HandleNicknameChanged(string fromNick, string toNick)
+        {
+            _logger.LogInformation($"User renamed from {fromNick} => {toNick}");
+            if (fromNick == _options.Nick)
+            {
+                _logger.LogError("Nickname changed {fromNick} => {toNick} opened our preferred nickname!", fromNick, toNick);
+                HandlePreferredNameAvailable();
+            }
+        }
+
+        private void HandlePreferredNameAvailable()
+        {
+            _logger.LogWarning($"Renaming ourselves from {_client.LocalUser.NickName} to our preferred nickname {_options.Nick}");
+            _client.LocalUser.SetNickName(_options.Nick);
         }
 
         private void Client_MotdReceived(object? sender, EventArgs e)
