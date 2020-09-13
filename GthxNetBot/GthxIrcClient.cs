@@ -119,7 +119,7 @@ namespace GthxNetBot
             client.LocalUser.Quit += IrcClient_LocalUser_OnQuit;
             client.LocalUser.JoinedChannel += LocalUser_JoinedChannel;
             client.LocalUser.LeftChannel += IrcClient_LocalUser_LeftChannel;
-            client.NickChanged += IrcClient_NickChanged;
+//            client.NickChanged += IrcClient_NickChanged;
 
             var channels = _options.Channels!.Split(',');
             foreach (var channel in channels)
@@ -151,11 +151,13 @@ namespace GthxNetBot
             _logger.LogInformation($"User quit: {e.Comment}");
         }
 
+#if false
+// Disabled for now since IrcNickChangedEventArgs isn't present in the latest version of IrcDotNet released on nuget.org
         private void IrcClient_NickChanged(object? sender, IrcNickChangedEventArgs e)
         {
             HandleNicknameChanged(e.OldNickName, e.NewNickName);
         }
-
+#endif
         private void IrcClient_LocalUser_LeftChannel(object? sender, IrcChannelEventArgs e)
         {
             _logger.LogDebug("User left channel: {nickname}", e.Channel.Name);
