@@ -4,9 +4,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace GthxNetBot
 {
@@ -27,6 +29,7 @@ namespace GthxNetBot
         private readonly IBotNick _botNick;
         private readonly ILogger<IrcClient> _logger;
         private readonly IrcOptions _options = new IrcOptions();
+        private readonly System.Timers.Timer _whoIsTimer;
 
         private readonly StandardIrcClient _client = new StandardIrcClient
         {
@@ -40,6 +43,11 @@ namespace GthxNetBot
             _logger = logger;
 
             _logger.LogError("GthxNetBot starting...");
+
+            // 2 minute timer
+            _whoIsTimer = new System.Timers.Timer(2.0 * 60.0 * 1000.0);
+            _whoIsTimer.AutoReset = false;
+            _whoIsTimer.Elapsed += HandleWhoIsTimer;
 
             config.GetSection(IrcOptions.IrcInfo).Bind(_options);
             if (string.IsNullOrWhiteSpace(_options.Server) ||
@@ -112,6 +120,12 @@ namespace GthxNetBot
                 return;
             }
 
+            if (_botNick.BotNick != _options.Nick)
+            {
+                _client.WhoIsReplyReceived += Client_WhoIsReplyReceived;
+                _client.QueryWhoIs(new List<string>{_options.Nick});
+            }
+
             //client.LocalUser.NoticeReceived += IrcClient_LocalUser_NoticeReceived;
             client.LocalUser.MessageReceived += IrcClient_LocalUser_MessageReceived;
             client.LocalUser.JoinedChannel += IrcClient_LocalUser_JoinedChannel;
@@ -119,7 +133,6 @@ namespace GthxNetBot
             client.LocalUser.Quit += IrcClient_LocalUser_OnQuit;
             client.LocalUser.JoinedChannel += LocalUser_JoinedChannel;
             client.LocalUser.LeftChannel += IrcClient_LocalUser_LeftChannel;
-//            client.NickChanged += IrcClient_NickChanged;
 
             var channels = _options.Channels!.Split(',');
             foreach (var channel in channels)
@@ -127,6 +140,29 @@ namespace GthxNetBot
                 _logger.LogInformation("Joining {channel}", channel);
                 client.Channels.Join(channel);
             }
+        }
+
+        private void Client_WhoIsReplyReceived(object? sender, IrcUserEventArgs e)
+        {
+            if (e.User.HostName == null)
+            {
+                Debug.WriteLine($"No WhoIs reply: serverinfo {e.User.ServerInfo} servername {e.User.ServerName}");
+                _logger.LogWarning("No user found from WhoIs query. Time to get our nickname back!");
+                // No reply, so get our nickname back!!
+                HandlePreferredNameAvailable();
+                return;
+            }
+
+            _logger.LogInformation($"WhoIs response for {e.User.NickName}: {e.User.UserName}@{e.User.HostName} ({e.User.RealName})");
+            
+            // Enable the timer to check again later
+            _whoIsTimer.Enabled = true;
+        }
+
+        private void HandleWhoIsTimer(object sender, ElapsedEventArgs e)
+        {
+            _logger.LogDebug("WhoIs timer expired. Querying again...");
+            _client.QueryWhoIs(new List<string> { _options.Nick });
         }
 
         private void LocalUser_JoinedChannel(object? sender, IrcChannelEventArgs e)
@@ -151,13 +187,6 @@ namespace GthxNetBot
             _logger.LogInformation($"User quit: {e.Comment}");
         }
 
-#if false
-// Disabled for now since IrcNickChangedEventArgs isn't present in the latest version of IrcDotNet released on nuget.org
-        private void IrcClient_NickChanged(object? sender, IrcNickChangedEventArgs e)
-        {
-            HandleNicknameChanged(e.OldNickName, e.NewNickName);
-        }
-#endif
         private void IrcClient_LocalUser_LeftChannel(object? sender, IrcChannelEventArgs e)
         {
             _logger.LogDebug("User left channel: {nickname}", e.Channel.Name);

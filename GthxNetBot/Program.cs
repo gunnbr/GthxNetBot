@@ -46,7 +46,7 @@ namespace GthxNetBot
             var loggerConfig = new LoggerConfiguration()
                 .ReadFrom.Configuration(_configuration);
 
-            Serilog.Core.Logger logger = null;
+            Serilog.Core.Logger logger;
 
             var emailOptions = new EmailOptions();
             _configuration.GetSection(EmailOptions.EmailConfiguration).Bind(emailOptions);
