@@ -96,7 +96,7 @@ namespace GthxNetBot
                 _client.Connected += (sender2, e2) => connectedEvent.Set();
 
                 // Connect to given server.
-                _client.Connect(server, false, registrationInfo);
+                _client.Connect(server, true, registrationInfo);
 
                 // Wait until connection has succeeded or timed out.
                 if (!connectedEvent.Wait(10000))
