@@ -7,7 +7,7 @@ namespace Gthx.Bot.Modules
 {
     public class TellModule : IGthxModule
     {
-        private readonly Regex _tellRegex = new Regex(@$"\s*tell\s+(?'nick'{GthxUtil.NickMatch})\s*(?'message'.+)");
+        private readonly Regex _tellRegex = new Regex(@$"^\s*tell\s+(?'nick'{GthxUtil.NickMatch})\s*(?'message'.+)");
         private readonly IGthxData _data;
         private readonly IIrcClient _client;
         private readonly IGthxUtil _util;
