@@ -377,7 +377,7 @@ namespace GthxNetBot
 
         public bool SendAction(string channel, string action)
         {
-            _client.LocalUser.SendNotice(channel, action);
+            _client.LocalUser.SendMessage(channel, $"\u0001ACTION {action}\u0001");
             return true;
         }
 
