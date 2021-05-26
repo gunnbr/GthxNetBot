@@ -7,7 +7,7 @@ The main reasons for this are :
 * Gthx replaced the bot it used to track, so all the bot tracking code no longer needs to exist
 
 # TODO
-* Verify that received actions are handled and update the last seen
-* Verify that direct messages work
+* Handle received actions and update the last seen
+* Handle more CTCP messages
+* Switch to use CtcpClient instead of IrcClient so CTCP is handled automatically
 * Implement lurkers module
-* Fix automatic build and deploy rules on github

@@ -1,4 +1,5 @@
-﻿using Gthx.Bot.Interfaces;
+﻿using Gthx.Bot;
+using Gthx.Bot.Interfaces;
 using IrcDotNet;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -237,11 +238,12 @@ namespace GthxNetBot
 
             if (ctcp.StartsWith("PING "))
             {
-                //_client.LocalUser.SendMessage(fromUser, ctcp);
+                var parameter = ctcp.Substring(5);
+                _client.LocalUser.SendNotice(fromUser, $"\u0001PING {parameter}\u0001");
             }
             else if (ctcp.StartsWith("VERSION"))
             {
-                //_client.LocalUser.SendMessage(fromUser, $"GNB {GthxBot.Version}");
+                _client.LocalUser.SendNotice(fromUser, $"\u0001VERSION Gthx Bot Version {GthxBot.Version}\u0001");
             }
 
             return true;
