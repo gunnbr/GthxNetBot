@@ -8,7 +8,7 @@ namespace Gthx.Bot
 {
     public class GthxBot
     {
-        public static readonly string Version = "2.02 2021-05-26";
+        public static readonly string Version = "2.05 2021-05-26";
 
         private readonly List<IGthxModule> _Modules;
         private readonly IBotNick _botNick;
@@ -28,7 +28,7 @@ namespace Gthx.Bot
             _Modules = modules.ToList();
 
             _botNick.BotNickChangedEvent += BotNick_NickChangedEvent;
-            _matchNick = new Regex($@"{_botNick.BotNick}(:|;|,|-|\s)+(?'message'.+)");
+            _matchNick = new Regex($@"^{_botNick.BotNick}(:|;|,|-|\s)+(?'message'.+)");
 
             _messageReader.MessageProducedHandler += HandleIncomingMessage;
         }
@@ -54,15 +54,17 @@ namespace Gthx.Bot
         private void BotNick_NickChangedEvent(object? sender, System.EventArgs e)
         {
             _logger.LogInformation("Bot nick changed to {nick}", _botNick.BotNick);
-            _matchNick = new Regex($@"{_botNick.BotNick}(:|;|,|-|\s)+(?'message'.+)");
+            _matchNick = new Regex($@"^{_botNick.BotNick}(:|;|,|-|\s)+(?'message'.+)");
         }
 
         public void HandleReceivedMessage(string channel, string user, string message)
         {
             var wasDirectlyAddressed = false;
 
-            if (channel == _botNick.BotNick)
+            if (!channel.StartsWith('#') && channel == user)
             {
+                // Not sent to a real channel and the channel and user are the same, so this must be a PM
+                // TODO: See if there's a better/more reliable way to determine this.
                 wasDirectlyAddressed = true;
             }
             else
