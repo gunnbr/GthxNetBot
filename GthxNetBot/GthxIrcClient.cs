@@ -97,7 +97,7 @@ namespace GthxNetBot
 
                 // Connect to given server.
                 // TODO: Move port number and SSL flag to be environment variables passed in.
-                _client.Connect(server, 6697, true, registrationInfo);
+                _client.Connect(server, 6667, false, registrationInfo);
 
                 // Wait until connection has succeeded or timed out.
                 if (!connectedEvent.Wait(10000))
