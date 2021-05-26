@@ -7,7 +7,7 @@ The main reasons for this are :
 * Gthx replaced the bot it used to track, so all the bot tracking code no longer needs to exist
 
 # TODO
-* Verify that actions are detected and update the last seen
+* (DONE?) Verify that actions are detected and update the last seen
 * Verify that direct messages work
 * Implement lurkers module
 * Fix automatic build and deploy rules on github
