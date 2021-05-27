@@ -11,3 +11,4 @@ The main reasons for this are :
 * Handle more CTCP messages
 * Switch to use CtcpClient instead of IrcClient so CTCP is handled automatically
 * Implement lurkers module
+f
