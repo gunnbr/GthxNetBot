@@ -41,7 +41,7 @@ namespace GthxNetBot
             var done = false;
             while (!done)
             {
-#if DEBUG
+#if false //DEBUG
                 Console.Write("command> ");
                 try
                 {
