@@ -2,13 +2,14 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Gthx.Bot
 {
     public class GthxBot
     {
-        public static readonly string Version = "2.05 2021-05-26";
+        public static readonly string Version = "2.06 2021-06-13";
 
         private readonly List<IGthxModule> _Modules;
         private readonly IBotNick _botNick;
@@ -41,6 +42,24 @@ namespace Gthx.Bot
         private void HandleIncomingMessage(object? sender, GthxMessageProducedEventArgs e)
         {
             _logger.LogDebug("Gthx: Incoming {Type}: {Message}", e.Type, e.Message);
+            if (e.Message.Any(c => c > 127))
+            {
+                var sb = new StringBuilder();
+                sb.Append("Non-ASCII characters: ");
+                int i = 0;
+                foreach (var c in e.Message)
+                {
+                    if (c > 127)
+                    {
+                        string hex = ((int)c).ToString("X4");
+                        sb.Append($"{i}: 0x{hex} ");
+                    }
+                    i++;
+                }
+
+                _logger.LogDebug(sb.ToString());
+            }
+
             if (e.Type == GthxMessageType.Message)
             {
                 HandleReceivedMessage(e.Channel, e.FromUser, e.Message);
