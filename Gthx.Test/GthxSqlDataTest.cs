@@ -200,7 +200,7 @@ namespace Gthx.Test
             Assert.AreEqual(0, tells.Count(), "Tell exists at the start of the test");
 
             var tellData = _Data.GetTell(toUser);
-            Assert.AreEqual(0, tellData.Count(), "Tell Data exists at the start of the test");
+            Assert.AreEqual(0, tellData.Count, "Tell Data exists at the start of the test");
 
             _Data.AddTell(fromUser, toUser, message);
 
@@ -208,7 +208,7 @@ namespace Gthx.Test
             Assert.AreEqual(1, tells.Count(), "Tell not added to the DB");
 
             tellData = _Data.GetTell(toUser);
-            Assert.AreEqual(1, tellData.Count(), "Tell not returned when it should be");
+            Assert.AreEqual(1, tellData.Count, "Tell not returned when it should be");
             Assert.AreEqual(toUser, tellData[0].Recipient);
             Assert.AreEqual(fromUser, tellData[0].Author);
             Assert.AreEqual(message, tellData[0].Message);
@@ -217,7 +217,7 @@ namespace Gthx.Test
             Assert.AreEqual(0, tells.Count(), "Tell still exists after being returned");
 
             tellData = _Data.GetTell(toUser);
-            Assert.AreEqual(0, tellData.Count(), "Tell Data still exists after being returned");
+            Assert.AreEqual(0, tellData.Count, "Tell Data still exists after being returned");
         }
 
         [Test]

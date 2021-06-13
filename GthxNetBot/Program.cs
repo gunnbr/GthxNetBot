@@ -30,7 +30,7 @@ namespace GthxNetBot
     class Program
     {
         private static ServiceProvider? _serviceProvider;
-        private static IConfiguration? _configuration;
+        private static IConfiguration _configuration;
 
         static void Main(string[] args)
         { 

@@ -29,10 +29,10 @@ namespace GthxNetBot
         private readonly IGthxMessageConduit _gthx;
         private readonly IBotNick _botNick;
         private readonly ILogger<IrcClient> _logger;
-        private readonly IrcOptions _options = new IrcOptions();
+        private readonly IrcOptions _options = new();
         private readonly System.Timers.Timer _whoIsTimer;
 
-        private readonly StandardIrcClient _client = new StandardIrcClient
+        private readonly StandardIrcClient _client = new()
         {
             FloodPreventer = new IrcStandardFloodPreventer(4, 2000)
         };
@@ -116,7 +116,7 @@ namespace GthxNetBot
         {
             _logger.LogInformation($"Registered with the IRC server.");
 
-            if (!(sender is IrcClient client))
+            if (sender is not IrcClient client)
             {
                 _logger.LogError("Registered event didn't get a client!");
                 return;
@@ -125,7 +125,7 @@ namespace GthxNetBot
             if (_botNick.BotNick != _options.Nick)
             {
                 _client.WhoIsReplyReceived += Client_WhoIsReplyReceived;
-                _client.QueryWhoIs(new List<string>{_options.Nick});
+                _client.QueryWhoIs(new List<string?>{_options.Nick});
             }
 
             //client.LocalUser.NoticeReceived += IrcClient_LocalUser_NoticeReceived;
@@ -164,7 +164,7 @@ namespace GthxNetBot
         private void HandleWhoIsTimer(object sender, ElapsedEventArgs e)
         {
             _logger.LogDebug("WhoIs timer expired. Querying again...");
-            _client.QueryWhoIs(new List<string> { _options.Nick });
+            _client.QueryWhoIs(new List<string?> { _options.Nick });
         }
 
         private void LocalUser_JoinedChannel(object? sender, IrcChannelEventArgs e)
