@@ -126,9 +126,24 @@ namespace GthxNetBot
             services.TryAddSingleton<GthxMessageConduit>();
             services.TryAddSingleton<IGthxMessageConduit>(s => s.GetRequiredService<GthxMessageConduit>());
             services.TryAddSingleton<IGthxMessageConsumer>(s => s.GetRequiredService<GthxMessageConduit>());
+
+            var useMariaDb = false;
+            var dbType = _configuration.GetConnectionString("GthxDb_Type");
+            if (dbType == "mariadb")
+            {
+                Log.Information("Using MariaDB mode");
+            }
             services.AddDbContext<GthxDataContext>(options =>
             {
-                options.UseSqlServer(_configuration.GetConnectionString("GthxDb"));//.UseLoggerFactory(ConsoleLoggerFactory);
+                if (useMariaDb)
+                {
+                    options.UseMySql(_configuration.GetConnectionString("GthxDb"),
+                        new MariaDbServerVersion(new Version(10, 3, 29)));
+                }
+                else
+                {
+                    options.UseSqlServer(_configuration.GetConnectionString("GthxDb"));//.UseLoggerFactory(ConsoleLoggerFactory);
+                }
             }, ServiceLifetime.Singleton);
             services.AddGthxBot();
             services.TryAddSingleton<GthxBot>();
