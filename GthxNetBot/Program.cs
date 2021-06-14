@@ -132,18 +132,18 @@ namespace GthxNetBot
             if (dbType == "mariadb")
             {
                 Log.Information("Using MariaDB mode");
+                useMariaDb = true;
             }
-            services.AddDbContext<GthxDataContext>(options =>
+            else
             {
-                if (useMariaDb)
-                {
-                    options.UseMySql(_configuration.GetConnectionString("GthxDb"),
-                        new MariaDbServerVersion(new Version(10, 3, 29)));
-                }
-                else
-                {
-                    options.UseSqlServer(_configuration.GetConnectionString("GthxDb"));//.UseLoggerFactory(ConsoleLoggerFactory);
-                }
+                Log.Information("Using SQL Server mode");
+            }
+            var provider = _configuration.GetValue("Provider", "SqlServer");
+            services.AddDbContext<GthxDataContext>(options => _ = provider switch
+            {
+                "MySql" => options.UseMySql(_configuration.GetConnectionString("GthxDb"), new MariaDbServerVersion(new Version(10, 3, 29))),
+                "SqlServer" => options.UseSqlServer(_configuration.GetConnectionString("GthxDb")), //.UseLoggerFactory(ConsoleLoggerFactory);,,
+                _ => throw new Exception($"Unsupported provider: {provider}")
             }, ServiceLifetime.Singleton);
             services.AddGthxBot();
             services.TryAddSingleton<GthxBot>();

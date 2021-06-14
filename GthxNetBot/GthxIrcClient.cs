@@ -60,8 +60,8 @@ namespace GthxNetBot
                 return;
             }
 
-            _logger.LogInformation("Starting GthxIrcClient");
-            Start();
+            _logger.LogInformation("NOT Starting GthxIrcClient (for testing)");
+            //Start();
         }
 
         private void Start()
