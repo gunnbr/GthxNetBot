@@ -1,7 +1,10 @@
 name: 'Build and Deploy to Azure'
 env:
     IMAGE_NAME: gthxnetbot
-on: [push]
+on: 
+    push:
+        branches: 
+           - 'main'
 
 jobs:
     build-and-deploy:
