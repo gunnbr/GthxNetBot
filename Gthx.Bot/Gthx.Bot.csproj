@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <BaseOutputPath>..\bin\</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Gthx.Core\Gthx.Core.csproj" />
-    <ProjectReference Include="..\Gthx.Data\Gthx.Data.csproj" />
+    <ProjectReference Include="..\Gthx.Data\Gthx.Core\Gthx.Core.csproj" />
+    <ProjectReference Include="..\Gthx.Data\Gthx.Data\Gthx.Data.csproj" />
   </ItemGroup>
 
 </Project>

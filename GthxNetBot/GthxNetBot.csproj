@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <BaseOutputPath>..\bin\</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,7 +31,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Gthx.Bot\Gthx.Bot.csproj" />
-    <ProjectReference Include="..\Gthx.Data\Gthx.Data.csproj" />
+    <ProjectReference Include="..\Gthx.Data\Gthx.Data\Gthx.Data.csproj" />
+    <ProjectReference Include="..\Gthx.Data\MariaDbMigrations\MariaDbMigrations.csproj" />
+    <ProjectReference Include="..\Gthx.Data\SqlServerMigrations\SqlServerMigrations.csproj" />
   </ItemGroup>
 
   <ItemGroup>

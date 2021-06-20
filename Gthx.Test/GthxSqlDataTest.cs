@@ -38,7 +38,7 @@ namespace Gthx.Test
 
             services.AddDbContext<GthxDataContext>(options =>
             {
-                options.UseSqlServer(_config.GetConnectionString("GthxDb"));
+                options.UseSqlServer(_config.GetConnectionString("GthxDb"), x => x.MigrationsAssembly("SqlServerMigrations.Migrations"));
             });
 
             services.AddSingleton<IGthxData, GthxSqlData>();

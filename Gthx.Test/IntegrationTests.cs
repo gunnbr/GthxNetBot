@@ -47,11 +47,11 @@ namespace Gthx.Test
                 if (useMariaDb)
                 {
                     options.UseMySql(_config.GetConnectionString("GthxDb"),
-                        new MariaDbServerVersion(new Version(10, 3, 29)));
+                        new MariaDbServerVersion(new Version(10, 3, 29)), x => x.MigrationsAssembly("MariaDbMigrations.Migrations"));
                 }
                 else
                 {
-                    options.UseSqlServer(_config.GetConnectionString("GthxDb"));
+                    options.UseSqlServer(_config.GetConnectionString("GthxDb"), x => x.MigrationsAssembly("SqlServerMigrations.Migrations"));
                 }
             });
 

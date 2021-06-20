@@ -5,11 +5,9 @@ VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GthxNetBot", "GthxNetBot\GthxNetBot.csproj", "{6B8ADB96-CADB-4DD3-A426-A8429B0DA900}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gthx.Core", "Gthx.Core\Gthx.Core.csproj", "{F0202A36-86DF-4119-B9F4-0C307FBD415C}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gthx.Test", "Gthx.Test\Gthx.Test.csproj", "{7DF703C3-B9BC-49FA-ACAD-86705F003A2C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gthx.Data", "Gthx.Data\Gthx.Data.csproj", "{A94C1EFC-9EAC-4BA5-BA1A-52BC0D3ACB06}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gthx.Data", "Gthx.Data\Gthx.Data\Gthx.Data.csproj", "{A94C1EFC-9EAC-4BA5-BA1A-52BC0D3ACB06}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gthx.Bot", "Gthx.Bot\Gthx.Bot.csproj", "{DBBEE8EA-0628-498B-AE9C-6780DB6FF6A7}"
 EndProject
@@ -19,6 +17,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.github\workflows\main.yml = .github\workflows\main.yml
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MariaDbMigrations", "Gthx.Data\MariaDbMigrations\MariaDbMigrations.csproj", "{9E1AEA36-3042-4777-A3EC-26C22A6F5992}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlServerMigrations", "Gthx.Data\SqlServerMigrations\SqlServerMigrations.csproj", "{478B8C29-A0CD-4D45-9170-BCBBD11D66A1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gthx.Core", "Gthx.Data\Gthx.Core\Gthx.Core.csproj", "{2F14D10A-88F8-4E31-B358-D53874A42442}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,10 +34,6 @@ Global
 		{6B8ADB96-CADB-4DD3-A426-A8429B0DA900}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B8ADB96-CADB-4DD3-A426-A8429B0DA900}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B8ADB96-CADB-4DD3-A426-A8429B0DA900}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F0202A36-86DF-4119-B9F4-0C307FBD415C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F0202A36-86DF-4119-B9F4-0C307FBD415C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F0202A36-86DF-4119-B9F4-0C307FBD415C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F0202A36-86DF-4119-B9F4-0C307FBD415C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7DF703C3-B9BC-49FA-ACAD-86705F003A2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7DF703C3-B9BC-49FA-ACAD-86705F003A2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DF703C3-B9BC-49FA-ACAD-86705F003A2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,6 +45,18 @@ Global
 		{DBBEE8EA-0628-498B-AE9C-6780DB6FF6A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBBEE8EA-0628-498B-AE9C-6780DB6FF6A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBBEE8EA-0628-498B-AE9C-6780DB6FF6A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E1AEA36-3042-4777-A3EC-26C22A6F5992}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E1AEA36-3042-4777-A3EC-26C22A6F5992}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E1AEA36-3042-4777-A3EC-26C22A6F5992}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E1AEA36-3042-4777-A3EC-26C22A6F5992}.Release|Any CPU.Build.0 = Release|Any CPU
+		{478B8C29-A0CD-4D45-9170-BCBBD11D66A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{478B8C29-A0CD-4D45-9170-BCBBD11D66A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{478B8C29-A0CD-4D45-9170-BCBBD11D66A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{478B8C29-A0CD-4D45-9170-BCBBD11D66A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F14D10A-88F8-4E31-B358-D53874A42442}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F14D10A-88F8-4E31-B358-D53874A42442}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F14D10A-88F8-4E31-B358-D53874A42442}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F14D10A-88F8-4E31-B358-D53874A42442}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

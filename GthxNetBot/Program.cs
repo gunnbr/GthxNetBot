@@ -11,6 +11,9 @@ using System;
 using System.Net;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog.Sinks.Email;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 
 namespace GthxNetBot
 {
@@ -138,12 +141,10 @@ namespace GthxNetBot
             {
                 Log.Information("Using SQL Server mode");
             }
-            var provider = _configuration.GetValue("Provider", "SqlServer");
-            services.AddDbContext<GthxDataContext>(options => _ = provider switch
+            services.AddDbContext<GthxDataContext>(options => _ = useMariaDb switch
             {
-                "MySql" => options.UseMySql(_configuration.GetConnectionString("GthxDb"), new MariaDbServerVersion(new Version(10, 3, 29))),
-                "SqlServer" => options.UseSqlServer(_configuration.GetConnectionString("GthxDb")), //.UseLoggerFactory(ConsoleLoggerFactory);,,
-                _ => throw new Exception($"Unsupported provider: {provider}")
+                true => options.UseMySql(_configuration.GetConnectionString("GthxDb"), new MariaDbServerVersion(new Version(10, 3, 29)), x => x.MigrationsAssembly("MariaDbMigrations")),
+                false => options.UseSqlServer(_configuration.GetConnectionString("GthxDb"), x => x.MigrationsAssembly("SqlServerMigrations")), //.UseLoggerFactory(ConsoleLoggerFactory);,,
             }, ServiceLifetime.Singleton);
             services.AddGthxBot();
             services.TryAddSingleton<GthxBot>();
@@ -171,6 +172,34 @@ namespace GthxNetBot
             {
                 disposable.Dispose();
             }
+        }
+
+        // EF Core uses this method at design time to access the DbContext
+        public static IHostBuilder CreateHostBuilder(string[] args)
+            => Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(
+                    webBuilder => webBuilder.UseStartup<Startup>());
+    }
+
+    public class Startup
+    {
+        private IConfiguration _configuration;
+
+        public Startup()
+        {
+            _configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+            => services.AddDbContext<GthxDataContext>(options =>
+                options.UseMySql(_configuration.GetConnectionString("GthxDb"),
+                                 new MariaDbServerVersion(new Version(10, 3, 29)), x => x.MigrationsAssembly("MariaDbMigrations.Migrations")));
+
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
         }
     }
 }

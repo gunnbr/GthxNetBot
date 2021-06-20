@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-
-    <IsPackable>false</IsPackable>
+      <BaseOutputPath>..\bin\</BaseOutputPath>
+      <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Gthx.Bot\Gthx.Bot.csproj" />
-    <ProjectReference Include="..\Gthx.Core\Gthx.Core.csproj" />
+    <ProjectReference Include="..\Gthx.Data\Gthx.Data\Gthx.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
