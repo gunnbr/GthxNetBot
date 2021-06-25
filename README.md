@@ -41,6 +41,11 @@ Or if you have cloned without doing this, the subrepo can be initialized by runn
     git submodule init
     git submodule update
 
+# Adding features
+Modifying or adding features is done mainly in the Modules folder in the Gthx.Bot project. To add a new module,
+add a new .cs file here that implements IGthxModule, then implement the interface, following the pattern from
+the existing modules.
+
 # Building
 ## Visual Studio
 Use Ctrl-Shift-B or the Build->Build Solution menu item to build from Visual Studio
@@ -67,3 +72,4 @@ Or find the compiled executables in the bin/Debug/net5.0
 ## Docker
 To run with environment overrides and network access to localhost and automatic restart, use:
     docker run --env-file ./othx.env --network="host" --restart unless-stopped gthxnetbot:latest
+Then status can be monitored by way of the configured logging.
