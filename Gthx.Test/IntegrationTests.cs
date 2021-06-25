@@ -36,9 +36,23 @@ namespace Gthx.Test
         {
             services.AddLogging(configure => configure.AddConsole().AddSerilog()).AddTransient<GthxBot>();
 
+            var useMariaDb = false;
+            var dbType = _config.GetConnectionString("GthxDb_Type");
+            if (dbType == "mariadb")
+            {
+                Log.Information("Using MariaDB mode");
+            }
             services.AddDbContext<GthxDataContext>(options =>
             {
-                options.UseSqlServer(_config.GetConnectionString("GthxDb"));
+                if (useMariaDb)
+                {
+                    options.UseMySql(_config.GetConnectionString("GthxDb"),
+                        new MariaDbServerVersion(new Version(10, 3, 29)), x => x.MigrationsAssembly("MariaDbMigrations.Migrations"));
+                }
+                else
+                {
+                    options.UseSqlServer(_config.GetConnectionString("GthxDb"), x => x.MigrationsAssembly("SqlServerMigrations.Migrations"));
+                }
             });
 
             services.TryAddSingleton<IGthxData, GthxSqlData>();

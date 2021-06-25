@@ -11,6 +11,9 @@ using System;
 using System.Net;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog.Sinks.Email;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 
 namespace GthxNetBot
 {
@@ -30,7 +33,7 @@ namespace GthxNetBot
     class Program
     {
         private static ServiceProvider? _serviceProvider;
-        private static IConfiguration? _configuration;
+        private static IConfiguration _configuration;
 
         static void Main(string[] args)
         { 
@@ -126,9 +129,22 @@ namespace GthxNetBot
             services.TryAddSingleton<GthxMessageConduit>();
             services.TryAddSingleton<IGthxMessageConduit>(s => s.GetRequiredService<GthxMessageConduit>());
             services.TryAddSingleton<IGthxMessageConsumer>(s => s.GetRequiredService<GthxMessageConduit>());
-            services.AddDbContext<GthxDataContext>(options =>
+
+            var useMariaDb = false;
+            var dbType = _configuration.GetConnectionString("GthxDb_Type");
+            if (dbType == "mariadb")
             {
-                options.UseSqlServer(_configuration.GetConnectionString("GthxDb"));//.UseLoggerFactory(ConsoleLoggerFactory);
+                Log.Information("Using MariaDB mode");
+                useMariaDb = true;
+            }
+            else
+            {
+                Log.Information("Using SQL Server mode");
+            }
+            services.AddDbContext<GthxDataContext>(options => _ = useMariaDb switch
+            {
+                true => options.UseMySql(_configuration.GetConnectionString("GthxDb"), new MariaDbServerVersion(new Version(10, 3, 29)), x => x.MigrationsAssembly("MariaDbMigrations")),
+                false => options.UseSqlServer(_configuration.GetConnectionString("GthxDb"), x => x.MigrationsAssembly("SqlServerMigrations")), //.UseLoggerFactory(ConsoleLoggerFactory);,,
             }, ServiceLifetime.Singleton);
             services.AddGthxBot();
             services.TryAddSingleton<GthxBot>();
@@ -156,6 +172,34 @@ namespace GthxNetBot
             {
                 disposable.Dispose();
             }
+        }
+
+        // EF Core uses this method at design time to access the DbContext
+        public static IHostBuilder CreateHostBuilder(string[] args)
+            => Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(
+                    webBuilder => webBuilder.UseStartup<Startup>());
+    }
+
+    public class Startup
+    {
+        private IConfiguration _configuration;
+
+        public Startup()
+        {
+            _configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+            => services.AddDbContext<GthxDataContext>(options =>
+                options.UseMySql(_configuration.GetConnectionString("GthxDb"),
+                                 new MariaDbServerVersion(new Version(10, 3, 29)), x => x.MigrationsAssembly("MariaDbMigrations.Migrations")));
+
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
         }
     }
 }
