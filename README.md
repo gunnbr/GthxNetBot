@@ -38,8 +38,7 @@ Then install the .NET 5 SDK
 GthxNetBot uses a source subrepo, so when cloning to build, be sure use the --recurse-submodules when cloning:
     git clone --recurse-submodules https://github.com/gunnbr/GthxNetBot.git
 Or if you have cloned without doing this, the subrepo can be initialized by running:
-    git submodule init
-    git submodule update
+    git submodule update --init
 
 # Adding features
 Modifying or adding features is done mainly in the Modules folder in the Gthx.Bot project. To add a new module,
