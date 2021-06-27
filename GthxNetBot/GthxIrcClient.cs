@@ -43,8 +43,6 @@ namespace GthxNetBot
             _botNick = botNick;
             _logger = logger;
 
-            _logger.LogError("GthxNetBot starting...");
-
             // 2 minute timer
             _whoIsTimer = new System.Timers.Timer(2.0 * 60.0 * 1000.0);
             _whoIsTimer.AutoReset = false;
@@ -59,6 +57,8 @@ namespace GthxNetBot
                 _logger.LogError("Missing required IRC parameters!");
                 return;
             }
+
+            _logger.LogError($"GthxNetBot starting for bot '{_options.Nick}'...");
 
             _logger.LogInformation("Starting GthxIrcClient");
             Start();
