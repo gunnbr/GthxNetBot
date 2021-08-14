@@ -16,6 +16,7 @@ namespace GthxNetBot
         private readonly ILogger<ConsoleTestBot> _logger;
         private readonly IConfiguration _configuration;
         private readonly IServiceProvider _services;
+        private bool _ExitRequested = false;
 
         public ConsoleTestBot(IIrcClient ircClient, ILogger<ConsoleTestBot> logger, IConfiguration configuration, IServiceProvider services)
         {
@@ -24,6 +25,12 @@ namespace GthxNetBot
             _configuration = configuration;
             _services = services;
             _logger.LogInformation("ConsoleTestBot constructor: Logging enabled");
+        }
+
+        public void Exit()
+        {
+            _logger.LogInformation("Exiting as requested");
+            _ExitRequested = true;
         }
 
         // TODO: Refactor this to work like the unit tests now that I know more about
@@ -37,8 +44,7 @@ namespace GthxNetBot
             context.Database.EnsureCreated();
             var gthx = _services.GetRequiredService<GthxBot>();
 
-            var done = false;
-            while (!done)
+            while (!_ExitRequested)
             {
                 Console.Write("gunnbr> ");
                 try
@@ -46,7 +52,7 @@ namespace GthxNetBot
                     var input = Console.ReadLine();
                     if (input == null || input == "quit")
                     {
-                        done = true;
+                        _ExitRequested = true;
                         continue;
                     }
                     else if (input.StartsWith("/me "))
@@ -61,7 +67,7 @@ namespace GthxNetBot
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Exception in gthx program");
-                    done = true;
+                    _ExitRequested = true;
                 }
             }
         }

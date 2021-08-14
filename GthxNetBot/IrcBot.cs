@@ -12,15 +12,15 @@ namespace GthxNetBot
 {
     class IrcBot : IBotRunner
     {
-        private readonly IIrcClient _ircClient;
         private readonly ILogger<IrcBot> _logger;
         private readonly IServiceProvider _services;
+        private readonly SemaphoreSlim _exitSemaphore;
 
-        public IrcBot(IIrcClient ircClient, ILogger<IrcBot> logger, IServiceProvider services)
+        public IrcBot(ILogger<IrcBot> logger, IServiceProvider services)
         {
             _logger = logger;
-            _ircClient = ircClient;
             _services = services;
+            _exitSemaphore = new SemaphoreSlim(0);
         }
 
         // TODO: Refactor this to work like the unit tests now that I know more about
@@ -32,34 +32,19 @@ namespace GthxNetBot
             // Just to get some output from Azure
             Trace.TraceError("Gthx running");
 
-            _logger.LogInformation($"irc client is {_ircClient}");
-
             var context = _services.GetRequiredService<GthxDataContext>();
             RelationalDatabaseFacadeExtensions.Migrate(context.Database);
             var gthx = _services.GetRequiredService<GthxBot>();
 
-            var done = false;
-            while (!done)
-            {
-#if DEBUG
-                Console.Write("command> ");
-                try
-                {
-                    var input = Console.ReadLine();
-                    if (input == null || input == "quit")
-                    {
-                        done = true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Exception in IrcBot program");
-                    done = true;
-                }
-#else
-                Thread.Sleep(5000);
-#endif
-            }
+            _exitSemaphore.Wait();
+        }
+
+        /// <summary>
+        /// Exit and allow the bot to close
+        /// </summary>
+        public void Exit()
+        {
+            _exitSemaphore.Release();
         }
     }
 }

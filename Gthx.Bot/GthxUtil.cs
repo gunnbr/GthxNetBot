@@ -12,8 +12,8 @@ namespace Gthx.Bot
     {
         private readonly IWebReader _webReader;
         private readonly ILogger<GthxUtil> _logger;
-        private readonly Regex _titleRegex = new Regex(@"<title>(?'title'.*) - .*<\/title>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        private readonly Regex _metaRegex = new Regex("<meta name=\"title\" content=\"(?'title'.*)\"", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private readonly Regex _titleRegex = new(@"<title>(?'title'.*) - .*<\/title>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private readonly Regex _metaRegex = new("<meta name=\"title\" content=\"(?'title'.*)\"", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
         public GthxUtil(IWebReader webReader, ILogger<GthxUtil> logger)
         {

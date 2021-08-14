@@ -6,6 +6,7 @@ namespace GthxNetBot
 {
     public enum IrcProtocolErrorEnum
     {
+        MotdMissing = 422,
         NickInUse = 433,
     }
 }

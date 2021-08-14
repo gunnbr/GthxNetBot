@@ -33,10 +33,12 @@ namespace GthxNetBot
     class Program
     {
         private static ServiceProvider? _serviceProvider;
-        private static IConfiguration _configuration;
+        private static IConfiguration _configuration = (IConfiguration)new ConfigurationBuilder();
 
         static void Main(string[] args)
-        { 
+        {
+            AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
+
             // From https://docs.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs, 
             // this should display in the log.
             System.Diagnostics.Trace.TraceError("GthxNetBot.Main is running!");
@@ -104,7 +106,16 @@ namespace GthxNetBot
                 logger.Dispose();
             }
         }
-        
+
+        private static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
+        {
+            Log.Error(e.ExceptionObject as Exception, "Unhandled exception caught");
+            // Make sure serilog has time to log all messages and send email with 
+            // the error information before exiting.
+            Log.CloseAndFlush();
+            Environment.Exit(1);
+        }
+
         public static readonly ILoggerFactory ConsoleLoggerFactory
              = LoggerFactory.Create(builder =>
              {
@@ -183,7 +194,7 @@ namespace GthxNetBot
 
     public class Startup
     {
-        private IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
 
         public Startup()
         {

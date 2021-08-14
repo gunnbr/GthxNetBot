@@ -30,7 +30,7 @@ namespace Gthx.Bot
             var success = _queue.Post(newMessage);
             if (!success)
             {
-                _logger.LogError("Failed to add message to the queue!");
+                _logger.LogError("Failed to process message");
             }
         }
 
@@ -40,7 +40,7 @@ namespace Gthx.Bot
             var success = _queue.Post(newMessage);
             if (!success)
             {
-                _logger.LogError("Failed to add message to the queue!");
+                _logger.LogError("Failed to process action");
             }
         }
 

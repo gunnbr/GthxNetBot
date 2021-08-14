@@ -9,9 +9,9 @@ namespace Gthx.Bot.Modules
 {
     public class FactoidModule : IGthxModule
     {
-        private readonly Regex _FactoidSet = new Regex(@"(?'factoid'.+?)\s(?'isAre'is|are)(?'hasAlso'\salso)?\s(?'value'.+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private readonly Regex _InvalidRegex = new Regex(@"^(here|how|it|something|that|this|what|when|where|which|who|why|you)$", RegexOptions.IgnoreCase);
-        private readonly Regex _FactoidGet = new Regex(@$"(?'factoid'.+)[?!](?'hasPipe'\s*$|\s*\|\s*(?'pipeToUser'{GthxUtil.NickMatch})$)", RegexOptions.Compiled);
+        private readonly Regex _FactoidSet = new(@"(?'factoid'.+?)\s(?'isAre'is|are)(?'hasAlso'\salso)?\s(?'value'.+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private readonly Regex _InvalidRegex = new(@"^(here|how|it|something|that|this|what|when|where|which|who|why|you)$", RegexOptions.IgnoreCase);
+        private readonly Regex _FactoidGet = new(@$"(?'factoid'.+)[?!](?'hasPipe'\s*$|\s*\|\s*(?'pipeToUser'{GthxUtil.NickMatch})$)", RegexOptions.Compiled);
         private readonly IGthxData _Data;
         private readonly IIrcClient _IrcClient;
         private readonly ILogger<FactoidModule> _Logger;
