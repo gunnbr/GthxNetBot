@@ -377,7 +377,7 @@ namespace GthxNetBot
 
         private void Client_ErrorMessageReceived(object? sender, IrcErrorMessageEventArgs e)
         {
-            _logger.LogWarning("Error message received: {message}", e.Message);
+            _logger.LogError("Error message received: {message}", e.Message);
         }
 
         private void Client_Error(object? sender, IrcErrorEventArgs e)
