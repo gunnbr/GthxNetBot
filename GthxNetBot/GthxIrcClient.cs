@@ -18,6 +18,7 @@ namespace GthxNetBot
         public const string IrcInfo = "IrcInfo";
 
         public string? Server { get; set; }
+        public int? Port { get; set; }
         public string? Channels { get; set; }
         public string? Nick { get; set; }
         public string? Password { get; set; }
@@ -82,10 +83,10 @@ namespace GthxNetBot
                 _logger.LogError("No server specified!");
                 return;
             }
-            Connect(server, info);
+            Connect(server, _options.Port ?? 6667, info);
         }
 
-        private void Connect(string server, IrcRegistrationInfo registrationInfo)
+        private void Connect(string server, int port, IrcRegistrationInfo registrationInfo)
         {
             _client.Connected += IrcClient_Connected;
             _client.Disconnected += IrcClient_Disconnected;
@@ -98,7 +99,7 @@ namespace GthxNetBot
 
                 // Connect to given server.
                 // TODO: Move port number and SSL flag to be environment variables passed in.
-                _client.Connect(server, 6667, false, registrationInfo);
+                _client.Connect(server, port, false, registrationInfo);
 
                 // Wait until connection has succeeded or timed out.
                 if (!connectedEvent.Wait(10000))
