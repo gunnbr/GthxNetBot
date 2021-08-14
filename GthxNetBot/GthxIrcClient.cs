@@ -29,6 +29,7 @@ namespace GthxNetBot
         private readonly IGthxMessageConduit _gthx;
         private readonly IBotNick _botNick;
         private readonly ILogger<IrcClient> _logger;
+        private readonly IBotRunner _runner;
         private readonly IrcOptions _options = new();
         private readonly System.Timers.Timer _whoIsTimer;
 
@@ -37,11 +38,12 @@ namespace GthxNetBot
             FloodPreventer = new IrcStandardFloodPreventer(4, 2000)
         };
 
-        public GthxIrcClient(IGthxMessageConduit sender, IBotNick botNick, ILogger<IrcClient> logger, IConfiguration config) 
+        public GthxIrcClient(IGthxMessageConduit sender, IBotNick botNick, ILogger<IrcClient> logger, IConfiguration config, IBotRunner runner) 
         {
             _gthx = sender;
             _botNick = botNick;
             _logger = logger;
+            _runner = runner;
 
             // 2 minute timer
             _whoIsTimer = new System.Timers.Timer(2.0 * 60.0 * 1000.0);
@@ -238,7 +240,8 @@ namespace GthxNetBot
 
             if (ctcp.StartsWith("PING "))
             {
-                var parameter = ctcp.Substring(5);
+                var parameter = ctcp[5..];
+                // TODO: Is this right? Should be PONG?
                 _client.LocalUser.SendNotice(fromUser, $"\u0001PING {parameter}\u0001");
             }
             else if (ctcp.StartsWith("VERSION"))
@@ -262,14 +265,15 @@ namespace GthxNetBot
 
         private void IrcClient_Disconnected(object? sender, EventArgs e)
         {
-            _logger.LogWarning("Disconnected from the IRC server");
+            _logger.LogError("Disconnected from the IRC server");
+            _runner.Exit();
         }
 
         private void IrcClient_Connected(object? sender, EventArgs e)
         {
             _logger.LogInformation("Connected to IRC server!");
 
-            if (!(sender is IrcClient client))
+            if (sender is not IrcClient client)
             {
                 _logger.LogError("Connected with no client!");
                 return;
@@ -325,6 +329,10 @@ namespace GthxNetBot
                     _botNick.BotNick = newNick;
                 }
             }
+            else if (e.Code == (int)IrcProtocolErrorEnum.MotdMissing)
+            {
+                // Just ignore
+            }
         }
 
         private void SimpleBot_RawMessageReceived(object? sender, IrcRawMessageEventArgs e)
@@ -375,6 +383,9 @@ namespace GthxNetBot
         private void Client_Error(object? sender, IrcErrorEventArgs e)
         {
             _logger.LogError(e.Error, "IRC error!");
+            // If we got here, the read has stopped and we're dead in the water. 
+            // TODO: Try to reconnect instead of exit?
+            _runner.Exit();
         }
 
         public bool SendAction(string channel, string action)
