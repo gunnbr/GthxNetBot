@@ -33,11 +33,11 @@ namespace GthxNetBot
     class Program
     {
         private static ServiceProvider? _serviceProvider;
-        private static IConfiguration _configuration;
+        private static IConfiguration? _configuration;
 
         static void Main(string[] args)
         {
-            System.AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
+            AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
 
             // From https://docs.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs, 
             // this should display in the log.
@@ -194,7 +194,7 @@ namespace GthxNetBot
 
     public class Startup
     {
-        private IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
 
         public Startup()
         {

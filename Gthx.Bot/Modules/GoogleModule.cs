@@ -10,7 +10,7 @@ namespace Gthx.Bot.Modules
     {
         private readonly IIrcClient _IrcClient;
 
-        private readonly Regex _GoogleRegex = new Regex(@$"\s*google\s+(?'search'.*?)\s+for\s+(?'nick'{GthxUtil.NickMatch})");
+        private readonly Regex _GoogleRegex = new(@$"\s*google\s+(?'search'.*?)\s+for\s+(?'nick'{GthxUtil.NickMatch})");
 
         public GoogleModule(IIrcClient ircClient)
         {
