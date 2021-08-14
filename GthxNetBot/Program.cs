@@ -33,42 +33,46 @@ namespace GthxNetBot
     class Program
     {
         private static ServiceProvider? _serviceProvider;
-        private static IConfiguration _configuration = (IConfiguration)new ConfigurationBuilder();
+        private static IConfiguration _configuration;// = (IConfiguration)new ConfigurationBuilder();
 
         static void Main(string[] args)
         {
-            AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
-
-            // From https://docs.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs, 
-            // this should display in the log.
-            System.Diagnostics.Trace.TraceError("GthxNetBot.Main is running!");
-
-            _configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
-
-            var loggerConfig = new LoggerConfiguration()
-                .ReadFrom.Configuration(_configuration);
-
-            Serilog.Core.Logger logger;
-
-            var emailOptions = new EmailOptions();
-            _configuration.GetSection(EmailOptions.EmailConfiguration).Bind(emailOptions);
-            if (string.IsNullOrWhiteSpace(emailOptions.EmailSubject) ||
-                string.IsNullOrWhiteSpace(emailOptions.FromName) ||
-                string.IsNullOrWhiteSpace(emailOptions.MailServer) ||
-                string.IsNullOrWhiteSpace(emailOptions.Password) ||
-                string.IsNullOrWhiteSpace(emailOptions.ToEmail) ||
-                string.IsNullOrWhiteSpace(emailOptions.UserName) ||
-                emailOptions.Port == null)
+            try
             {
-                logger = loggerConfig.CreateLogger();
-                logger.Warning("Email logging not configured");
-            }
-            else
-            {
-                loggerConfig = loggerConfig.WriteTo.Email(new EmailConnectionInfo
+                AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
+
+                // From https://docs.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs, 
+                // this should display in the log.
+                System.Diagnostics.Trace.TraceError("GthxNetBot.Main is running!");
+
+                IConfigurationRoot config = new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                    .AddEnvironmentVariables()
+                    .Build();
+
+                _configuration = config as IConfiguration;
+
+                var loggerConfig = new LoggerConfiguration()
+                    .ReadFrom.Configuration(_configuration);
+
+                Serilog.Core.Logger logger;
+
+                var emailOptions = new EmailOptions();
+                _configuration.GetSection(EmailOptions.EmailConfiguration).Bind(emailOptions);
+                if (string.IsNullOrWhiteSpace(emailOptions.EmailSubject) ||
+                    string.IsNullOrWhiteSpace(emailOptions.FromName) ||
+                    string.IsNullOrWhiteSpace(emailOptions.MailServer) ||
+                    string.IsNullOrWhiteSpace(emailOptions.Password) ||
+                    string.IsNullOrWhiteSpace(emailOptions.ToEmail) ||
+                    string.IsNullOrWhiteSpace(emailOptions.UserName) ||
+                    emailOptions.Port == null)
+                {
+                    logger = loggerConfig.CreateLogger();
+                    logger.Warning("Email logging not configured");
+                }
+                else
+                {
+                    loggerConfig = loggerConfig.WriteTo.Email(new EmailConnectionInfo
                     {
                         FromEmail = emailOptions.FromName,
                         ToEmail = emailOptions.ToEmail,
@@ -82,33 +86,40 @@ namespace GthxNetBot
                             Password = emailOptions.Password
                         },
                     },
-                    "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] {Message}{NewLine}{Exception}",
-                    batchPostingLimit: 20,
-                    restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning);
-                 logger = loggerConfig.CreateLogger();
+                        "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] {Message}{NewLine}{Exception}",
+                        batchPostingLimit: 20,
+                        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning);
+                    logger = loggerConfig.CreateLogger();
+                }
+
+                Log.Logger = logger;
+                try
+                {
+                    _serviceProvider = RegisterServices();
+
+                    Log.Information("gthx running with: {args}", args);
+
+                    var scope = _serviceProvider.CreateScope();
+                    var myBot = scope.ServiceProvider.GetRequiredService<IBotRunner>();
+                    myBot.Run();
+                    DisposeServices();
+                }
+                finally
+                {
+                    Log.Error("GthxNetBot exiting.");
+                    logger.Dispose();
+                }
             }
-
-            Log.Logger = logger;
-            try
+            catch (Exception ex)
             {
-                _serviceProvider = RegisterServices();
-
-                Log.Information("gthx running with: {args}", args);
-
-                var scope = _serviceProvider.CreateScope();
-                var myBot = scope.ServiceProvider.GetRequiredService<IBotRunner>();
-                myBot.Run();
-                DisposeServices();
-            }
-            finally
-            {
-                Log.Error("GthxNetBot exiting.");
-                logger.Dispose();
+                Console.WriteLine($"Gthx Failure: {ex}");
             }
         }
 
         private static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
         {
+            Console.WriteLine($"Unhandled Exception: {e.ExceptionObject as Exception}");
+
             Log.Error(e.ExceptionObject as Exception, "Unhandled exception caught");
             // Make sure serilog has time to log all messages and send email with 
             // the error information before exiting.
