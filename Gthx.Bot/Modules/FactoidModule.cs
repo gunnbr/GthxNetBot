@@ -101,7 +101,7 @@ namespace Gthx.Bot.Modules
                 return false;
             }
 
-            var factoid = message.Remove(0, 5);
+            var factoid = message.Remove(0, 5).TrimEnd(new char[]{ '?', '.', '!', ' ', '\t'});
             _Logger.LogInformation("info request for '{factoid}' in {channel}", factoid, channel);
 
             var info = _Data.GetFactoidInfo(factoid);

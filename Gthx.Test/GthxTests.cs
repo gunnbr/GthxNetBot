@@ -324,7 +324,37 @@ namespace Gthx.Test
 
             testFactoid = "cake";
 
-            _gthx.HandleReceivedMessage(testChannel, testUser, $"info {testFactoid}");
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"info {testFactoid}?");
+
+            replies = _client.GetReplies();
+            Assert.AreEqual(5, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual(testFactoid, _data.InfoFactoid);
+
+            Assert.AreEqual($"Factoid '{testFactoid}' has been referenced 176 times", replies.Messages[0]);
+            Assert.AreEqual("At Wed, 10 Oct 2007 08:00:00 GMT, GLaDOS set to: delicious", replies.Messages[1]);
+            Assert.AreEqual("At Wed, 10 Oct 2007 14:34:53 GMT, Chell deleted this item", replies.Messages[2]);
+            Assert.AreEqual("At Wed, 10 Oct 2007 14:34:53 GMT, UnknownEntity set to: a lie!", replies.Messages[3]);
+            Assert.AreEqual("At Wed, 10 Oct 2007 14:34:55 GMT, Unknown set to: delicious", replies.Messages[4]);
+
+            testFactoid = "cake";
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"info {testFactoid}.");
+
+            replies = _client.GetReplies();
+            Assert.AreEqual(5, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual(testFactoid, _data.InfoFactoid);
+
+            Assert.AreEqual($"Factoid '{testFactoid}' has been referenced 176 times", replies.Messages[0]);
+            Assert.AreEqual("At Wed, 10 Oct 2007 08:00:00 GMT, GLaDOS set to: delicious", replies.Messages[1]);
+            Assert.AreEqual("At Wed, 10 Oct 2007 14:34:53 GMT, Chell deleted this item", replies.Messages[2]);
+            Assert.AreEqual("At Wed, 10 Oct 2007 14:34:53 GMT, UnknownEntity set to: a lie!", replies.Messages[3]);
+            Assert.AreEqual("At Wed, 10 Oct 2007 14:34:55 GMT, Unknown set to: delicious", replies.Messages[4]);
+
+            testFactoid = "cake";
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"info {testFactoid}!");
 
             replies = _client.GetReplies();
             Assert.AreEqual(5, replies.Messages.Count);
