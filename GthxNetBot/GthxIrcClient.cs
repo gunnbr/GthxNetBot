@@ -96,7 +96,7 @@ namespace GthxNetBot
 
             using (var connectedEvent = new ManualResetEventSlim(false))
             {
-                _logger.LogInformation("Connecting to {server}", server);
+                _logger.LogInformation("Connecting to {server}:{port}", server, port);
                 _client.Connected += (sender2, e2) => connectedEvent.Set();
 
                 // Connect to given server.
