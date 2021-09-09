@@ -90,6 +90,7 @@ namespace GthxNetBot
                         batchPostingLimit: 20,
                         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning);
                     logger = loggerConfig.CreateLogger();
+                    logger.Information("Logger configured with email to {user}", emailOptions.ToEmail);
                 }
 
                 Log.Logger = logger;
