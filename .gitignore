@@ -3,8 +3,8 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-# Config file with passwords in it.
-appsettings.json
+# Config file with passwords in it. (Turns out we need this for the default Seq configuration for now)
+# appsettings.json
 
 # User-specific files
 *.rsuser
