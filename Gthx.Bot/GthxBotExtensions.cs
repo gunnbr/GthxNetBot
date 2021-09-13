@@ -2,9 +2,6 @@
 using Gthx.Bot.Modules;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Gthx.Bot
 {
@@ -25,8 +22,9 @@ namespace Gthx.Bot
                 ServiceDescriptor.Singleton<IGthxModule, GoogleModule>(),
                 ServiceDescriptor.Singleton<IGthxModule, LurkerModule>(),
 
-                ServiceDescriptor.Singleton<IGthxModule, ThingiverseModule>(),
-                ServiceDescriptor.Singleton<IGthxModule, YoutubeModule>(),
+                // TODO: Reenable this as a module once the data access is fixed on SQL server!
+                //ServiceDescriptor.Singleton<IGthxModule, ThingiverseModule>(),
+                //ServiceDescriptor.Singleton<IGthxModule, YoutubeModule>(),
 
                 ServiceDescriptor.Singleton<IGthxModule, TellModule>(),
 
