@@ -74,6 +74,6 @@ Or find the compiled executables in the bin/Debug/net5.0
 ## Docker
 To run with environment overrides and network access to localhost and automatic restart, use:
 
-    docker run --env-file ./othx.env --network="host" --restart unless-stopped gthxnetbot:latest
+    docker run -d --env-file ./gthx.env --network="host" --restart unless-stopped gthxnetbot:latest
 
 Then status can be monitored by way of the configured logging.
