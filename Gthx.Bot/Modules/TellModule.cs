@@ -1,6 +1,6 @@
 ﻿using Gthx.Bot.Interfaces;
 using Gthx.Data;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
 namespace Gthx.Bot.Modules
@@ -11,12 +11,14 @@ namespace Gthx.Bot.Modules
         private readonly IGthxData _data;
         private readonly IIrcClient _client;
         private readonly IGthxUtil _util;
+        private readonly ILogger<TellModule> _logger;
 
-        public TellModule(IGthxData data, IIrcClient ircClient, IGthxUtil util)
+        public TellModule(IGthxData data, IIrcClient ircClient, IGthxUtil util, ILogger<TellModule> logger)
         {
             this._data = data;
             this._client = ircClient;
             _util = util;
+            _logger = logger;
         }
 
         public bool ProcessAction(string channel, string user, string message)
@@ -29,7 +31,7 @@ namespace Gthx.Bot.Modules
             var waitingMessages = _data.GetTell(user);
             foreach (var waitingMessage in waitingMessages)
             {
-                Debug.WriteLine($"Found tell for '{user}' from '{waitingMessage.Author}");
+                _logger.LogInformation($"Found tell for '{user}' from '{waitingMessage.Author}");
                 var timeSince = _util.TimeBetweenString(waitingMessage.Timestamp);
                 var reply = $"{user}: {timeSince} ago {waitingMessage.Author} tell {waitingMessage.Recipient} {waitingMessage.Message}";
                 _client.SendMessage(channel, reply);

@@ -151,7 +151,7 @@ namespace GthxNetBot
         {
             if (e.User.HostName == null)
             {
-                Debug.WriteLine($"No WhoIs reply: serverinfo {e.User.ServerInfo} servername {e.User.ServerName}");
+                _logger.LogInformation($"No WhoIs reply: serverinfo {e.User.ServerInfo} servername {e.User.ServerName}");
                 _logger.LogWarning("No user found from WhoIs query. Time to get our nickname back!");
                 // No reply, so get our nickname back!!
                 HandlePreferredNameAvailable();

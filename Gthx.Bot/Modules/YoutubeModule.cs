@@ -46,7 +46,7 @@ namespace Gthx.Bot.Modules
             var referenceData = _data.AddYoutubeReference(id);
             if (referenceData.Title != null)
             {
-                Debug.WriteLine($"Already have a title for youtube item {referenceData.Item}:{referenceData.Title}");
+                _logger.LogInformation($"Already have a title for youtube item {referenceData.Item}:{referenceData.Title}");
                 _client.SendMessage(channel, $"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.Count} IRC mentions");
                 return false;
             }
