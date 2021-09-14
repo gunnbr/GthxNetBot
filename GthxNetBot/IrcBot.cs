@@ -33,7 +33,10 @@ namespace GthxNetBot
             Trace.TraceError("Gthx running");
 
             var context = _services.GetRequiredService<GthxDataContext>();
+            _logger.LogInformation("Running migrations on the database");
             RelationalDatabaseFacadeExtensions.Migrate(context.Database);
+            _logger.LogInformation("Database migration complete.");
+
             var gthx = _services.GetRequiredService<GthxBot>();
 
             _exitSemaphore.Wait();

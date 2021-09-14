@@ -141,14 +141,23 @@ namespace Gthx.Test
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testUser} linked to YouTube video \"Pro Riders Laughing\" => 1 IRC mentions", replies.Messages[0]);
 
-            // Test non-Western characters
-            testUser = "AndrewJohnson";
-            _gthx.HandleReceivedMessage(testChannel, testUser, $"Calm down and listen to this: https://www.youtube.com/watch?v=xtAHgrNs7r4");
+            // Reference the same video a second time to verify that the count increases
+            testUser = "LeroyJenkins";
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"I love this video too! https://www.youtube.com/watch?v=I7nVrT00ST4");
             await Task.Delay(5000);
             replies = _client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
-            Assert.AreEqual($"{testUser} linked to YouTube video \"Studio Ghibli - Music Collection (Piano and Violin Duo) 株式会社スタジオジブリ- Relaxing music song\" => 1 IRC mentions", replies.Messages[0]);
+            Assert.AreEqual($"{testUser} linked to YouTube video \"Pro Riders Laughing\" => 2 IRC mentions", replies.Messages[0]);
+
+            // Test non-Western characters
+            testUser = "AndrewJohnson";
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"Are you hungry? https://www.youtube.com/watch?v=RE9gtTLZ5Ic");
+            await Task.Delay(5000);
+            replies = _client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser} linked to YouTube video \"QUICK Japanese Fried Rice (焼き飯 - Yakimeshi)\" => 1 IRC mentions", replies.Messages[0]);
         }
 
         [Test]
@@ -163,6 +172,14 @@ namespace Gthx.Test
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
             Assert.AreEqual($"{testUser} linked to \"Articulated Butterfly by 8ran\" on thingiverse => 1 IRC mentions", replies.Messages[0]);
+
+            // Test the same reference a second time to verify the count increases
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"Did you hear what I said? I love this thing! https://www.thingiverse.com/thing:2810756");
+            await Task.Delay(5000);
+            replies = _client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser} linked to \"Articulated Butterfly by 8ran\" on thingiverse => 2 IRC mentions", replies.Messages[0]);
         }
 
         /// <summary>

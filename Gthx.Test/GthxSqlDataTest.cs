@@ -38,7 +38,8 @@ namespace Gthx.Test
 
             services.AddDbContext<GthxDataContext>(options =>
             {
-                options.UseSqlServer(_config.GetConnectionString("GthxDb"), x => x.MigrationsAssembly("SqlServerMigrations.Migrations"));
+                var connString = _config.GetConnectionString("GthxDb");
+                options.UseSqlServer(connString, x => x.MigrationsAssembly("SqlServerMigrations.Migrations"));
             });
 
             services.AddSingleton<IGthxData, GthxSqlData>();
@@ -243,6 +244,48 @@ namespace Gthx.Test
             Assert.IsTrue(names.Contains("gunnbr"));
             Assert.IsTrue(names.Contains("gunnbr_"));
             Assert.IsTrue(names.Contains("gunner"));
+        }
+
+        [Test]
+        public void GthxData_TestYouTubeRefCount()
+        {
+            var testItem = "12345abcde";
+            var testTitle = "My first YouTube video";
+
+            var refData = _Data.AddYoutubeReference(testItem);
+            Assert.AreEqual(testItem, refData.Item, "Wrong item returned");
+            Assert.AreEqual(1, refData.Count, "Wrong initial count value");
+            Assert.IsNull(refData.Title, "Test failure: Title already exists");
+
+            // Mainly test that this doesn't throw an exception
+            _Data.AddYoutubeTitle(testItem, testTitle);
+
+            // Verify that we have the title now and that the refcount was updated
+            refData = _Data.AddYoutubeReference(testItem);
+            Assert.AreEqual(testItem, refData.Item, "Wrong item returned");
+            Assert.AreEqual(2, refData.Count, "Count not updated");
+            Assert.AreEqual(testTitle, refData.Title, "Title not available in second attempt");
+        }
+
+        [Test]
+        public void GthxData_TestThingiRefCount()
+        {
+            var testItem = "12345";
+            var testTitle = "Spiral Gears";
+
+            var refData = _Data.AddThingiverseReference(testItem);
+            Assert.AreEqual(testItem, refData.Item.ToString(), "Wrong item returned");
+            Assert.AreEqual(1, refData.Count, "Wrong initial count value");
+            Assert.IsNull(refData.Title, "Test failure: Title already exists");
+
+            // Mainly test that this doesn't throw an exception
+            _Data.AddThingiverseTitle(testItem, testTitle);
+
+            // Verify that we have the title now and that the refcount was updated
+            refData = _Data.AddThingiverseReference(testItem);
+            Assert.AreEqual(testItem, refData.Item.ToString(), "Wrong item returned");
+            Assert.AreEqual(2, refData.Count, "Count not updated");
+            Assert.AreEqual(testTitle, refData.Title, "Title not available in second attempt");
         }
     }
 }

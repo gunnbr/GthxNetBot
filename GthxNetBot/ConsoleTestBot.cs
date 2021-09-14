@@ -1,12 +1,11 @@
-﻿using System;
-using System.Security.Policy;
-using System.Threading.Tasks;
-using Gthx.Bot;
+﻿using Gthx.Bot;
 using Gthx.Bot.Interfaces;
 using GthxData;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace GthxNetBot
 {
@@ -41,7 +40,10 @@ namespace GthxNetBot
             _logger.LogInformation($"irc client is {_ircClient}");
 
             var context = _services.GetRequiredService<GthxDataContext>();
-            context.Database.EnsureCreated();
+            _logger.LogInformation("Migrating DB...");
+            RelationalDatabaseFacadeExtensions.Migrate(context.Database);
+            _logger.LogInformation("DBMigration complete.");
+
             var gthx = _services.GetRequiredService<GthxBot>();
 
             while (!_ExitRequested)
