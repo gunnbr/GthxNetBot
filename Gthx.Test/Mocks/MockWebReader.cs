@@ -31,6 +31,12 @@ namespace Gthx.Test.Mocks
 <meta name=""title"" content=""Meta Title"">
 </head>");
                 }
+                else if (url.EndsWith("/encoded"))
+                {
+                    dataString = utf8Encoding.GetBytes(@"<head>
+<title>Rum &amp; &quot;Coke&quot; - YouTube</title>
+</head>");
+                }
                 else if (url.EndsWith(":2810756"))
                 {
                     dataString = utf8Encoding.GetBytes(@"<head>
