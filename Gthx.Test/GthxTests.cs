@@ -646,10 +646,17 @@ namespace Gthx.Test
             _gthx.HandleReceivedMessage(testChannel, testUser, $"seen {testSeenUser}");
             replies = _client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
-            Assert.AreEqual(_data.LastSeenUserQuery, testSeenUser);
+            Assert.AreEqual(testSeenUser, _data.LastSeenUserQuery);
 
             Assert.AreEqual("Razor was last seen in #twitch ", replies.Messages[0].Substring(0, 31));
             Assert.AreEqual("Stream is starting NOW! Tune in!'.", replies.Messages[0].Substring(replies.Messages[0].Length - 34, 34));
+
+            // Make sure that messages which are longer than a nick don't trigger a seen response
+            _data.ClearLastSeen();
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"seen him a dozen times since then.");
+            replies = _client.GetReplies();
+            Assert.AreEqual(0, replies.Messages.Count);
+            Assert.IsNull(_data.LastSeenUserQuery);
 
             // TODO: Test Timestamp == null in seen
         }

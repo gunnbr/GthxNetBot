@@ -213,6 +213,11 @@ namespace Gthx.Test.Mocks
             };
         }
 
+        public void ClearLastSeen()
+        {
+            LastSeenUserQuery = null;
+        }
+
         public List<Seen> GetLastSeen(string user)
         {
             LastSeenUserQuery = user;
@@ -235,6 +240,10 @@ namespace Gthx.Test.Mocks
                         new Seen() { Channel = "#superherohigh", User = "Themyscira", Message = "Hey everyone, come visit!", Timestamp = new DateTime(2020, 7, 20, 5, 6, 7)},
                         new Seen() { Channel = "#TheMatrix", User = "TheOne", Message = "Whoah", Timestamp = new DateTime(1999, 3, 31, 14, 0, 0)},
                         new Seen() { Channel = "#reprap", User = "TheOwner", Message = "Don't make me kick you.", Timestamp = new DateTime(2020, 7, 17, 13, 31, 32)},
+                    },
+                "him" => new List<Seen>()
+                    {
+                        new Seen() { Channel = "#trap", User = "him", Message = "Yeah, I can do that.", Timestamp = new DateTime(2021, 9, 21, 21, 13, 11)},
                     },
                 _ => null,
             };
