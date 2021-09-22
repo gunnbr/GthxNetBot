@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using Gthx.Bot.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -129,6 +130,8 @@ namespace Gthx.Bot
 
             _logger.LogInformation("Finished waiting for the web stream...");
 
+            string? encodedTitle = null;
+
             using var reader = new StreamReader(webStream);
             while (!reader.EndOfStream)
             {
@@ -142,18 +145,25 @@ namespace Gthx.Bot
                 if (titleMatch.Success)
                 {
                     _logger.LogInformation("Found title: {Title}", titleMatch.Groups["title"].Value);
-                    return titleMatch.Groups["title"].Value;
+                    encodedTitle = titleMatch.Groups["title"].Value;
+                    break;
                 }
 
                 var metaMatch = _metaRegex.Match(line);
                 if (metaMatch.Success)
                 {
                     _logger.LogInformation("Found meta title: {Title}", metaMatch.Groups["title"].Value);
-                    return metaMatch.Groups["title"].Value;
+                    encodedTitle = metaMatch.Groups["title"].Value;
+                    break;
                 }
             }
 
-            return string.Empty;
+            if (encodedTitle == null)
+            {
+                return string.Empty;
+            }
+
+            return HttpUtility.HtmlDecode(encodedTitle);
         }
 
     }
