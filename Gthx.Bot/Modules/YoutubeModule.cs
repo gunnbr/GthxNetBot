@@ -66,7 +66,7 @@ namespace Gthx.Bot.Modules
             }
             else
             {
-                _client.SendMessage(channel, $"{user} linked to YouTube video \"{title}\" => 1 IRC mentions");
+                _client.SendMessage(channel, $"{user} linked to YouTube video \"{title}\" => {referenceCount} IRC mentions");
             }
         }
     }
