@@ -16,7 +16,7 @@ namespace Gthx.Bot.Modules
         private readonly IIrcClient _client;
         private readonly IGthxUtil _util;
         private readonly ILogger<SeenModule> _logger;
-        private readonly Regex _seenRegex = new(@$"^\s*seen\s+(?'nick'{GthxUtil.NickMatch})[\s\?]*");
+        private readonly Regex _seenRegex = new(@$"^\s*seen\s+(?'nick'{GthxUtil.NickMatch})[\s\?]*$");
 
         public SeenModule(IGthxData data, IIrcClient ircClient, IGthxUtil util, ILogger<SeenModule> logger)
         {
