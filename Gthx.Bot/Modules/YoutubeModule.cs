@@ -44,7 +44,7 @@ namespace Gthx.Bot.Modules
             var id = youtubeMatch.Groups["id"].Value;
             _logger.LogInformation("Checking for Youtube title for '{id}'", id);
             var referenceData = _data.AddYoutubeReference(id);
-            if (referenceData.Title != null)
+            if (!string.IsNullOrEmpty(referenceData.Title))
             {
                 _logger.LogInformation($"Already have a title for youtube item {referenceData.Item}:{referenceData.Title}");
                 _client.SendMessage(channel, $"{user} linked to YouTube video \"{referenceData.Title}\" => {referenceData.Count} IRC mentions");

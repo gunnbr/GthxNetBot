@@ -43,7 +43,7 @@ namespace Gthx.Bot.Modules
             var id = youtubeMatch.Groups["id"].Value;
             _logger.LogInformation("Checking for Thingiverse title for '{id}'", id);
             var referenceData = _data.AddThingiverseReference(id);
-            if (referenceData.Title != null)
+            if (!string.IsNullOrEmpty(referenceData.Title))
             {
                 _logger.LogInformation("Already have a title for Thingiverse {Item}: {Title}", referenceData.Item, referenceData.Title);
                 _client.SendMessage(channel, $"{user} linked to \"{referenceData.Title}\" on thingiverse => {referenceData.Count} IRC mentions");
