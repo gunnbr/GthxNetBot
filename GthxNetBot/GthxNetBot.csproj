@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="IrcDotNet" Version="0.7.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.7">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -34,6 +33,7 @@
     <ProjectReference Include="..\Gthx.Data\Gthx.Data\Gthx.Data.csproj" />
     <ProjectReference Include="..\Gthx.Data\MariaDbMigrations\MariaDbMigrations.csproj" />
     <ProjectReference Include="..\Gthx.Data\SqlServerMigrations\SqlServerMigrations.csproj" />
+    <ProjectReference Include="..\IrcDotNet\source\IrcDotNet\IrcDotNet.csproj" />
   </ItemGroup>
 
   <ItemGroup>

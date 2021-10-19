@@ -1,3 +1,6 @@
 [submodule "Gthx.Data"]
 	path = Gthx.Data
 	url = https://github.com/gunnbr/GthxNetData
+[submodule "IrcDotNet"]
+	path = IrcDotNet
+	url = https://github.com/gunnbr/IrcDotNet.git
