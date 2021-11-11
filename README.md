@@ -76,4 +76,8 @@ To run with environment overrides and network access to localhost and automatic 
 
     docker run -d --env-file ./gthx.env --network="host" --restart unless-stopped gthxnetbot:latest
 
+If you have modified the appsettings.json or added environment variables to configure, then you can
+leave out the "--env-file ./gthx.env" part. Otherwise, copy "gthx.env.example" to "gthx.env" and edit
+it to suit your installation.
+
 Then status can be monitored by way of the configured logging.

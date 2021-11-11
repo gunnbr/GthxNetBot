@@ -376,12 +376,29 @@ namespace Gthx.Test
             var testTellToUser = "CrashOverride";
             var testMessage = "Mess with the best, die like the rest.";
 
+            // Not directly addressed, so gthx should ignore
             _gthx.HandleReceivedMessage(testChannel, testUser, $"tell {testTellToUser} {testMessage}");
-
             var replies = _client.GetReplies();
+            Assert.AreEqual(0, replies.Messages.Count);
+
+            // Telling a message to someone not in the server
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: tell {testTellToUser} {testMessage}");
+            replies = _client.GetReplies();
             Assert.AreEqual(1, replies.Messages.Count);
             Assert.AreEqual(testChannel, replies.Channel);
-            Assert.AreEqual($"{testUser}: Okay.", replies.Messages[0]);
+            Assert.AreEqual($"{testUser}: I'll pass that on when {testTellToUser} is around, but I've never seen them before.", replies.Messages[0]);
+
+            Assert.AreEqual(testUser, _data.TellFromUser);
+            Assert.AreEqual(testTellToUser, _data.TellToUser);
+            Assert.AreEqual(testMessage, _data.TellMessage);
+
+            // Message to a user who has been seen before
+            testTellToUser = "Razor";
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: tell {testTellToUser} {testMessage}");
+            replies = _client.GetReplies();
+            Assert.AreEqual(1, replies.Messages.Count);
+            Assert.AreEqual(testChannel, replies.Channel);
+            Assert.AreEqual($"{testUser}: I'll pass that on when {testTellToUser} is around.", replies.Messages[0]);
 
             Assert.AreEqual(testUser, _data.TellFromUser);
             Assert.AreEqual(testTellToUser, _data.TellToUser);
@@ -599,7 +616,7 @@ namespace Gthx.Test
             var gotTitleResponse = false;
             foreach (var message in replies.Messages)
             {
-                if (message == $"{testUser}: Okay.")
+                if (message == $"{testUser}: I'll pass that on when {tellToUser} is around, but I've never seen them before.")
                 {
                     gotTellResponse = true;
                 }

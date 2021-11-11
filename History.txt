@@ -1,0 +1,6 @@
+Version 2.23 Nov. 11, 2021
+--------------------------
+Fix the response to a 'tell' command to match the python version of gthx.
+Process 'tell' commands only when directly addressed.
+Check for the existance of a user before leaving a 'tell' message for them.
+
