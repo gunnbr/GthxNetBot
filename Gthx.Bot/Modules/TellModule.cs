@@ -31,10 +31,15 @@ namespace Gthx.Bot.Modules
             var waitingMessages = _data.GetTell(user);
             foreach (var waitingMessage in waitingMessages)
             {
-                _logger.LogInformation($"Found tell for '{user}' from '{waitingMessage.Author}");
+                _logger.LogInformation($"Found tell for '{user}' from '{waitingMessage.Author}'");
                 var timeSince = _util.TimeBetweenString(waitingMessage.Timestamp);
                 var reply = $"{user}: {timeSince} ago {waitingMessage.Author} tell {waitingMessage.Recipient} {waitingMessage.Message}";
                 _client.SendMessage(channel, reply);
+            }
+
+            if (!wasDirectlyAddressed)
+            {
+                return false;
             }
 
             var tellMatch = _tellRegex.Match(message);
@@ -45,11 +50,24 @@ namespace Gthx.Bot.Modules
 
             var nick = tellMatch.Groups["nick"].Value;
             var tellMessage = tellMatch.Groups["message"].Value;
+            
+            // TODO: Add a method to EXACTLY match the specified user.
+            // This wildcard match works good enough for now and better than no check.
+            var lastSeen = _data.GetLastSeen(nick);
 
             var success = _data.AddTell(user, nick, tellMessage);
             if (success)
             {
-                _client.SendMessage(channel, $"{user}: Okay.");
+                if (lastSeen == null)
+                {
+                    _client.SendMessage(channel, $"{user}: I'll pass that on when {nick} is around, but I've never seen them before.");
+                    // Logged as an error to send email so I can go clean this out of the DB if necessary
+                    _logger.LogError($"Message to unseen user '{nick}' from '{user}");
+                }
+                else
+                {
+                    _client.SendMessage(channel, $"{user}: I'll pass that on when {nick} is around.");
+                }
             }
             else
             {
