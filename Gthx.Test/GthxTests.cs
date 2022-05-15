@@ -602,7 +602,7 @@ namespace Gthx.Test
             var testChannel = "#reprap";
             var testUser = "CerealKiller";
             var tellToUser = "Nikon";
-            _gthx.HandleReceivedMessage(testChannel, testUser, $"tell {tellToUser} Can I crash at your place and print this out? https://www.thingiverse.com/thing:2823006");
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"gthxbot: tell {tellToUser} Can I crash at your place and print this out? https://www.thingiverse.com/thing:2823006");
             Console.WriteLine("Finished processing received message");
             // Wait for async replies to get sent
             await Task.Delay(500);
