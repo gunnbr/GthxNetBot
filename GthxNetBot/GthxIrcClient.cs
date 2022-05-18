@@ -164,7 +164,7 @@ namespace GthxNetBot
             _whoIsTimer.Enabled = true;
         }
 
-        private void HandleWhoIsTimer(object sender, ElapsedEventArgs e)
+        private void HandleWhoIsTimer(object? sender, ElapsedEventArgs e)
         {
             _logger.LogDebug("WhoIs timer expired. Querying again...");
             _client.QueryWhoIs(new List<string?> { _options.Nick });
@@ -339,7 +339,7 @@ namespace GthxNetBot
         private void SimpleBot_RawMessageReceived(object? sender, IrcRawMessageEventArgs e)
         {
 #if true
-            _logger.LogDebug("Raw Message Received: {RawContent} {Message}", e.RawContent, e.Message);
+            _logger.LogDebug("Raw Message Received: {RawContent} {Message}", e.RawContent, e.IrcMessage);
 #else
             _logger.LogDebug("RawContent: {RawContent}", e.RawContent);
             _logger.LogDebug("Message:");

@@ -33,24 +33,28 @@ namespace GthxNetBot
     class Program
     {
         private static ServiceProvider? _serviceProvider;
-        private static IConfiguration _configuration;// = (IConfiguration)new ConfigurationBuilder();
+        private static IConfiguration _configuration;
+
+        static Program()
+        {
+            AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
+
+            IConfigurationRoot config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            _configuration = (IConfiguration)config;
+        }
 
         static void Main(string[] args)
         {
             try
             {
-                AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
 
                 // From https://docs.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs, 
                 // this should display in the log.
                 System.Diagnostics.Trace.TraceError("GthxNetBot.Main is running!");
-
-                IConfigurationRoot config = new ConfigurationBuilder()
-                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                    .AddEnvironmentVariables()
-                    .Build();
-
-                _configuration = config as IConfiguration;
 
                 var loggerConfig = new LoggerConfiguration()
                     .ReadFrom.Configuration(_configuration);
