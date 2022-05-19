@@ -1,4 +1,5 @@
 ﻿using Gthx.Bot.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -10,24 +11,22 @@ namespace Gthx.Bot
 {
     public class GthxBot
     {
-        public static readonly string Version = "2.23 2021-11-11";
+        public static readonly string Version = "2.24 2022-05-18";
 
-        private readonly List<IGthxModule> _Modules;
         private readonly IBotNick _botNick;
         private readonly ILogger<GthxBot> _logger;
         private readonly IGthxMessageConsumer _messageReader;
-
+        private readonly IServiceScopeFactory _scopeFactory;
         private Regex _matchNick;
         
-        public GthxBot(IEnumerable<IGthxModule> modules, IBotNick botNick, ILogger<GthxBot> logger, IGthxMessageConsumer messageReader) 
+        public GthxBot(IBotNick botNick, ILogger<GthxBot> logger, IGthxMessageConsumer messageReader, IServiceScopeFactory scopeFactory) 
         {
             _botNick = botNick;
             _logger = logger;
             _messageReader = messageReader;
-            
-            _logger.LogDebug("GthxBot instantiated");
+            _scopeFactory = scopeFactory;
 
-            _Modules = modules.ToList();
+            _logger.LogDebug($"GthxBot instantiated");
 
             _botNick.BotNickChangedEvent += BotNick_NickChangedEvent;
             _matchNick = new Regex($@"^{_botNick.BotNick}(:|;|,|-|\s)+(?'message'.+)");
@@ -104,7 +103,11 @@ namespace Gthx.Bot
                 }
             }
 
-            foreach (var module in _Modules)
+            using IServiceScope messageScope = _scopeFactory.CreateScope();
+
+            var modules = messageScope.ServiceProvider.GetRequiredService<IEnumerable<IGthxModule>>();
+
+            foreach (var module in modules)
             {
                 var isDone = module.ProcessMessage(channel, user, message, wasDirectlyAddressed);
                 if (isDone)
@@ -116,7 +119,11 @@ namespace Gthx.Bot
 
         public void HandleReceivedAction(string channel, string user, string action)
         {
-            foreach (var module in _Modules)
+            using IServiceScope messageScope = _scopeFactory.CreateScope();
+
+            var modules = messageScope.ServiceProvider.GetRequiredService<IEnumerable<IGthxModule>>();
+
+            foreach (var module in modules)
             {
                 var isDone = module.ProcessAction(channel, user, action);
                 if (isDone)

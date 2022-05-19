@@ -339,7 +339,7 @@ namespace GthxNetBot
         private void SimpleBot_RawMessageReceived(object? sender, IrcRawMessageEventArgs e)
         {
 #if true
-            _logger.LogDebug("Raw Message Received: {RawContent} {Message}", e.RawContent, e.IrcMessage);
+            _logger.LogDebug("Raw Message Received: {RawContent} {Message}", e.RawContent, e.Message);
 #else
             _logger.LogDebug("RawContent: {RawContent}", e.RawContent);
             _logger.LogDebug("Message:");

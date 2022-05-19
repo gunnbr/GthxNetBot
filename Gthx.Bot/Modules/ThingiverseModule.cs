@@ -1,5 +1,6 @@
 ﻿using Gthx.Bot.Interfaces;
 using Gthx.Data;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
@@ -16,13 +17,15 @@ namespace Gthx.Bot.Modules
         private readonly IIrcClient _client;
         private readonly IGthxUtil _util;
         private readonly ILogger<ThingiverseModule> _logger;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        public ThingiverseModule(IGthxData data, IIrcClient ircClient, IGthxUtil util, ILogger<ThingiverseModule> logger)
+        public ThingiverseModule(IGthxData data, IIrcClient ircClient, IGthxUtil util, ILogger<ThingiverseModule> logger, IServiceScopeFactory scopeFactory)
         {
             _data = data;
             _client = ircClient;
             _util = util;
             _logger = logger;
+            _scopeFactory = scopeFactory;
         }
 
         public bool ProcessAction(string channel, string user, string message)
@@ -50,24 +53,35 @@ namespace Gthx.Bot.Modules
                 return false;
             }
 
-            GetAndSaveTitle(url, id, channel, user, referenceData?.Count ?? 1);
+            Task.Run(() => GetAndSaveTitle(url, id, channel, user, referenceData?.Count ?? 1));
             return false;
         }
 
 
-        public async void GetAndSaveTitle(string url, string id, string channel, string user, int referenceCount)
+        public async Task GetAndSaveTitle(string url, string id, string channel, string user, int referenceCount)
         {
-            var title = await _util.GetTitle(url);
-            _logger.LogInformation("Got the title for ID {id} as '{title}'", id, title);
-            _data.AddThingiverseTitle(id, title);
+            try
+            {
+                using IServiceScope messageScope = _scopeFactory.CreateScope();
 
-            if (string.IsNullOrEmpty(title))
-            {
-                _client.SendMessage(channel, $"{user} linked to thing {id} on thingiverse => {referenceCount} IRC mentions");
+                var data = messageScope.ServiceProvider.GetRequiredService<IGthxData>();
+
+                var title = await _util.GetTitle(url);
+                _logger.LogInformation("Got the title for ID {id} as '{title}'", id, title);
+                data.AddThingiverseTitle(id, title);
+
+                if (string.IsNullOrEmpty(title))
+                {
+                    _client.SendMessage(channel, $"{user} linked to thing {id} on thingiverse => {referenceCount} IRC mentions");
+                }
+                else
+                {
+                    _client.SendMessage(channel, $"{user} linked to \"{title}\" on thingiverse => {referenceCount} IRC mentions");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _client.SendMessage(channel, $"{user} linked to \"{title}\" on thingiverse => {referenceCount} IRC mentions");
+                _logger.LogError(ex, "ThingiverseModule.GetAndSaveTitle failed!");
             }
         }
     }

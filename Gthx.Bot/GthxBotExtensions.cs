@@ -17,19 +17,19 @@ namespace Gthx.Bot
                 // This group of commands shouldn't have any
                 // YouTube or Thingiverse links embedded, so they're safe
                 // to process first, before the link handling modules.
-                ServiceDescriptor.Singleton<IGthxModule, StatusModule>(),
-                ServiceDescriptor.Singleton<IGthxModule, SeenModule>(),
-                ServiceDescriptor.Singleton<IGthxModule, GoogleModule>(),
-                ServiceDescriptor.Singleton<IGthxModule, LurkerModule>(),
+                ServiceDescriptor.Scoped<IGthxModule, StatusModule>(),
+                ServiceDescriptor.Scoped<IGthxModule, SeenModule>(),
+                ServiceDescriptor.Scoped<IGthxModule, GoogleModule>(),
+                ServiceDescriptor.Scoped<IGthxModule, LurkerModule>(),
 
-                ServiceDescriptor.Singleton<IGthxModule, ThingiverseModule>(),
-                ServiceDescriptor.Singleton<IGthxModule, YoutubeModule>(),
+                ServiceDescriptor.Scoped<IGthxModule, ThingiverseModule>(),
+                ServiceDescriptor.Scoped<IGthxModule, YoutubeModule>(),
 
-                ServiceDescriptor.Singleton<IGthxModule, TellModule>(),
+                ServiceDescriptor.Scoped<IGthxModule, TellModule>(),
 
                 // Factoid module should be last to prevent excess queries for factoids
                 // when that wasn't the user's intention.
-                ServiceDescriptor.Singleton<IGthxModule, FactoidModule>(),
+                ServiceDescriptor.Scoped<IGthxModule, FactoidModule>(),
             });
 
             return services;

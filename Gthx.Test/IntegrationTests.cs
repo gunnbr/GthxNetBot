@@ -53,9 +53,9 @@ public class IntegrationTestsStartup
             {
                 options.UseSqlServer(_config.GetConnectionString("GthxDb"), x => x.MigrationsAssembly("SqlServerMigrations.Migrations"));
             }
-        }, ServiceLifetime.Transient);
+        });
 
-        services.TryAddSingleton<IGthxData, GthxSqlData>();
+        services.TryAddScoped<IGthxData, GthxSqlData>();
         services.TryAddSingleton<IWebReader, WebReader>();
         services.TryAddSingleton<IGthxUtil, GthxUtil>();
         services.TryAddSingleton<MockIrcClient>();
