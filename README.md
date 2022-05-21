@@ -7,6 +7,8 @@ The main reasons for this are :
 * Gthx replaced the bot it used to track, so all the bot tracking code no longer needs to exist
 
 # TODO
+* Change to use .NET 6 DI
+* Figure out how to get scoped lifetime to work for GthxDbContext to fix issue #29
 * Finish the build, configure, and run instructions in this doc (which are currently mainly written as reminders for myself)
 * Handle received actions and update the last seen
 * Handle more CTCP messages
@@ -24,12 +26,12 @@ To use with Visual Studio, install Visual Studio with the following features ena
 * .NET desktop development
 * .NET cross-platform development
 
-Then install the .NET 5 SDK
+Then install the .NET 6 SDK
 
 ## Command Line
 * Install dotnet tools
 * Install entity framework tools
-* Install .NET 5 SDK
+* Install .NET 6 SDK
 
 ## Via Docker
 * Install Docker
@@ -69,7 +71,7 @@ menu item to run through Visual Studio
 
 ## Command line
     dotnet run
-Or find the compiled executables in the bin/Debug/net5.0
+Or find the compiled executables in the bin/Debug/net6.0
 
 ## Docker
 To run with environment overrides and network access to localhost and automatic restart, use:

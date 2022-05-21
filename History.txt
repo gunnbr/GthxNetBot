@@ -1,3 +1,10 @@
+Version 2.24 May 20, 2022
+-------------------------
+Update to .NET 6
+Create a new DI scope to handle each incoming message (fixes #29)
+Fix Thingiverse and Youtube modules to correctly start a background task to get
+  and save titles using their own DbContext
+
 Version 2.23 Nov. 11, 2021
 --------------------------
 Fix the response to a 'tell' command to match the python version of gthx.

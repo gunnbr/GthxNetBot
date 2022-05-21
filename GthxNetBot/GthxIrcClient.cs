@@ -164,7 +164,7 @@ namespace GthxNetBot
             _whoIsTimer.Enabled = true;
         }
 
-        private void HandleWhoIsTimer(object sender, ElapsedEventArgs e)
+        private void HandleWhoIsTimer(object? sender, ElapsedEventArgs e)
         {
             _logger.LogDebug("WhoIs timer expired. Querying again...");
             _client.QueryWhoIs(new List<string?> { _options.Nick });
