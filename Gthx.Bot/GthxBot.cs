@@ -12,15 +12,17 @@ namespace Gthx.Bot
     public class GthxBot
     {
         public static readonly string Version = "2.24 2022-05-18";
-
+        private readonly IIrcClient _ircClient;
         private readonly IBotNick _botNick;
         private readonly ILogger<GthxBot> _logger;
         private readonly IGthxMessageConsumer _messageReader;
         private readonly IServiceScopeFactory _scopeFactory;
         private Regex _matchNick;
         
-        public GthxBot(IBotNick botNick, ILogger<GthxBot> logger, IGthxMessageConsumer messageReader, IServiceScopeFactory scopeFactory) 
+        public GthxBot(IIrcClient ircClient, IBotNick botNick, ILogger<GthxBot> logger, IGthxMessageConsumer messageReader, IServiceScopeFactory scopeFactory) 
         {
+            // IrcClient isn't actually used, but is a dependency just to get the whole bot kicked off to start connecting
+            _ircClient = ircClient;
             _botNick = botNick;
             _logger = logger;
             _messageReader = messageReader;
