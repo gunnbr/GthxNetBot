@@ -8,6 +8,9 @@ namespace GthxNetBot
     public class ConsoleIrcClient : IIrcClient
     {
         private readonly IBotNick _botNick;
+        private readonly DateTime _startupTime = DateTime.UtcNow;
+
+        public DateTime StartupTime => _startupTime;
 
         public ConsoleIrcClient(IBotNick botNick)
         {
