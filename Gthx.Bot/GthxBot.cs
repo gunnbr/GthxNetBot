@@ -11,7 +11,7 @@ namespace Gthx.Bot
 {
     public class GthxBot
     {
-        public static readonly string Version = "2.24 2022-05-18";
+        public static readonly string Version = "2.25 2022-05-30";
         private readonly IIrcClient _ircClient;
         private readonly IBotNick _botNick;
         private readonly ILogger<GthxBot> _logger;

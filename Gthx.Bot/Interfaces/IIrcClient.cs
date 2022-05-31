@@ -29,5 +29,10 @@ namespace Gthx.Bot.Interfaces
         /// <param name="channel">Channel on which to get the list of users</param>
         /// <returns>A list of users in the given channel</returns>
         public Task<List<string>> GetUsersInChannelAsync(string channel);
+
+        /// <summary>
+        /// UTC DateTime that the IrcClient was started
+        /// </summary>
+        public DateTime StartupTime { get; }
     }
 }

@@ -24,6 +24,8 @@ namespace Gthx.Test.Mocks
 
         public string BotNick { get; set; } = "gthxbot";
 
+        public DateTime StartupTime => DateTime.UtcNow;
+
         public event EventHandler BotNickChangedEvent;
 
         public bool SendAction(string channel, string action)

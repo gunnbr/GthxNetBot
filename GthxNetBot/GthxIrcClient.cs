@@ -33,11 +33,14 @@ namespace GthxNetBot
         private readonly IBotRunner _runner;
         private readonly IrcOptions _options = new();
         private readonly System.Timers.Timer _whoIsTimer;
+        private readonly DateTime _startupTime = DateTime.UtcNow;
 
         private readonly StandardIrcClient _client = new()
         {
             FloodPreventer = new IrcStandardFloodPreventer(4, 2000)
         };
+
+        public DateTime StartupTime => _startupTime;
 
         public GthxIrcClient(IGthxMessageConduit sender, IBotNick botNick, ILogger<IrcClient> logger, IConfiguration config, IBotRunner runner) 
         {
