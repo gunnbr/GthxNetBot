@@ -9,7 +9,6 @@ namespace Gthx.Bot.Modules
         private readonly IGthxData _data;
         private readonly IIrcClient _client;
         private readonly IGthxUtil _util;
-        private readonly DateTime _startTime = DateTime.UtcNow;
 
         public StatusModule(IGthxData data, IIrcClient ircClient, IGthxUtil util)
         {
@@ -32,7 +31,7 @@ namespace Gthx.Bot.Modules
 
             var moodValue = _data.GetMood();
             var moodString = MoodToString(moodValue);
-            _client.SendMessage(channel, $"Gthx.NET version {GthxBot.Version}: OK; Up for {_util.TimeBetweenString(_startTime)}; mood: {moodString}");
+            _client.SendMessage(channel, $"Gthx.NET version {GthxBot.Version}: OK; Up for {_util.TimeBetweenString(_client.StartupTime)}; mood: {moodString}");
             return true;
         }
 
