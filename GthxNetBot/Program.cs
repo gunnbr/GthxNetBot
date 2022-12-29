@@ -109,6 +109,11 @@ namespace GthxNetBot
                     myBot.Run();
                     DisposeServices();
                 }
+                catch (Exception ex)
+                {
+                    Log.Error($"Gthx failed to start: {ex.Message}");
+                    Console.WriteLine($"Gthx Failure: {ex}");
+                }
                 finally
                 {
                     Log.Error("GthxNetBot exiting.");
