@@ -197,7 +197,7 @@ namespace Gthx.Test
             var fromUser = "fromUser";
             var message = "Be sure to test tells";
 
-            var tells = _Db.Tell.Where(t => t.Recipient == toUser);
+            var tells = System.Linq.Queryable.Where(_Db.Tell, t => t.Recipient == toUser);
             Assert.AreEqual(0, tells.Count(), "Tell exists at the start of the test");
 
             var tellData = _Data.GetTell(toUser);
@@ -205,7 +205,7 @@ namespace Gthx.Test
 
             _Data.AddTell(fromUser, toUser, message);
 
-            tells = _Db.Tell.Where(t => t.Recipient == toUser);
+            tells = System.Linq.Queryable.Where(_Db.Tell, t => t.Recipient == toUser);
             Assert.AreEqual(1, tells.Count(), "Tell not added to the DB");
 
             tellData = _Data.GetTell(toUser);
@@ -214,7 +214,7 @@ namespace Gthx.Test
             Assert.AreEqual(fromUser, tellData[0].Author);
             Assert.AreEqual(message, tellData[0].Message);
 
-            tells = _Db.Tell.Where(t => t.Recipient == toUser);
+            tells = System.Linq.Queryable.Where(_Db.Tell, t => t.Recipient == toUser);
             Assert.AreEqual(0, tells.Count(), "Tell still exists after being returned");
 
             tellData = _Data.GetTell(toUser);

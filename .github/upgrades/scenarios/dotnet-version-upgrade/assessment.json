@@ -1,0 +1,2121 @@
+{
+  "settings": {
+    "components": {
+      "code": true,
+      "binaries": false
+    },
+    "targetId": "net10.0",
+    "targetDisplayName": ".NETCoreApp,Version=v10.0"
+  },
+  "analysisStartTime": "2026-04-14T17:03:22.0391505Z",
+  "analysisEndTime": "2026-04-14T17:03:27.4276096Z",
+  "privacyModeHelpUrl": "https://go.microsoft.com/fwlink/?linkid=2270980",
+  "stats": {
+    "summary": {
+      "projects": 7,
+      "issues": 5,
+      "incidents": 73,
+      "effort": 73
+    },
+    "charts": {
+      "severity": {
+        "Mandatory": 7,
+        "Optional": 17,
+        "Potential": 49,
+        "Information": 0
+      },
+      "category": {
+        "Project": 7,
+        "NuGet": 30,
+        "Api": 36
+      }
+    }
+  },
+  "projects": [
+    {
+      "path": "Gthx.Bot\\Gthx.Bot.csproj",
+      "startingProject": true,
+      "issues": 3,
+      "storyPoints": 3,
+      "properties": {
+        "appName": "Gthx.Bot",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 22,
+        "numberOfCodeFiles": 22,
+        "linesTotal": 1373,
+        "linesOfCode": 1373,
+        "totalApiScanned": 1139,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "66d52021-c29c-4931-982f-06247362d5e6",
+          "ruleId": "NuGet.0002",
+          "projectPath": "Gthx.Bot\\Gthx.Bot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Threading.Tasks.Dataflow, 5.0.0\n\nRecommendation:\n\nRemove System.Threading.Tasks.Dataflow, and replace with new package System.Threading.Tasks.Dataflow 10.0.5",
+              "protected": "System.Threading.Tasks.Dataflow, 5.0.0\n\nRecommendation:\n\nRemove System.Threading.Tasks.Dataflow, and replace with new package System.Threading.Tasks.Dataflow 10.0.5"
+            },
+            "kind": "File",
+            "path": "Gthx.Bot\\Gthx.Bot.csproj",
+            "snippet": "System.Threading.Tasks.Dataflow, 5.0.0\n\nRecommendation:\n\nRemove System.Threading.Tasks.Dataflow, and replace with new package System.Threading.Tasks.Dataflow 10.0.5",
+            "protectedSnippet": "System.Threading.Tasks.Dataflow, 5.0.0\n\nRecommendation:\n\nRemove System.Threading.Tasks.Dataflow, and replace with new package System.Threading.Tasks.Dataflow 10.0.5",
+            "label": "System.Threading.Tasks.Dataflow 5.0.0",
+            "properties": {
+              "PackageId": "System.Threading.Tasks.Dataflow",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "200fdb90-4aae-4c64-a7b4-46dbf44f464d",
+          "ruleId": "NuGet.0005",
+          "projectPath": "Gthx.Bot\\Gthx.Bot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Threading.Tasks.Dataflow, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove System.Threading.Tasks.Dataflow, and replace with new package System.Threading.Tasks.Dataflow, 10.0.5",
+              "protected": "System.Threading.Tasks.Dataflow, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove System.Threading.Tasks.Dataflow, and replace with new package System.Threading.Tasks.Dataflow, 10.0.5"
+            },
+            "kind": "File",
+            "path": "Gthx.Bot\\Gthx.Bot.csproj",
+            "snippet": "System.Threading.Tasks.Dataflow, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove System.Threading.Tasks.Dataflow, and replace with new package System.Threading.Tasks.Dataflow, 10.0.5",
+            "protectedSnippet": "System.Threading.Tasks.Dataflow, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove System.Threading.Tasks.Dataflow, and replace with new package System.Threading.Tasks.Dataflow, 10.0.5",
+            "label": "System.Threading.Tasks.Dataflow 5.0.0",
+            "properties": {
+              "PackageId": "System.Threading.Tasks.Dataflow",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "8bdb2808-1917-47db-adcd-473ec9e3e2bf",
+          "ruleId": "Project.0002",
+          "projectPath": "Gthx.Bot\\Gthx.Bot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Gthx.Bot\\Gthx.Bot.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Gthx.Data\\Gthx.Core\\Gthx.Core.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 1,
+      "properties": {
+        "appName": "Gthx.Core",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 7,
+        "numberOfCodeFiles": 7,
+        "linesTotal": 117,
+        "linesOfCode": 117,
+        "totalApiScanned": 172,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "30002bdc-30b6-43c5-9e20-df15311b006a",
+          "ruleId": "Project.0002",
+          "projectPath": "Gthx.Data\\Gthx.Core\\Gthx.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Gthx.Data\\Gthx.Core\\Gthx.Core.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+      "startingProject": true,
+      "issues": 3,
+      "storyPoints": 8,
+      "properties": {
+        "appName": "Gthx.Data",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 4,
+        "numberOfCodeFiles": 4,
+        "linesTotal": 413,
+        "linesOfCode": 413,
+        "totalApiScanned": 421,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "24fdebe3-950e-481e-920d-02d69d8185bc",
+          "ruleId": "NuGet.0002",
+          "projectPath": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.EntityFrameworkCore.SqlServer, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.SqlServer, and replace with new package Microsoft.EntityFrameworkCore.SqlServer 10.0.5",
+              "protected": "Microsoft.EntityFrameworkCore.SqlServer, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.SqlServer, and replace with new package Microsoft.EntityFrameworkCore.SqlServer 10.0.5"
+            },
+            "kind": "File",
+            "path": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+            "snippet": "Microsoft.EntityFrameworkCore.SqlServer, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.SqlServer, and replace with new package Microsoft.EntityFrameworkCore.SqlServer 10.0.5",
+            "protectedSnippet": "Microsoft.EntityFrameworkCore.SqlServer, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.SqlServer, and replace with new package Microsoft.EntityFrameworkCore.SqlServer 10.0.5",
+            "label": "Microsoft.EntityFrameworkCore.SqlServer 5.0.7",
+            "properties": {
+              "PackageId": "Microsoft.EntityFrameworkCore.SqlServer",
+              "PackageVersion": "5.0.7",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "f97a766a-07b9-4af8-a3ed-6748c7a54c20",
+          "ruleId": "NuGet.0002",
+          "projectPath": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.EntityFrameworkCore.Tools, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Tools, and replace with new package Microsoft.EntityFrameworkCore.Tools 10.0.5",
+              "protected": "Microsoft.EntityFrameworkCore.Tools, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Tools, and replace with new package Microsoft.EntityFrameworkCore.Tools 10.0.5"
+            },
+            "kind": "File",
+            "path": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+            "snippet": "Microsoft.EntityFrameworkCore.Tools, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Tools, and replace with new package Microsoft.EntityFrameworkCore.Tools 10.0.5",
+            "protectedSnippet": "Microsoft.EntityFrameworkCore.Tools, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Tools, and replace with new package Microsoft.EntityFrameworkCore.Tools 10.0.5",
+            "label": "Microsoft.EntityFrameworkCore.Tools 5.0.7",
+            "properties": {
+              "PackageId": "Microsoft.EntityFrameworkCore.Tools",
+              "PackageVersion": "5.0.7",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "29c68859-71f6-46e9-a393-0ea9cbcda637",
+          "ruleId": "NuGet.0002",
+          "projectPath": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console 10.0.5",
+              "protected": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console 10.0.5"
+            },
+            "kind": "File",
+            "path": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+            "snippet": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console 10.0.5",
+            "label": "Microsoft.Extensions.Logging.Console 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Logging.Console",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "4d17538d-322b-4ee2-9e7c-6410c978e89a",
+          "ruleId": "NuGet.0005",
+          "projectPath": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0",
+              "protected": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0"
+            },
+            "kind": "File",
+            "path": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+            "snippet": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0",
+            "protectedSnippet": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0",
+            "label": "Pomelo.EntityFrameworkCore.MySql 5.0.0",
+            "properties": {
+              "PackageId": "Pomelo.EntityFrameworkCore.MySql",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "9c911cb0-0287-42c0-bb61-9c120bfaa427",
+          "ruleId": "NuGet.0005",
+          "projectPath": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.EntityFrameworkCore.SqlServer, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.EntityFrameworkCore.SqlServer, and replace with new package Microsoft.EntityFrameworkCore.SqlServer, 10.0.5",
+              "protected": "Microsoft.EntityFrameworkCore.SqlServer, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.EntityFrameworkCore.SqlServer, and replace with new package Microsoft.EntityFrameworkCore.SqlServer, 10.0.5"
+            },
+            "kind": "File",
+            "path": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+            "snippet": "Microsoft.EntityFrameworkCore.SqlServer, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.EntityFrameworkCore.SqlServer, and replace with new package Microsoft.EntityFrameworkCore.SqlServer, 10.0.5",
+            "protectedSnippet": "Microsoft.EntityFrameworkCore.SqlServer, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.EntityFrameworkCore.SqlServer, and replace with new package Microsoft.EntityFrameworkCore.SqlServer, 10.0.5",
+            "label": "Microsoft.EntityFrameworkCore.SqlServer 5.0.7",
+            "properties": {
+              "PackageId": "Microsoft.EntityFrameworkCore.SqlServer",
+              "PackageVersion": "5.0.7",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "f61528fe-eefa-4023-aa6b-04bf3aa3be4d",
+          "ruleId": "NuGet.0005",
+          "projectPath": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.EntityFrameworkCore.Tools, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.EntityFrameworkCore.Tools, and replace with new package Microsoft.EntityFrameworkCore.Tools, 10.0.5",
+              "protected": "Microsoft.EntityFrameworkCore.Tools, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.EntityFrameworkCore.Tools, and replace with new package Microsoft.EntityFrameworkCore.Tools, 10.0.5"
+            },
+            "kind": "File",
+            "path": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+            "snippet": "Microsoft.EntityFrameworkCore.Tools, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.EntityFrameworkCore.Tools, and replace with new package Microsoft.EntityFrameworkCore.Tools, 10.0.5",
+            "protectedSnippet": "Microsoft.EntityFrameworkCore.Tools, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.EntityFrameworkCore.Tools, and replace with new package Microsoft.EntityFrameworkCore.Tools, 10.0.5",
+            "label": "Microsoft.EntityFrameworkCore.Tools 5.0.7",
+            "properties": {
+              "PackageId": "Microsoft.EntityFrameworkCore.Tools",
+              "PackageVersion": "5.0.7",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "0995fad0-b03e-48dc-a6b5-d0f46b1fbbdc",
+          "ruleId": "NuGet.0005",
+          "projectPath": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console, 10.0.5",
+              "protected": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console, 10.0.5"
+            },
+            "kind": "File",
+            "path": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+            "snippet": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console, 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console, 10.0.5",
+            "label": "Microsoft.Extensions.Logging.Console 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Logging.Console",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "c932da5f-822f-405e-ab6d-0a3ac5e053f1",
+          "ruleId": "Project.0002",
+          "projectPath": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Gthx.Data\\Gthx.Data\\Gthx.Data.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Gthx.Test\\Gthx.Test.csproj",
+      "startingProject": true,
+      "issues": 5,
+      "storyPoints": 40,
+      "properties": {
+        "appName": "Gthx.Test",
+        "projectKind": "DotNetCoreApp",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 10,
+        "numberOfCodeFiles": 7,
+        "linesTotal": 3844,
+        "linesOfCode": 1896,
+        "totalApiScanned": 3429,
+        "minLinesOfCodeToChange": 36,
+        "maxLinesOfCodeToChange": 36
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "7267d41e-aaf7-4859-a68d-3e59880d0745",
+          "ruleId": "NuGet.0002",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.AspNetCore.TestHost, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.TestHost, and replace with new package Microsoft.AspNetCore.TestHost 10.0.5",
+              "protected": "Microsoft.AspNetCore.TestHost, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.TestHost, and replace with new package Microsoft.AspNetCore.TestHost 10.0.5"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\Gthx.Test.csproj",
+            "snippet": "Microsoft.AspNetCore.TestHost, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.TestHost, and replace with new package Microsoft.AspNetCore.TestHost 10.0.5",
+            "protectedSnippet": "Microsoft.AspNetCore.TestHost, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.TestHost, and replace with new package Microsoft.AspNetCore.TestHost 10.0.5",
+            "label": "Microsoft.AspNetCore.TestHost 5.0.7",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.TestHost",
+              "PackageVersion": "5.0.7",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "49bdc6fc-dab3-431e-8a3d-d7cb28bd42c4",
+          "ruleId": "NuGet.0005",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.AspNetCore.TestHost, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.AspNetCore.TestHost, and replace with new package Microsoft.AspNetCore.TestHost, 10.0.5",
+              "protected": "Microsoft.AspNetCore.TestHost, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.AspNetCore.TestHost, and replace with new package Microsoft.AspNetCore.TestHost, 10.0.5"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\Gthx.Test.csproj",
+            "snippet": "Microsoft.AspNetCore.TestHost, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.AspNetCore.TestHost, and replace with new package Microsoft.AspNetCore.TestHost, 10.0.5",
+            "protectedSnippet": "Microsoft.AspNetCore.TestHost, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.AspNetCore.TestHost, and replace with new package Microsoft.AspNetCore.TestHost, 10.0.5",
+            "label": "Microsoft.AspNetCore.TestHost 5.0.7",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.TestHost",
+              "PackageVersion": "5.0.7",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "c56b4032-bd32-45c6-9fef-aed7ea64081e",
+          "ruleId": "NuGet.0005",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0",
+              "protected": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\Gthx.Test.csproj",
+            "snippet": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0",
+            "protectedSnippet": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0",
+            "label": "Pomelo.EntityFrameworkCore.MySql 5.0.0",
+            "properties": {
+              "PackageId": "Pomelo.EntityFrameworkCore.MySql",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "6d1e9217-2564-4389-914e-4887f6588d48",
+          "ruleId": "Project.0002",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\Gthx.Test.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        },
+        {
+          "incidentId": "e1517693-e4c2-4c7f-8cda-f801882a2f30",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_logger = _server.Host.Services.GetService\u003CILogger\u003CGthxTests\u003E\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxTests.cs",
+            "snippet": "_logger = _server.Host.Services.GetService\u003CILogger\u003CGthxTests\u003E\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 83,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "cdae4c5d-1573-4c78-a621-ed3b85a61dee",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_gthx = _server.Host.Services.GetRequiredService\u003CGthxBot\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxTests.cs",
+            "snippet": "_gthx = _server.Host.Services.GetRequiredService\u003CGthxBot\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 82,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "7e4a7aa6-adeb-4073-9165-1a14ad78a0b3",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_client = (MockIrcClient)_server.Host.Services.GetService\u003CIIrcClient\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxTests.cs",
+            "snippet": "_client = (MockIrcClient)_server.Host.Services.GetService\u003CIIrcClient\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 81,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "b05c866e-2dfd-41ef-977e-357854c5b933",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_data = (MockData)_server.Host.Services.GetService\u003CIGthxData\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxTests.cs",
+            "snippet": "_data = (MockData)_server.Host.Services.GetService\u003CIGthxData\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 80,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "8a41740d-e426-411d-9dd9-e38313bc9788",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup\u003CGthxTestsStartup\u003E().UseSerilog());",
+              "protected": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxTests.cs",
+            "snippet": "_server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup\u003CGthxTestsStartup\u003E().UseSerilog());",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "label": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 79,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "dbc6d69c-b90b-44d2-8480-77b7a241b62b",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_logger = _server.Host.Services.GetService\u003CILogger\u003CGthxTests\u003E\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxTests.cs",
+            "snippet": "_logger = _server.Host.Services.GetService\u003CILogger\u003CGthxTests\u003E\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 83,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "caecbf0e-25fe-4345-94b3-fece39ab97a6",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_gthx = _server.Host.Services.GetRequiredService\u003CGthxBot\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxTests.cs",
+            "snippet": "_gthx = _server.Host.Services.GetRequiredService\u003CGthxBot\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 82,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "ac40ab93-5bdc-47ec-89f7-fd637cb65057",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_client = (MockIrcClient)_server.Host.Services.GetService\u003CIIrcClient\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxTests.cs",
+            "snippet": "_client = (MockIrcClient)_server.Host.Services.GetService\u003CIIrcClient\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 81,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "16f170dd-8588-476c-ac92-5de131898f02",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_data = (MockData)_server.Host.Services.GetService\u003CIGthxData\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxTests.cs",
+            "snippet": "_data = (MockData)_server.Host.Services.GetService\u003CIGthxData\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 80,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "2d95e7df-daa2-4fb0-91cc-b7f8e5cc020c",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup\u003CGthxTestsStartup\u003E().UseSerilog());",
+              "protected": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxTests.cs",
+            "snippet": "_server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup\u003CGthxTestsStartup\u003E().UseSerilog());",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "label": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 79,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "10963d1e-9c14-4274-9fbf-8facc6858b2b",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddLogging(configure =\u003E configure.AddConsole().AddSerilog()).AddTransient\u003CGthxTests\u003E();",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxTests.cs",
+            "snippet": "services.AddLogging(configure =\u003E configure.AddConsole().AddSerilog()).AddTransient\u003CGthxTests\u003E();",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 36,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "7b8d0b18-0849-4636-a85e-b004e601b2e1",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_gthx = _server.Host.Services.GetRequiredService\u003CGthxBot\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\IntegrationTests.cs",
+            "snippet": "_gthx = _server.Host.Services.GetRequiredService\u003CGthxBot\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 106,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "a9f8021d-196b-40bf-bcdc-f9577d182ecb",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_botNick = _server.Host.Services.GetService\u003CIBotNick\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\IntegrationTests.cs",
+            "snippet": "_botNick = _server.Host.Services.GetService\u003CIBotNick\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 105,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "493f028b-058c-4ca3-a3b1-04bc409151d9",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_client = _server.Host.Services.GetService\u003CIIrcClient\u003E() as MockIrcClient;",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\IntegrationTests.cs",
+            "snippet": "_client = _server.Host.Services.GetService\u003CIIrcClient\u003E() as MockIrcClient;",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 104,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "ca7d97be-6bb0-47c6-a72c-ca7d7445f42c",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_data = _server.Host.Services.GetService\u003CIGthxData\u003E() as GthxSqlData;",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\IntegrationTests.cs",
+            "snippet": "_data = _server.Host.Services.GetService\u003CIGthxData\u003E() as GthxSqlData;",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 103,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "0808deb8-659d-4d45-b5b9-34dc83bba164",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_Db = _server.Host.Services.GetRequiredService\u003CGthxDataContext\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\IntegrationTests.cs",
+            "snippet": "_Db = _server.Host.Services.GetRequiredService\u003CGthxDataContext\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 102,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "f7b6e899-242e-46d1-9f53-2878dbf94289",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_server = new TestServer(new WebHostBuilder()\r\n                .UseConfiguration(_config)\r\n                .UseStartup\u003CIntegrationTestsStartup\u003E()\r\n                .UseSerilog());",
+              "protected": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\IntegrationTests.cs",
+            "snippet": "_server = new TestServer(new WebHostBuilder()\r\n                .UseConfiguration(_config)\r\n                .UseStartup\u003CIntegrationTestsStartup\u003E()\r\n                .UseSerilog());",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "label": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 98,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "c283a96f-9b96-4e2c-baf7-ff953ba636a9",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_gthx = _server.Host.Services.GetRequiredService\u003CGthxBot\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\IntegrationTests.cs",
+            "snippet": "_gthx = _server.Host.Services.GetRequiredService\u003CGthxBot\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 106,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "79113d20-c1c6-4299-8b02-5a2111896767",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_botNick = _server.Host.Services.GetService\u003CIBotNick\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\IntegrationTests.cs",
+            "snippet": "_botNick = _server.Host.Services.GetService\u003CIBotNick\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 105,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "93d6d8c3-6624-4f4a-a5be-55f3fc41ed77",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_client = _server.Host.Services.GetService\u003CIIrcClient\u003E() as MockIrcClient;",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\IntegrationTests.cs",
+            "snippet": "_client = _server.Host.Services.GetService\u003CIIrcClient\u003E() as MockIrcClient;",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 104,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "5afd095a-e3ce-41bc-9f40-4a9a104a8f84",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_data = _server.Host.Services.GetService\u003CIGthxData\u003E() as GthxSqlData;",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\IntegrationTests.cs",
+            "snippet": "_data = _server.Host.Services.GetService\u003CIGthxData\u003E() as GthxSqlData;",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 103,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "5be1f646-fa90-4aac-b3ac-abab843ac869",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_Db = _server.Host.Services.GetRequiredService\u003CGthxDataContext\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\IntegrationTests.cs",
+            "snippet": "_Db = _server.Host.Services.GetRequiredService\u003CGthxDataContext\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 102,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "8fbcacad-11c5-43d8-b216-f78df0645cad",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_server = new TestServer(new WebHostBuilder()\r\n                .UseConfiguration(_config)\r\n                .UseStartup\u003CIntegrationTestsStartup\u003E()\r\n                .UseSerilog());",
+              "protected": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\IntegrationTests.cs",
+            "snippet": "_server = new TestServer(new WebHostBuilder()\r\n                .UseConfiguration(_config)\r\n                .UseStartup\u003CIntegrationTestsStartup\u003E()\r\n                .UseSerilog());",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "label": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 98,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "bdde9344-6b42-4824-9483-2d1f2c3ecd19",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddLogging(configure =\u003E configure.AddConsole().AddSerilog()).AddTransient\u003CGthxBot\u003E();",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\IntegrationTests.cs",
+            "snippet": "services.AddLogging(configure =\u003E configure.AddConsole().AddSerilog()).AddTransient\u003CGthxBot\u003E();",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 36,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "26c9bdc2-ac9a-40aa-847e-e2bc8992af98",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_Data = (GthxSqlData)_server.Host.Services.GetService\u003CIGthxData\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxSqlDataTest.cs",
+            "snippet": "_Data = (GthxSqlData)_server.Host.Services.GetService\u003CIGthxData\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 74,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "e55f167e-a5e0-456a-92f2-ad64ba13ac56",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_Db = _server.Host.Services.GetRequiredService\u003CGthxDataContext\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxSqlDataTest.cs",
+            "snippet": "_Db = _server.Host.Services.GetRequiredService\u003CGthxDataContext\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 73,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "ee64346b-c1cc-412a-82f1-65e672946490",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup\u003CSqlDataTestsStartup\u003E().UseSerilog());",
+              "protected": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxSqlDataTest.cs",
+            "snippet": "_server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup\u003CSqlDataTestsStartup\u003E().UseSerilog());",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "label": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 72,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "2b8df639-b453-47bd-a721-97db18ee4a9e",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_Data = (GthxSqlData)_server.Host.Services.GetService\u003CIGthxData\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxSqlDataTest.cs",
+            "snippet": "_Data = (GthxSqlData)_server.Host.Services.GetService\u003CIGthxData\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 74,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "c07a4e46-2d67-4ae1-ac32-947159e457b8",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_Db = _server.Host.Services.GetRequiredService\u003CGthxDataContext\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxSqlDataTest.cs",
+            "snippet": "_Db = _server.Host.Services.GetRequiredService\u003CGthxDataContext\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 73,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "ca18d6c9-244d-4a32-8bd4-82f26fc415ce",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup\u003CSqlDataTestsStartup\u003E().UseSerilog());",
+              "protected": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxSqlDataTest.cs",
+            "snippet": "_server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup\u003CSqlDataTestsStartup\u003E().UseSerilog());",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "label": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 72,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "e398e090-f1b5-4315-85d6-ced799be9c39",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddLogging(configure =\u003E configure.AddConsole().AddSerilog()).AddTransient\u003CGthxBot\u003E();",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\GthxSqlDataTest.cs",
+            "snippet": "services.AddLogging(configure =\u003E configure.AddConsole().AddSerilog()).AddTransient\u003CGthxBot\u003E();",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 36,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "e515d934-6190-4510-9406-b427295ec670",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_util = _server.Host.Services.GetService\u003CIGthxUtil\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\UtilTests.cs",
+            "snippet": "_util = _server.Host.Services.GetService\u003CIGthxUtil\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 66,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "44b04017-09ce-44af-9ebd-dcb3ca59d19a",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup\u003CUtilTestStartup\u003E().UseSerilog());",
+              "protected": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\UtilTests.cs",
+            "snippet": "_server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup\u003CUtilTestStartup\u003E().UseSerilog());",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "label": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 65,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "aa797084-a54d-4f8f-b950-456db141df42",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_util = _server.Host.Services.GetService\u003CIGthxUtil\u003E();",
+              "protected": "T:Microsoft.AspNetCore.Hosting.IWebHost"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\UtilTests.cs",
+            "snippet": "_util = _server.Host.Services.GetService\u003CIGthxUtil\u003E();",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "label": "T:Microsoft.AspNetCore.Hosting.IWebHost",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 66,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "c429aa41-357b-44f9-be62-de79fcb330fc",
+          "ruleId": "Api.0002",
+          "description": "WebHostBuilder, IWebHost, and WebHost are obsolete ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup\u003CUtilTestStartup\u003E().UseSerilog());",
+              "protected": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\UtilTests.cs",
+            "snippet": "_server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup\u003CUtilTestStartup\u003E().UseSerilog());",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "label": "T:Microsoft.AspNetCore.Hosting.WebHostBuilder",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/aspnet-core/10/webhostbuilder-deprecated.md",
+                "isCustom": false
+              }
+            ],
+            "line": 65,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "b7966db7-bd4d-4f7c-9187-cf3d1c3a0fc3",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "Gthx.Test\\Gthx.Test.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddLogging(configure =\u003E configure.AddConsole()).AddTransient\u003CUtilTests\u003E();",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "Gthx.Test\\UtilTests.cs",
+            "snippet": "services.AddLogging(configure =\u003E configure.AddConsole()).AddTransient\u003CUtilTests\u003E();",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 35,
+            "column": 12
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "GthxNetBot\\GthxNetBot.csproj",
+      "startingProject": true,
+      "issues": 3,
+      "storyPoints": 18,
+      "properties": {
+        "appName": "GthxNetBot",
+        "projectKind": "DotNetCoreApp",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 7,
+        "numberOfCodeFiles": 7,
+        "linesTotal": 874,
+        "linesOfCode": 874,
+        "totalApiScanned": 1279,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "eaf50b03-28af-490d-af2e-229ab767a5c9",
+          "ruleId": "NuGet.0002",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.EntityFrameworkCore.Design, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design 10.0.5",
+              "protected": "Microsoft.EntityFrameworkCore.Design, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.EntityFrameworkCore.Design, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design 10.0.5",
+            "protectedSnippet": "Microsoft.EntityFrameworkCore.Design, 5.0.7\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design 10.0.5",
+            "label": "Microsoft.EntityFrameworkCore.Design 5.0.7",
+            "properties": {
+              "PackageId": "Microsoft.EntityFrameworkCore.Design",
+              "PackageVersion": "5.0.7",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "d9e077cb-293c-4565-8aee-a8fe9d5e795a",
+          "ruleId": "NuGet.0002",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Configuration, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration, and replace with new package Microsoft.Extensions.Configuration 10.0.5",
+              "protected": "Microsoft.Extensions.Configuration, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration, and replace with new package Microsoft.Extensions.Configuration 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.Configuration, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration, and replace with new package Microsoft.Extensions.Configuration 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Configuration, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration, and replace with new package Microsoft.Extensions.Configuration 10.0.5",
+            "label": "Microsoft.Extensions.Configuration 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Configuration",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "de92700d-9029-4f73-9381-61c5803b25e8",
+          "ruleId": "NuGet.0002",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Configuration.CommandLine, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.CommandLine, and replace with new package Microsoft.Extensions.Configuration.CommandLine 10.0.5",
+              "protected": "Microsoft.Extensions.Configuration.CommandLine, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.CommandLine, and replace with new package Microsoft.Extensions.Configuration.CommandLine 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.Configuration.CommandLine, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.CommandLine, and replace with new package Microsoft.Extensions.Configuration.CommandLine 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Configuration.CommandLine, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.CommandLine, and replace with new package Microsoft.Extensions.Configuration.CommandLine 10.0.5",
+            "label": "Microsoft.Extensions.Configuration.CommandLine 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Configuration.CommandLine",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "79b08811-eb05-432f-ad17-66633901a48a",
+          "ruleId": "NuGet.0002",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Configuration.EnvironmentVariables, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.EnvironmentVariables, and replace with new package Microsoft.Extensions.Configuration.EnvironmentVariables 10.0.5",
+              "protected": "Microsoft.Extensions.Configuration.EnvironmentVariables, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.EnvironmentVariables, and replace with new package Microsoft.Extensions.Configuration.EnvironmentVariables 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.Configuration.EnvironmentVariables, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.EnvironmentVariables, and replace with new package Microsoft.Extensions.Configuration.EnvironmentVariables 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Configuration.EnvironmentVariables, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.EnvironmentVariables, and replace with new package Microsoft.Extensions.Configuration.EnvironmentVariables 10.0.5",
+            "label": "Microsoft.Extensions.Configuration.EnvironmentVariables 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Configuration.EnvironmentVariables",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "8e69e8cd-b8d0-485d-889d-8913113222e7",
+          "ruleId": "NuGet.0002",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Configuration.Json, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.Json, and replace with new package Microsoft.Extensions.Configuration.Json 10.0.5",
+              "protected": "Microsoft.Extensions.Configuration.Json, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.Json, and replace with new package Microsoft.Extensions.Configuration.Json 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.Configuration.Json, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.Json, and replace with new package Microsoft.Extensions.Configuration.Json 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Configuration.Json, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Configuration.Json, and replace with new package Microsoft.Extensions.Configuration.Json 10.0.5",
+            "label": "Microsoft.Extensions.Configuration.Json 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Configuration.Json",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "fd72c711-622a-4775-9530-ec22214d2e28",
+          "ruleId": "NuGet.0002",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.DependencyInjection, 5.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection 10.0.5",
+              "protected": "Microsoft.Extensions.DependencyInjection, 5.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.DependencyInjection, 5.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.DependencyInjection, 5.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection 10.0.5",
+            "label": "Microsoft.Extensions.DependencyInjection 5.0.1",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.DependencyInjection",
+              "PackageVersion": "5.0.1",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "876c2647-9228-4697-b67a-97dc7ebe79a4",
+          "ruleId": "NuGet.0002",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Logging, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging, and replace with new package Microsoft.Extensions.Logging 10.0.5",
+              "protected": "Microsoft.Extensions.Logging, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging, and replace with new package Microsoft.Extensions.Logging 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.Logging, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging, and replace with new package Microsoft.Extensions.Logging 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Logging, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging, and replace with new package Microsoft.Extensions.Logging 10.0.5",
+            "label": "Microsoft.Extensions.Logging 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Logging",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "c695507d-cbfe-4dd2-84ec-2ae3d880b85a",
+          "ruleId": "NuGet.0002",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console 10.0.5",
+              "protected": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console 10.0.5",
+            "label": "Microsoft.Extensions.Logging.Console 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Logging.Console",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": "10.0.5",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "d45e3ab9-7578-4f31-a73e-5e45dbb4a1fd",
+          "ruleId": "NuGet.0005",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.EntityFrameworkCore.Design, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design, 10.0.5",
+              "protected": "Microsoft.EntityFrameworkCore.Design, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design, 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.EntityFrameworkCore.Design, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design, 10.0.5",
+            "protectedSnippet": "Microsoft.EntityFrameworkCore.Design, 5.0.7\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design, 10.0.5",
+            "label": "Microsoft.EntityFrameworkCore.Design 5.0.7",
+            "properties": {
+              "PackageId": "Microsoft.EntityFrameworkCore.Design",
+              "PackageVersion": "5.0.7",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "6e755fe2-5d23-4ffd-b2e6-baf36eebb2d7",
+          "ruleId": "NuGet.0005",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Configuration, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration, and replace with new package Microsoft.Extensions.Configuration, 10.0.5",
+              "protected": "Microsoft.Extensions.Configuration, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration, and replace with new package Microsoft.Extensions.Configuration, 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.Configuration, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration, and replace with new package Microsoft.Extensions.Configuration, 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Configuration, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration, and replace with new package Microsoft.Extensions.Configuration, 10.0.5",
+            "label": "Microsoft.Extensions.Configuration 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Configuration",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "50bbea57-8861-41fd-936b-f2a4804ef102",
+          "ruleId": "NuGet.0005",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Configuration.CommandLine, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration.CommandLine, and replace with new package Microsoft.Extensions.Configuration.CommandLine, 10.0.5",
+              "protected": "Microsoft.Extensions.Configuration.CommandLine, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration.CommandLine, and replace with new package Microsoft.Extensions.Configuration.CommandLine, 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.Configuration.CommandLine, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration.CommandLine, and replace with new package Microsoft.Extensions.Configuration.CommandLine, 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Configuration.CommandLine, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration.CommandLine, and replace with new package Microsoft.Extensions.Configuration.CommandLine, 10.0.5",
+            "label": "Microsoft.Extensions.Configuration.CommandLine 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Configuration.CommandLine",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "8d60f5de-6e87-4abf-9a66-e101992a59fa",
+          "ruleId": "NuGet.0005",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Configuration.EnvironmentVariables, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration.EnvironmentVariables, and replace with new package Microsoft.Extensions.Configuration.EnvironmentVariables, 10.0.5",
+              "protected": "Microsoft.Extensions.Configuration.EnvironmentVariables, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration.EnvironmentVariables, and replace with new package Microsoft.Extensions.Configuration.EnvironmentVariables, 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.Configuration.EnvironmentVariables, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration.EnvironmentVariables, and replace with new package Microsoft.Extensions.Configuration.EnvironmentVariables, 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Configuration.EnvironmentVariables, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration.EnvironmentVariables, and replace with new package Microsoft.Extensions.Configuration.EnvironmentVariables, 10.0.5",
+            "label": "Microsoft.Extensions.Configuration.EnvironmentVariables 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Configuration.EnvironmentVariables",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "62c032f8-c3ac-4b66-949e-f3e172e22547",
+          "ruleId": "NuGet.0005",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Configuration.Json, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration.Json, and replace with new package Microsoft.Extensions.Configuration.Json, 10.0.5",
+              "protected": "Microsoft.Extensions.Configuration.Json, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration.Json, and replace with new package Microsoft.Extensions.Configuration.Json, 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.Configuration.Json, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration.Json, and replace with new package Microsoft.Extensions.Configuration.Json, 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Configuration.Json, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Configuration.Json, and replace with new package Microsoft.Extensions.Configuration.Json, 10.0.5",
+            "label": "Microsoft.Extensions.Configuration.Json 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Configuration.Json",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "5bd9c39e-a689-4ce3-9583-1daa1c842dd2",
+          "ruleId": "NuGet.0005",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.DependencyInjection, 5.0.1\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection, 10.0.5",
+              "protected": "Microsoft.Extensions.DependencyInjection, 5.0.1\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection, 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.DependencyInjection, 5.0.1\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection, 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.DependencyInjection, 5.0.1\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection, 10.0.5",
+            "label": "Microsoft.Extensions.DependencyInjection 5.0.1",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.DependencyInjection",
+              "PackageVersion": "5.0.1",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "5c4875a0-7228-4df9-9ea4-14b48c485a1f",
+          "ruleId": "NuGet.0005",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Logging, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Logging, and replace with new package Microsoft.Extensions.Logging, 10.0.5",
+              "protected": "Microsoft.Extensions.Logging, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Logging, and replace with new package Microsoft.Extensions.Logging, 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.Logging, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Logging, and replace with new package Microsoft.Extensions.Logging, 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Logging, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Logging, and replace with new package Microsoft.Extensions.Logging, 10.0.5",
+            "label": "Microsoft.Extensions.Logging 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Logging",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "c2683b52-e800-44b1-bf99-6d45bbd28eae",
+          "ruleId": "NuGet.0005",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console, 10.0.5",
+              "protected": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console, 10.0.5"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console, 10.0.5",
+            "protectedSnippet": "Microsoft.Extensions.Logging.Console, 5.0.0\n\nRecommendation:\n\nThis package has been deprecated as part of the .NET Package Deprecation effort. You can learn more about it from https://github.com/dotnet/announcements/issues/217\nRemove Microsoft.Extensions.Logging.Console, and replace with new package Microsoft.Extensions.Logging.Console, 10.0.5",
+            "label": "Microsoft.Extensions.Logging.Console 5.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Logging.Console",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "cb7a09d8-a0a2-4ad5-b413-19e74799c3d1",
+          "ruleId": "NuGet.0005",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0",
+              "protected": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0",
+            "protectedSnippet": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0",
+            "label": "Pomelo.EntityFrameworkCore.MySql 5.0.0",
+            "properties": {
+              "PackageId": "Pomelo.EntityFrameworkCore.MySql",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "4ac76833-ade0-47d3-b04d-6f96992dbf15",
+          "ruleId": "Project.0002",
+          "projectPath": "GthxNetBot\\GthxNetBot.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "GthxNetBot\\GthxNetBot.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Gthx.Data\\MariaDbMigrations\\MariaDbMigrations.csproj",
+      "startingProject": true,
+      "issues": 2,
+      "storyPoints": 2,
+      "properties": {
+        "appName": "MariaDbMigrations",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 5,
+        "numberOfCodeFiles": 5,
+        "linesTotal": 884,
+        "linesOfCode": 884,
+        "totalApiScanned": 1097,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "f28c1c67-fa5c-4edc-b3d0-20631d017977",
+          "ruleId": "NuGet.0005",
+          "projectPath": "Gthx.Data\\MariaDbMigrations\\MariaDbMigrations.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0",
+              "protected": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0"
+            },
+            "kind": "File",
+            "path": "Gthx.Data\\MariaDbMigrations\\MariaDbMigrations.csproj",
+            "snippet": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0",
+            "protectedSnippet": "Pomelo.EntityFrameworkCore.MySql, 5.0.0\n\nRecommendation:\n\nShould be replaced.\nRemove Pomelo.EntityFrameworkCore.MySql, and replace with new package Pomelo.EntityFrameworkCore.MySql, 9.0.0",
+            "label": "Pomelo.EntityFrameworkCore.MySql 5.0.0",
+            "properties": {
+              "PackageId": "Pomelo.EntityFrameworkCore.MySql",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "675ae12f-e7c3-4377-8f4c-f559172ea203",
+          "ruleId": "Project.0002",
+          "projectPath": "Gthx.Data\\MariaDbMigrations\\MariaDbMigrations.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Gthx.Data\\MariaDbMigrations\\MariaDbMigrations.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "Gthx.Data\\SqlServerMigrations\\SqlServerMigrations.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 1,
+      "properties": {
+        "appName": "SqlServerMigrations",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net6.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 5,
+        "numberOfCodeFiles": 5,
+        "linesTotal": 939,
+        "linesOfCode": 939,
+        "totalApiScanned": 1114,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "8030d9d3-58b6-4e67-a4ac-d8bbb06714b0",
+          "ruleId": "Project.0002",
+          "projectPath": "Gthx.Data\\SqlServerMigrations\\SqlServerMigrations.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net6.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net6.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "Gthx.Data\\SqlServerMigrations\\SqlServerMigrations.csproj",
+            "snippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net6.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net6.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    }
+  ],
+  "rules": {
+    "Project.0002": {
+      "id": "Project.0002",
+      "isFeature": false,
+      "description": "Project\u0027s target framework(s) needs to be changed to the new target framework that you selected for this upgrade.\n\nDuring upgrade target framework will be adjusted to corresponding platform when applicable. In some cases project would result in multiple target frameworks after the upgrade if it was using features that now have their own platforms in modern .NET frameworks (windows, iOS, Android etc).",
+      "label": "Project\u0027s target framework(s) needs to be changed",
+      "severity": "Mandatory",
+      "effort": 1,
+      "links": [
+        {
+          "title": "Overview of porting from .NET Framework to .NET",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2265227",
+          "isCustom": false
+        },
+        {
+          "title": ".NET project SDKs",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2265226",
+          "isCustom": false
+        }
+      ]
+    },
+    "NuGet.0002": {
+      "id": "NuGet.0002",
+      "isFeature": false,
+      "description": "NuGet package upgrade is recommended for selected target framework.\n\nStandard .NET packages are recommended to have versions matching version of .NET that project targets.\n\nSome other packages also are known to work better for selected target frameworks.",
+      "label": "NuGet package upgrade is recommended",
+      "severity": "Potential",
+      "effort": 1,
+      "links": [
+        {
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262530",
+          "isCustom": false
+        }
+      ]
+    },
+    "NuGet.0005": {
+      "id": "NuGet.0005",
+      "isFeature": false,
+      "description": "NuGet package is deprecated.\n\nGo to its documentation and if there is a guidance for replacement of functionality provided by this package.",
+      "label": "NuGet package is deprecated",
+      "severity": "Optional",
+      "effort": 1,
+      "links": [
+        {
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262531",
+          "isCustom": false
+        }
+      ]
+    },
+    "Api.0002": {
+      "id": "Api.0002",
+      "isFeature": false,
+      "description": "API is source incompatible for selected .NET version: requires code changes to compile successfully when targeting a new version, such as removing obsolete APIs or changing method signatures.",
+      "label": "Source incompatible for selected .NET version",
+      "severity": "Potential",
+      "effort": 1,
+      "links": [
+        {
+          "title": "Breaking changes in .NET",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262679",
+          "isCustom": false
+        }
+      ]
+    },
+    "Api.0003": {
+      "id": "Api.0003",
+      "isFeature": false,
+      "description": "API has a behavioral change in selected .NET version: code and binaries may behave differently at runtime without needing recompilation, but the new behavior might be undesirable and require updates.",
+      "label": "Behavioral change in selected .NET version",
+      "severity": "Potential",
+      "effort": 1
+    }
+  }
+}
