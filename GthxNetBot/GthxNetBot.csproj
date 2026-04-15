@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="IrcDotNet" Version="0.7.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.17" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />

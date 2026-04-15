@@ -171,9 +171,10 @@ public class IntegrationTests
     }
 
     [Test]
+    [Ignore("Thingiverse is currently blocking these requests. Reenable once we can reliably fetch the title again.")]
     public async Task TestLiveThingiverseReferences()
     {
-        // Test fetching a new title that uses the <title> element
+        // Test fetching a new title that uses the <title> element  2
         var testChannel = "#reprap";
         var testUser = "RandomNick";
         _gthx.HandleReceivedMessage(testChannel, testUser, $"Your daughter would really like this: https://www.thingiverse.com/thing:2810756");
