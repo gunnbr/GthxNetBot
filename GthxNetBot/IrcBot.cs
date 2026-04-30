@@ -1,5 +1,4 @@
 ﻿using Gthx.Bot;
-using Gthx.Bot.Interfaces;
 using GthxData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
