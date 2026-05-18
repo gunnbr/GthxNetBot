@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Serilog;
@@ -108,15 +109,26 @@ public class IntegrationTests
         try
         {
             Log.Information("Serilog enabled for IntegrationTests");
-            _server = new TestServer(new WebHostBuilder()
-                .UseConfiguration(_config)
-                .UseStartup<IntegrationTestsStartup>()
-                .UseSerilog());
-            _Db = _server.Host.Services.GetRequiredService<GthxDataContext>();
-            _data = _server.Host.Services.GetService<IGthxData>() as GthxSqlData;
-            _client = _server.Host.Services.GetService<IIrcClient>() as MockIrcClient;
-            _botNick = _server.Host.Services.GetService<IBotNick>();
-            _gthx = _server.Host.Services.GetRequiredService<GthxBot>();
+            var hostBuilder = new HostBuilder()
+                .ConfigureAppConfiguration((context, builder) =>
+                {
+                    builder.AddConfiguration(_config);
+                })
+                .ConfigureWebHost(webHostBuilder =>
+                {
+                    webHostBuilder
+                        .UseTestServer()
+                        .UseStartup<IntegrationTestsStartup>();
+                })
+                .UseSerilog();
+
+            var host = hostBuilder.Start();
+            _server = host.GetTestServer();
+            _Db = host.Services.GetRequiredService<GthxDataContext>();
+            _data = host.Services.GetService<IGthxData>() as GthxSqlData;
+            _client = host.Services.GetService<IIrcClient>() as MockIrcClient;
+            _botNick = host.Services.GetService<IBotNick>();
+            _gthx = host.Services.GetRequiredService<GthxBot>();
         }
         catch (Exception ex)
         {
