@@ -16,6 +16,7 @@ using Serilog.Formatting.Json;
 using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Gthx.Test
 {
@@ -57,10 +58,21 @@ namespace Gthx.Test
 
         public GthxSqlDataTest()
         {
-            _config = new ConfigurationBuilder()
+            // Use the SQL Server container connection string
+            var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false)
-                .Build();
+                .AddJsonFile("appsettings.json", optional: false);
+
+            // Override the connection string for tests
+            var containerConnString = SqlServerTestContainerSetUp.SqlServerFixture?.ConnectionString;
+            if (!string.IsNullOrEmpty(containerConnString))
+            {
+                configBuilder.AddInMemoryCollection(new[]
+                {
+                    new KeyValuePair<string, string>("ConnectionStrings:GthxDb", containerConnString)
+                });
+            }
+            _config = configBuilder.Build();
 
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_config)

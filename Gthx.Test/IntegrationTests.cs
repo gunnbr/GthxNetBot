@@ -9,13 +9,14 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Gthx.Test;
 
@@ -83,10 +84,21 @@ public class IntegrationTests
 
     public IntegrationTests()
     {
-        _config = new ConfigurationBuilder()
+        // Use the SQL Server container connection string
+        var configBuilder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false)
-            .Build();
+            .AddJsonFile("appsettings.json", optional: false);
+
+        // Override the connection string for tests
+        var containerConnString = SqlServerTestContainerSetUp.SqlServerFixture?.ConnectionString;
+        if (!string.IsNullOrEmpty(containerConnString))
+        {
+            configBuilder.AddInMemoryCollection(new[]
+            {
+                    new KeyValuePair<string, string>("ConnectionStrings:GthxDb", containerConnString)
+                });
+        }
+        _config = configBuilder.Build();
 
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(_config)
@@ -171,7 +183,6 @@ public class IntegrationTests
     }
 
     [Test]
-    [Ignore("Thingiverse is currently blocking these requests. Reenable once we can reliably fetch the title again.")]
     public async Task TestLiveThingiverseReferences()
     {
         // Test fetching a new title that uses the <title> element  2
