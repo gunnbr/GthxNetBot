@@ -16,18 +16,18 @@ namespace Gthx.Test
                 .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
                 .WithEnvironment("ACCEPT_EULA", "Y")
                 .WithEnvironment("SA_PASSWORD", "Your_password123")
-                .WithPortBinding(14333, 1433)
+                .WithPortBinding(1433, true)
                 .WithWaitStrategy(
                     Wait.ForUnixContainer()
-                        .UntilPortIsAvailable(1433)
-                        .UntilMessageIsLogged("SQL Server is now ready for client connections"))
+                        .UntilPortIsAvailable(1433))
                 .Build();
         }
 
         public async Task InitializeAsync()
         {
             await _container.StartAsync();
-            ConnectionString = $"Server=127.0.0.1,14333;Database=master;User Id=sa;Password=Your_password123;TrustServerCertificate=True;";
+            var mappedPort = _container.GetMappedPublicPort(1433);
+            ConnectionString = $"Server=127.0.0.1,{mappedPort};Database=GthxNetBotTest;User Id=sa;Password=Your_password123;TrustServerCertificate=True;";
         }
 
         public async ValueTask DisposeAsync()
