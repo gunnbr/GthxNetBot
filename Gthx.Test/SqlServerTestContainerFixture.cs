@@ -17,7 +17,10 @@ namespace Gthx.Test
                 .WithEnvironment("ACCEPT_EULA", "Y")
                 .WithEnvironment("SA_PASSWORD", "Your_password123")
                 .WithPortBinding(14333, 1433)
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(1433))
+                .WithWaitStrategy(
+                    Wait.ForUnixContainer()
+                        .UntilPortIsAvailable(1433)
+                        .UntilMessageIsLogged("SQL Server is now ready for client connections"))
                 .Build();
         }
 
