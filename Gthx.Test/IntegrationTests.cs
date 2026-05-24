@@ -59,7 +59,7 @@ public class IntegrationTestsStartup
 
         services.TryAddScoped<IGthxData, GthxSqlData>();
         services.TryAddSingleton<IWebReader, WebReader>();
-        services.TryAddSingleton<IGthxUtil, GthxUtil>();
+        services.TryAddSingleton<IGthxUtil, MockGthxUtil>();
         services.TryAddSingleton<MockIrcClient>();
         services.TryAddSingleton<IIrcClient>(sp => sp.GetRequiredService<MockIrcClient>());
         services.TryAddSingleton<IBotNick>(sp => sp.GetRequiredService<MockIrcClient>());
