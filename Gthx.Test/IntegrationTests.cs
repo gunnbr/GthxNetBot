@@ -197,7 +197,7 @@ public class IntegrationTests
     [Test]
     public async Task TestLiveThingiverseReferences()
     {
-        // Test fetching a new title that uses the <title> element  2
+        // Test fetching a new title that uses the <title> element
         var testChannel = "#reprap";
         var testUser = "RandomNick";
         _gthx.HandleReceivedMessage(testChannel, testUser, $"Your daughter would really like this: https://www.thingiverse.com/thing:2810756");
