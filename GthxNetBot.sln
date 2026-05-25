@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.5.11626.173 insiders
+VisualStudioVersion = 18.5.11626.173
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GthxNetBot", "GthxNetBot\GthxNetBot.csproj", "{6B8ADB96-CADB-4DD3-A426-A8429B0DA900}"
 EndProject
