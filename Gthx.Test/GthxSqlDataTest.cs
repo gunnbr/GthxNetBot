@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 using Serilog;
 using Serilog.Formatting.Json;
@@ -17,7 +18,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using Gthx.Test.SqlIntegration;
 
 namespace Gthx.Test
 {
@@ -65,14 +65,16 @@ namespace Gthx.Test
                 .AddJsonFile("appsettings.json", optional: false);
 
             // Override the connection string for tests
-            var containerConnString = SqlServerTestContainerSetUp.SqlServerFixture?.ConnectionString;
-            if (!string.IsNullOrEmpty(containerConnString))
+            var containerConnString = SqlServerTestContainerSetUp.GetConnectionStringAsync().GetAwaiter().GetResult();
+            var sqlBuilder = new SqlConnectionStringBuilder(containerConnString)
             {
-                configBuilder.AddInMemoryCollection(new[]
-                {
-                    new KeyValuePair<string, string>("ConnectionStrings:GthxDb", containerConnString)
-                });
-            }
+                InitialCatalog = "GthxSqlDataTests"
+            };
+
+            configBuilder.AddInMemoryCollection(new[]
+            {
+                new KeyValuePair<string, string>("ConnectionStrings:GthxDb", sqlBuilder.ConnectionString)
+            });
             _config = configBuilder.Build();
 
             Log.Logger = new LoggerConfiguration()

@@ -12,13 +12,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Gthx.Test.SqlIntegration;
 
 namespace Gthx.Test;
 
@@ -92,14 +92,16 @@ public class IntegrationTests
             .AddJsonFile("appsettings.json", optional: false);
 
         // Override the connection string for tests
-        var containerConnString = SqlServerTestContainerSetUp.SqlServerFixture?.ConnectionString;
-        if (!string.IsNullOrEmpty(containerConnString))
+        var containerConnString = SqlServerTestContainerSetUp.GetConnectionStringAsync().GetAwaiter().GetResult();
+        var sqlBuilder = new SqlConnectionStringBuilder(containerConnString)
         {
-            configBuilder.AddInMemoryCollection(new[]
-            {
-                    new KeyValuePair<string, string>("ConnectionStrings:GthxDb", containerConnString)
-                });
-        }
+            InitialCatalog = "GthxIntegrationTests"
+        };
+
+        configBuilder.AddInMemoryCollection(new[]
+        {
+                new KeyValuePair<string, string>("ConnectionStrings:GthxDb", sqlBuilder.ConnectionString)
+            });
         _config = configBuilder.Build();
 
         Log.Logger = new LoggerConfiguration()
