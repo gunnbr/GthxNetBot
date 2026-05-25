@@ -1,8 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Gthx.Bot;
+using Gthx.Bot.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Sinks.Email;
+using System;
 using System.Collections.Generic;
 
 namespace GthxNetBot
@@ -23,6 +27,9 @@ namespace GthxNetBot
     {
         static void Main(string[] args)
         {
+            var useConsoleTestBot = Array.Exists(args, arg =>
+                string.Equals(arg, "--console", StringComparison.OrdinalIgnoreCase));
+
             var host = Host.CreateDefaultBuilder(args)
                 .UseSerilog((context, services, configuration) =>
                 {
@@ -50,9 +57,40 @@ namespace GthxNetBot
                 })
                 .ConfigureServices((context, services) =>
                 {
-                    // Register your services here
-                    services.AddTransient<IBotRunner, IrcBot>();
-                    // Add other services as needed
+                    // Register DbContext with scoped lifetime
+                    services.AddDbContext<GthxData.GthxDataContext>(options =>
+                        options.UseSqlServer(context.Configuration.GetConnectionString("GthxDatabase")));
+
+                    // Register IGthxData as scoped
+                    services.AddScoped<Gthx.Data.IGthxData, Gthx.Data.GthxSqlData>();
+
+                    // Register core bot services
+                    services.AddSingleton<IBotNick, NickManager>();
+                    services.AddSingleton<GthxMessageConduit>();
+                    services.AddSingleton<IGthxMessageConduit>(provider =>
+                        provider.GetRequiredService<GthxMessageConduit>());
+                    services.AddSingleton<IGthxMessageConsumer>(provider =>
+                        provider.GetRequiredService<GthxMessageConduit>());
+                    services.AddSingleton<IWebReader, WebReader>();
+                    services.AddSingleton<IGthxUtil, GthxUtil>();
+                    services.AddSingleton<GthxBot>();
+                    services.AddGthxBot();
+
+                    // Register IRC client implementations
+                    services.AddSingleton<ConsoleIrcClient>();
+                    services.AddSingleton<GthxIrcClient>();
+                    services.AddSingleton<IIrcClient>(provider =>
+                        useConsoleTestBot
+                            ? provider.GetRequiredService<ConsoleIrcClient>()
+                            : provider.GetRequiredService<GthxIrcClient>());
+
+                    // Register bot runners
+                    services.AddSingleton<IrcBot>();
+                    services.AddSingleton<ConsoleTestBot>();
+                    services.AddSingleton<IBotRunner>(provider =>
+                        useConsoleTestBot
+                            ? provider.GetRequiredService<ConsoleTestBot>()
+                            : provider.GetRequiredService<IrcBot>());
                 })
                 .Build();
 

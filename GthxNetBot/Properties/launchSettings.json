@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GthxNetBot": {
+      "commandName": "Project",
+      "commandLineArgs": "--console"
+    }
+  }
+}

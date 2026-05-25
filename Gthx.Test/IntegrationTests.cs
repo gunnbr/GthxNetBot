@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Gthx.Test.SqlIntegration;
 
 namespace Gthx.Test;
 
@@ -154,7 +155,7 @@ public class IntegrationTests
     }
 
     [Test]
-    public async Task TestLiveYoutubeReferences()
+    public async Task TestYoutubeReferences()
     {
         var testChannel = "#reprap";
         var testUser = "BobYourUncle";
@@ -195,7 +196,7 @@ public class IntegrationTests
     }
 
     [Test]
-    public async Task TestLiveThingiverseReferences()
+    public async Task TestThingiverseReferences()
     {
         // Test fetching a new title that uses the <title> element
         var testChannel = "#reprap";
