@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using System.Threading.Tasks;
 
-namespace Gthx.Test
+namespace Gthx.Test.SqlIntegration
 {
     [SetUpFixture]
     public class SqlServerTestContainerSetUp
