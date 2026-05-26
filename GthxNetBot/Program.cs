@@ -59,7 +59,33 @@ namespace GthxNetBot
                 {
                     // Register DbContext with scoped lifetime
                     services.AddDbContext<GthxData.GthxDataContext>(options =>
-                        options.UseSqlServer(context.Configuration.GetConnectionString("GthxDatabase")));
+                    {
+                        var connectionString =
+                            context.Configuration.GetConnectionString("GthxDb") ??
+                            throw new InvalidOperationException("Missing connection string. Configure ConnectionStrings:GthxDb.");
+
+                        var dbType = (context.Configuration.GetConnectionString("GthxDb_Type") ?? "sqlserver")
+                            .Trim()
+                            .ToLowerInvariant();
+
+                        if (dbType is "mariadb" or "mysql")
+                        {
+                            options.UseMySql(
+                                connectionString,
+                                new MariaDbServerVersion(new Version(10, 3, 29)),
+                                mySqlOptions => mySqlOptions.MigrationsAssembly("MariaDbMigrations"));
+                        }
+                        else if (dbType == "sqlserver")
+                        {
+                            options.UseSqlServer(
+                                connectionString,
+                                sqlOptions => sqlOptions.MigrationsAssembly("SqlServerMigrations"));
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Invalid ConnectionStrings:GthxDb_Type. Supported values are 'sqlserver', 'mariadb', or 'mysql'.");
+                        }
+                    });
 
                     // Register IGthxData as scoped
                     services.AddScoped<Gthx.Data.IGthxData, Gthx.Data.GthxSqlData>();
