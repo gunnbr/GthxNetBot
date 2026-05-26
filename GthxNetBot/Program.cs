@@ -120,8 +120,16 @@ namespace GthxNetBot
                 })
                 .Build();
 
-            var bot = host.Services.GetRequiredService<IBotRunner>();
-            bot.Run();
+            try
+            {
+                var bot = host.Services.GetRequiredService<IBotRunner>();
+                bot.Run();
+            }
+            finally
+            {
+                host.Dispose();
+                Log.CloseAndFlush();
+            }
         }
     }
 }
