@@ -133,13 +133,9 @@ namespace Gthx.Bot
             string? encodedTitle = null;
 
             using var reader = new StreamReader(webStream);
-            while (!reader.EndOfStream)
+            string? line;
+            while ((line = await reader.ReadLineAsync()) != null)
             {
-                var line = await reader.ReadLineAsync();
-                if (line == null)
-                {
-                    break;
-                }
 
                 var titleMatch = _titleRegex.Match(line);
                 if (titleMatch.Success)
