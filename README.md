@@ -19,6 +19,20 @@ The main reasons for this are :
 GthxNetBot supports both MariaDB and SQL Server. One of these must be installed with a database created
 for the bot and a user granted all permissions on the database.
 
+### SQL Server via .NET Aspire (recommended for development)
+For local development you don't need to install SQL Server manually. The `GthxNetBot.AppHost` project uses
+.NET Aspire to automatically start a SQL Server container, create the `GthxDb` database, apply EF Core
+migrations, and launch the bot wired to that database.
+
+This project uses **Podman** (not Docker Desktop) as the container runtime:
+* Install Podman and ensure the Podman machine is running: `podman machine start`
+* Aspire is configured to target Podman via the `DOTNET_ASPIRE_CONTAINER_RUNTIME=podman` environment
+  variable set in `GthxNetBot.AppHost/Properties/launchSettings.json`.
+* The SQL Server data is kept in a persistent named volume (`WithDataVolume()`), so the database survives
+  container restarts.
+
+See the [Running](#running) section for how to start it.
+
 ## Visual Studio
 To use with Visual Studio, install Visual Studio with the following features enabled:
 * ASP.NET and web development
@@ -64,6 +78,11 @@ To build and tag with docker, use
 Edit `appsettings.json` before running or set environment variables before running
 
 # Running
+## Visual Studio with .NET Aspire (recommended)
+Make sure Podman is running (`podman machine start`), set `GthxNetBot.AppHost` as the startup project,
+then use F5. Aspire will start a SQL Server container, create and migrate the `GthxDb` database, launch the
+bot, and open the Aspire dashboard listing both resources. No manual SQL Server startup is required.
+
 ## Visual Studio
 Use F5 to run through the debugger, Ctrl-F5 to run without the debugger or the Debug->Start Debugging
 menu item to run through Visual Studio
@@ -71,6 +90,10 @@ menu item to run through Visual Studio
 ## Command line
     dotnet run
 Or find the compiled executables in the bin/Debug/net6.0
+
+To run the full Aspire orchestration (SQL Server container + bot) from the command line:
+
+    dotnet run --project GthxNetBot.AppHost
 
 ## Docker
 To run with environment overrides and network access to localhost and automatic restart, use:

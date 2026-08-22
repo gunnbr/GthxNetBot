@@ -93,10 +93,8 @@ namespace GthxNetBot
                     // Register core bot services
                     services.AddSingleton<IBotNick, NickManager>();
                     services.AddSingleton<GthxMessageConduit>();
-                    services.AddSingleton<IGthxMessageConduit>(provider =>
-                        provider.GetRequiredService<GthxMessageConduit>());
-                    services.AddSingleton<IGthxMessageConsumer>(provider =>
-                        provider.GetRequiredService<GthxMessageConduit>());
+                    services.AddSingleton<IGthxMessageConduit>(provider => provider.GetRequiredService<GthxMessageConduit>());
+                    services.AddSingleton<IGthxMessageConsumer>(provider => provider.GetRequiredService<GthxMessageConduit>());
                     services.AddSingleton<IWebReader, WebReader>();
                     services.AddSingleton<IGthxUtil, GthxUtil>();
                     services.AddSingleton<GthxBot>();
@@ -119,6 +117,14 @@ namespace GthxNetBot
                             : provider.GetRequiredService<IrcBot>());
                 })
                 .Build();
+
+            // Apply any pending EF Core migrations so a freshly provisioned database
+            // (for example, the SQL Server container started by the Aspire AppHost) is schema-ready.
+            using (var scope = host.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<GthxData.GthxDataContext>();
+                dbContext.Database.Migrate();
+            }
 
             try
             {
