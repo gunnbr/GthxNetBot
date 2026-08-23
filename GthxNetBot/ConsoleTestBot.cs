@@ -1,7 +1,5 @@
-﻿using Gthx.Bot;
+using Gthx.Bot;
 using Gthx.Bot.Interfaces;
-using GthxData;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -39,11 +37,9 @@ namespace GthxNetBot
             Console.WriteLine("Welcome to Gthx");
             _logger.LogInformation($"irc client is {_ircClient}");
 
-            var context = _services.GetRequiredService<GthxDataContext>();
-            _logger.LogInformation("Migrating DB...");
-            RelationalDatabaseFacadeExtensions.Migrate(context.Database);
-            _logger.LogInformation("DBMigration complete.");
-
+            // Database migrations are applied once at startup in Program.cs (within a
+            // dedicated scope), so we must not resolve the scoped GthxDataContext from the
+            // root provider here.
             var gthx = _services.GetRequiredService<GthxBot>();
 
             while (!_ExitRequested)

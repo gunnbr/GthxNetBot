@@ -10,12 +10,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 using Serilog;
 using Serilog.Formatting.Json;
 using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Gthx.Test
 {
@@ -57,10 +59,23 @@ namespace Gthx.Test
 
         public GthxSqlDataTest()
         {
-            _config = new ConfigurationBuilder()
+            // Use the SQL Server container connection string
+            var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false)
-                .Build();
+                .AddJsonFile("appsettings.json", optional: false);
+
+            // Override the connection string for tests
+            var containerConnString = SqlServerTestContainerSetUp.GetConnectionStringAsync().GetAwaiter().GetResult();
+            var sqlBuilder = new SqlConnectionStringBuilder(containerConnString)
+            {
+                InitialCatalog = "GthxSqlDataTests"
+            };
+
+            configBuilder.AddInMemoryCollection(new[]
+            {
+                new KeyValuePair<string, string>("ConnectionStrings:GthxDb", sqlBuilder.ConnectionString)
+            });
+            _config = configBuilder.Build();
 
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_config)
@@ -197,7 +212,7 @@ namespace Gthx.Test
             var fromUser = "fromUser";
             var message = "Be sure to test tells";
 
-            var tells = _Db.Tell.Where(t => t.Recipient == toUser);
+            var tells = System.Linq.Queryable.Where(_Db.Tell, t => t.Recipient == toUser);
             Assert.AreEqual(0, tells.Count(), "Tell exists at the start of the test");
 
             var tellData = _Data.GetTell(toUser);
@@ -205,7 +220,7 @@ namespace Gthx.Test
 
             _Data.AddTell(fromUser, toUser, message);
 
-            tells = _Db.Tell.Where(t => t.Recipient == toUser);
+            tells = System.Linq.Queryable.Where(_Db.Tell, t => t.Recipient == toUser);
             Assert.AreEqual(1, tells.Count(), "Tell not added to the DB");
 
             tellData = _Data.GetTell(toUser);
@@ -214,7 +229,7 @@ namespace Gthx.Test
             Assert.AreEqual(fromUser, tellData[0].Author);
             Assert.AreEqual(message, tellData[0].Message);
 
-            tells = _Db.Tell.Where(t => t.Recipient == toUser);
+            tells = System.Linq.Queryable.Where(_Db.Tell, t => t.Recipient == toUser);
             Assert.AreEqual(0, tells.Count(), "Tell still exists after being returned");
 
             tellData = _Data.GetTell(toUser);

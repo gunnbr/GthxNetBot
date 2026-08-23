@@ -1,0 +1,23 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".github/workflows/main.yml" />
+    <File Path="Dockerfile" />
+    <File Path="History.txt" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="Gthx.Bot/Gthx.Bot.csproj" />
+  <Project Path="Gthx.Data/Gthx.Core/Gthx.Core.csproj" />
+  <Project Path="Gthx.Data/Gthx.Data/Gthx.Data.csproj" />
+  <Project Path="Gthx.Data/MariaDbMigrations/MariaDbMigrations.csproj" />
+  <Project Path="Gthx.Data/SqlServerMigrations/SqlServerMigrations.csproj" />
+  <Project Path="Gthx.Test/Gthx.Test.csproj">
+    <Build Solution="Release|Any CPU" Project="false" />
+  </Project>
+  <Project Path="GthxNetBot.AppHost/GthxNetBot.AppHost.csproj" />
+  <Project Path="GthxNetBot/GthxNetBot.csproj" />
+</Solution>

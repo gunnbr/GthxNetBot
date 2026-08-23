@@ -9,13 +9,16 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Gthx.Test;
 
@@ -57,7 +60,7 @@ public class IntegrationTestsStartup
 
         services.TryAddScoped<IGthxData, GthxSqlData>();
         services.TryAddSingleton<IWebReader, WebReader>();
-        services.TryAddSingleton<IGthxUtil, GthxUtil>();
+        services.TryAddSingleton<IGthxUtil, MockGthxUtil>();
         services.TryAddSingleton<MockIrcClient>();
         services.TryAddSingleton<IIrcClient>(sp => sp.GetRequiredService<MockIrcClient>());
         services.TryAddSingleton<IBotNick>(sp => sp.GetRequiredService<MockIrcClient>());
@@ -74,6 +77,7 @@ public class IntegrationTestsStartup
 public class IntegrationTests
 {
     private readonly TestServer _server;
+    private readonly IHost _host;
     private readonly GthxDataContext _Db;
     private readonly GthxBot _gthx;
     private readonly MockIrcClient _client;
@@ -83,10 +87,23 @@ public class IntegrationTests
 
     public IntegrationTests()
     {
-        _config = new ConfigurationBuilder()
+        // Use the SQL Server container connection string
+        var configBuilder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false)
-            .Build();
+            .AddJsonFile("appsettings.json", optional: false);
+
+        // Override the connection string for tests
+        var containerConnString = SqlServerTestContainerSetUp.GetConnectionStringAsync().GetAwaiter().GetResult();
+        var sqlBuilder = new SqlConnectionStringBuilder(containerConnString)
+        {
+            InitialCatalog = "GthxIntegrationTests"
+        };
+
+        configBuilder.AddInMemoryCollection(new[]
+        {
+                new KeyValuePair<string, string>("ConnectionStrings:GthxDb", sqlBuilder.ConnectionString)
+            });
+        _config = configBuilder.Build();
 
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(_config)
@@ -96,15 +113,27 @@ public class IntegrationTests
         try
         {
             Log.Information("Serilog enabled for IntegrationTests");
-            _server = new TestServer(new WebHostBuilder()
-                .UseConfiguration(_config)
-                .UseStartup<IntegrationTestsStartup>()
-                .UseSerilog());
-            _Db = _server.Host.Services.GetRequiredService<GthxDataContext>();
-            _data = _server.Host.Services.GetService<IGthxData>() as GthxSqlData;
-            _client = _server.Host.Services.GetService<IIrcClient>() as MockIrcClient;
-            _botNick = _server.Host.Services.GetService<IBotNick>();
-            _gthx = _server.Host.Services.GetRequiredService<GthxBot>();
+            var hostBuilder = new HostBuilder()
+                .ConfigureAppConfiguration((context, builder) =>
+                {
+                    builder.AddConfiguration(_config);
+                })
+                .ConfigureWebHost(webHostBuilder =>
+                {
+                    webHostBuilder
+                        .UseTestServer()
+                        .UseStartup<IntegrationTestsStartup>();
+                })
+                .UseSerilog();
+
+            var host = hostBuilder.Start();
+            _host = host;
+            _server = host.GetTestServer();
+            _Db = host.Services.GetRequiredService<GthxDataContext>();
+            _data = host.Services.GetService<IGthxData>() as GthxSqlData;
+            _client = host.Services.GetService<IIrcClient>() as MockIrcClient;
+            _botNick = host.Services.GetService<IBotNick>();
+            _gthx = host.Services.GetRequiredService<GthxBot>();
         }
         catch (Exception ex)
         {
@@ -127,10 +156,11 @@ public class IntegrationTests
     public void TestTearDown()
     {
         _Db.Database.EnsureDeleted();
+        _host?.Dispose();
     }
 
     [Test]
-    public async Task TestLiveYoutubeReferences()
+    public async Task TestYoutubeReferences()
     {
         var testChannel = "#reprap";
         var testUser = "BobYourUncle";
@@ -171,7 +201,7 @@ public class IntegrationTests
     }
 
     [Test]
-    public async Task TestLiveThingiverseReferences()
+    public async Task TestThingiverseReferences()
     {
         // Test fetching a new title that uses the <title> element
         var testChannel = "#reprap";

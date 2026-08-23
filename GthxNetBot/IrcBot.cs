@@ -1,7 +1,4 @@
-﻿using Gthx.Bot;
-using Gthx.Bot.Interfaces;
-using GthxData;
-using Microsoft.EntityFrameworkCore;
+using Gthx.Bot;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -32,11 +29,9 @@ namespace GthxNetBot
             // Just to get some output from Azure
             Trace.TraceError("Gthx running");
 
-            var context = _services.GetRequiredService<GthxDataContext>();
-            _logger.LogInformation("Running migrations on the database");
-            RelationalDatabaseFacadeExtensions.Migrate(context.Database);
-            _logger.LogInformation("Database migration complete.");
-
+            // Database migrations are applied once at startup in Program.cs (within a
+            // dedicated scope), so we must not resolve the scoped GthxDataContext from the
+            // root provider here.
             var gthx = _services.GetRequiredService<GthxBot>();
 
             _exitSemaphore.Wait();
