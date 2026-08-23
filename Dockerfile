@@ -3,7 +3,9 @@ WORKDIR /source
 
 # copy and publish app and libraries
 COPY . .
-RUN dotnet publish -c release -o /app
+# Publish the bot project explicitly. Publishing the solution would also include the
+# Aspire AppHost executable and emit ambiguous/overlapping output into /app.
+RUN dotnet publish GthxNetBot/GthxNetBot.csproj -c release -o /app
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/runtime:10.0

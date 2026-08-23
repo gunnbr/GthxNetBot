@@ -22,8 +22,12 @@ namespace Gthx.Test
             {
                 if (SqlServerFixture == null)
                 {
-                    SqlServerFixture = new SqlServerTestContainerFixture();
-                    await SqlServerFixture.InitializeAsync();
+                    // Only publish the fixture after initialization succeeds. Otherwise a failed
+                    // container start / readiness probe would leave a non-null but unready fixture
+                    // that later callers reuse instead of retrying.
+                    var fixture = new SqlServerTestContainerFixture();
+                    await fixture.InitializeAsync();
+                    SqlServerFixture = fixture;
                 }
 
                 return SqlServerFixture.ConnectionString;

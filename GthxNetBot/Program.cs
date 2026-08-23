@@ -29,7 +29,13 @@ namespace GthxNetBot
             var useConsoleTestBot = Array.Exists(args, arg =>
                 string.Equals(arg, "--console", StringComparison.OrdinalIgnoreCase));
 
-            var host = Host.CreateDefaultBuilder(args)
+            // Strip our custom valueless "--console" switch before forwarding args to the host.
+            // The command-line configuration provider expects "--key value" pairs, so a bare
+            // "--console" would otherwise consume the following argument as its value.
+            var hostArgs = Array.FindAll(args, arg =>
+                !string.Equals(arg, "--console", StringComparison.OrdinalIgnoreCase));
+
+            var host = Host.CreateDefaultBuilder(hostArgs)
                 .UseSerilog((context, services, configuration) =>
                 {
                     var emailOptions = new EmailOptions();
@@ -122,16 +128,18 @@ namespace GthxNetBot
                 })
                 .Build();
 
-            // Apply any pending EF Core migrations so a freshly provisioned database
-            // (for example, the SQL Server container started by the Aspire AppHost) is schema-ready.
-            using (var scope = host.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GthxData.GthxDataContext>();
-                dbContext.Database.Migrate();
-            }
-
             try
             {
+                // Apply any pending EF Core migrations so a freshly provisioned database
+                // (for example, the SQL Server container started by the Aspire AppHost) is schema-ready.
+                // Kept inside the try/finally so a migration failure still disposes the host and
+                // flushes Serilog (including any buffered startup-failure email).
+                using (var scope = host.Services.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<GthxData.GthxDataContext>();
+                    dbContext.Database.Migrate();
+                }
+
                 var bot = host.Services.GetRequiredService<IBotRunner>();
                 bot.Run();
             }
