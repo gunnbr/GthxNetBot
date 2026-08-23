@@ -77,6 +77,7 @@ public class IntegrationTestsStartup
 public class IntegrationTests
 {
     private readonly TestServer _server;
+    private readonly IHost _host;
     private readonly GthxDataContext _Db;
     private readonly GthxBot _gthx;
     private readonly MockIrcClient _client;
@@ -126,6 +127,7 @@ public class IntegrationTests
                 .UseSerilog();
 
             var host = hostBuilder.Start();
+            _host = host;
             _server = host.GetTestServer();
             _Db = host.Services.GetRequiredService<GthxDataContext>();
             _data = host.Services.GetService<IGthxData>() as GthxSqlData;
@@ -154,6 +156,7 @@ public class IntegrationTests
     public void TestTearDown()
     {
         _Db.Database.EnsureDeleted();
+        _host?.Dispose();
     }
 
     [Test]

@@ -34,12 +34,10 @@ namespace Gthx.Test
             }
         }
 
-        [OneTimeSetUp]
-        public async Task GlobalSetup()
-        {
-            await GetConnectionStringAsync();
-        }
-
+        // NOTE: The container is intentionally NOT started in a [OneTimeSetUp]. Doing so would
+        // force every test in the Gthx.Test namespace (including mock-only unit tests) to require
+        // Docker. Instead, the container starts lazily the first time a SQL integration test calls
+        // GetConnectionStringAsync, and GlobalTeardown disposes it only if it was actually created.
         [OneTimeTearDown]
         public async Task GlobalTeardown()
         {

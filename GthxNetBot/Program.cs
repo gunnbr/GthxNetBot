@@ -5,9 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using Serilog.Sinks.Email;
+using Serilog.Events;
 using System;
-using System.Collections.Generic;
 
 namespace GthxNetBot
 {
@@ -46,13 +45,18 @@ namespace GthxNetBot
                         !string.IsNullOrWhiteSpace(emailOptions.UserName) &&
                         emailOptions.Port != null)
                     {
+                        // Wire the full SMTP configuration (server, port, credentials, subject) so
+                        // error notifications are actually delivered, and restrict the sink to
+                        // Warning and above so routine Debug/Information logs are not emailed.
                         configuration.WriteTo.Email(
-                            new EmailSinkOptions
-                            {
-                                From = emailOptions.FromName,
-                                To = new List<string> { emailOptions.ToEmail }
-                            }
-                        );
+                            from: emailOptions.FromName,
+                            to: emailOptions.ToEmail,
+                            host: emailOptions.MailServer,
+                            port: emailOptions.Port.Value,
+                            connectionSecurity: MailKit.Security.SecureSocketOptions.Auto,
+                            credentials: new System.Net.NetworkCredential(emailOptions.UserName, emailOptions.Password),
+                            subject: emailOptions.EmailSubject,
+                            restrictedToMinimumLevel: LogEventLevel.Warning);
                     }
                 })
                 .ConfigureServices((context, services) =>

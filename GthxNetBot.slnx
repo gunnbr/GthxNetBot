@@ -7,7 +7,6 @@
   <Folder Name="/Solution Items/">
     <File Path=".github/workflows/main.yml" />
     <File Path="Dockerfile" />
-    <File Path="Dockerfile-UnitTests" />
     <File Path="History.txt" />
     <File Path="README.md" />
   </Folder>
