@@ -18,7 +18,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
-**Next up:** finish phase 3: set up the Azure SQL test database for `gthxtestbot`, run it on the local test server, then cut gthx over.
+**Next up:** finish phase 3: let `gthxtestbot` run on the local test server for a while, then cut gthx over (see the phase 3 checklist).
 
 **Testing rule:** never run test bots or probe clients against Libera (we were banned there on 2026-10-24 after phase 3 test runs). Use the local InspIRCd test server on sakura: `10.0.0.125:6667`, plaintext.
 
@@ -64,8 +64,8 @@ Decisions (2026-10-24):
 - **Don't touch `gthx2.26` while testing.** The new build runs as a separate `gthxtestbot` container with its own nick (`compose.gthxtestbot.yaml`, `gthxtestbot.env.example`).
 
 To do:
-- [ ] Test database: proposed `CREATE DATABASE Gthx AS COPY OF GthxTest` on `gthxdb` (run in `master`). That gives `gthxtestbot` real data without writing to production, and `Gthx` becomes the renamed catalog at cutover. Needs the user's go-ahead (extra Azure database cost; needs a server-admin/`dbmanager` login).
-- [ ] Run `gthxtestbot` on the local InspIRCd server against that database; exercise factoids, tell, seen, and status.
+- [x] Test database: `Gthx` created on 2026-10-24 as a Basic-tier copy of `GthxTest` on server `gthxdb` (resource group `FirstTests`). `gthxtestbot` gets real data without writing to production, and `Gthx` becomes the renamed catalog at cutover.
+- [x] `gthxtestbot` runs on the local InspIRCd server against `Gthx` (2026-10-24). Verified over IRC: existing factoids and `info` history from the copied data; set, `is also`, and forget; tell (acknowledged and delivered); seen; status. Replies take about 0.16 s (about 1.2 s for the first query after startup).
 - [ ] Optional: add NickServ to the local test server (InspIRCd has no services built in; it needs Anope or Atheme linked to it, which means root changes to `/etc/inspircd`) so SASL can be tested locally.
 - [ ] Cutover: back up the `gthx2.26` image, refresh the `Gthx` copy from `GthxTest`, start the new bot as `gthx` on `Gthx` (with SASL), stop `gthx2.26`, and later drop `GthxTest`.
 
@@ -74,6 +74,7 @@ To do:
 - To do: choose a destination (e.g. Azure Monitor / Application Insights via OpenTelemetry, or a hosted Seq) and wire it up before deploying.
 
 ## 5. Switch to deploy to Azure — ⬜
+- Reorganize Azure resource groups. Everything is in `FirstTests` (created long ago while experimenting), which isn't a fitting home for a real service. Create a properly named group for the gthx resources (e.g. the `gthxdb` SQL server and its databases, plus the container instances) and move or recreate them there.
 - `.github/workflows/main.yml` already builds and deploys to Azure Container Instances on push to `master`, but it runs no tests, uses outdated action versions (`azure/login@v1`, `actions/checkout@master`), and doesn't pass `IrcInfo__SaslPassword` / `UseSsl` / `Port`. Its runs on 2026-08-23 and after merging #40 (2026-10-24) both failed at the Azure login step, so nothing was deployed.
 
 ## 6. Automatic version numbers — ⬜
