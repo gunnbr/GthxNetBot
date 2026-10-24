@@ -66,7 +66,8 @@ Decisions (2026-10-24):
 To do:
 - [x] Test database: `Gthx` created on 2026-10-24 as a Basic-tier copy of `GthxTest` on server `gthxdb` (resource group `FirstTests`). `gthxtestbot` gets real data without writing to production, and `Gthx` becomes the renamed catalog at cutover.
 - [x] `gthxtestbot` runs on the local InspIRCd server against `Gthx` (2026-10-24). Verified over IRC: existing factoids and `info` history from the copied data; set, `is also`, and forget; tell (acknowledged and delivered); seen; status. Replies take about 0.16 s (about 1.2 s for the first query after startup).
-- [ ] Optional: add NickServ to the local test server (InspIRCd has no services built in; it needs Anope or Atheme linked to it, which means root changes to `/etc/inspircd`) so SASL can be tested locally.
+- [x] NickServ on the local test server (2026-10-24): Anope 2.0.20 in Docker (`testing/services/`), linked to InspIRCd 4 over `127.0.0.1:7000`. InspIRCd 4 requires TLS for server links from non-loopback addresses, so the link must stay on loopback. `gthxtestbot` is registered and logs in with SASL PLAIN (WHOIS shows it logged in).
+- Known behavior: if SASL fails (e.g. a wrong password), the bot logs an error (which emails in production) and then connects without logging in, with no retry. Consider failing or retrying instead before relying on it in production.
 - [ ] Cutover: back up the `gthx2.26` image, refresh the `Gthx` copy from `GthxTest`, start the new bot as `gthx` on `Gthx` (with SASL), stop `gthx2.26`, and later drop `GthxTest`.
 
 ## 4. Logging accessible after Azure deploy — ⬜
