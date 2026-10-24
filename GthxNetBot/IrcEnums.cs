@@ -8,5 +8,6 @@ namespace GthxNetBot
     {
         MotdMissing = 422,
         NickInUse = 433,
+        YoureBanned = 465,
     }
 }

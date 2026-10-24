@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -25,7 +26,20 @@ namespace GthxNetBot
         public string? Password { get; set; }
         public string? RealName { get; set; }
         public string? SaslPassword { get; set; }
-        public int? SaslFailureExitDelayMinutes { get; set; }
+
+        // How long to wait before exiting after losing the connection, by cause. Every exit is followed
+        // by a container restart and a reconnect, so these keep failures from turning into a rapid
+        // reconnect loop, which can get the host banned.
+        public double? BannedExitDelayMinutes { get; set; }
+        public double? SaslFailureExitDelayMinutes { get; set; }
+        public double? EarlyFailureExitDelayMinutes { get; set; }
+        public double? DisconnectExitDelayMinutes { get; set; }
+
+        /// <summary>
+        /// How long the bot must have been registered for a disconnect to count as normal (e.g. a
+        /// netsplit or server restart) rather than an early failure.
+        /// </summary>
+        public double? StableConnectionMinutes { get; set; }
     }
 
     public class GthxIrcClient : IIrcClient
@@ -37,7 +51,10 @@ namespace GthxNetBot
         private readonly IrcOptions _options = new();
         private readonly System.Timers.Timer _whoIsTimer;
         private readonly DateTime _startupTime = DateTime.UtcNow;
+        private static readonly Regex _banMessageRegex = new(@"\b([kgzd]-?lined?|banned)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private volatile bool _saslFailed;
+        private volatile bool _banned;
+        private DateTime? _registeredAt;
         private int _exitRequested;
 
         private readonly StandardIrcClient _client = new()
@@ -162,6 +179,7 @@ namespace GthxNetBot
                     _client.ConnectFailed -= ConnectFailedHandler;
                     _client.Dispose();
                     _logger.LogError("Connection to '{server}' timed out.", server);
+                    ExitBot();
                     return;
                 }
 
@@ -171,6 +189,7 @@ namespace GthxNetBot
                 if (!_client.IsConnected)
                 {
                     _logger.LogError("Connection to '{server}' did not succeed.", server);
+                    ExitBot();
                     return;
                 }
             }
@@ -241,8 +260,9 @@ namespace GthxNetBot
         }
 
         /// <summary>
-        /// Stops the bot. After a SASL failure, waits first so that a restart policy can't turn a bad
-        /// password into a rapid reconnect loop.
+        /// Stops the bot after a delay chosen by why the connection ended. The container restart policy
+        /// reconnects as soon as the bot exits, so exiting right away after a failure would turn it into
+        /// a rapid reconnect loop.
         /// </summary>
         private void ExitBot()
         {
@@ -251,20 +271,37 @@ namespace GthxNetBot
                 return;
             }
 
-            if (!_saslFailed)
+            var (delayMinutes, reason) = GetExitDelay();
+            var delay = TimeSpan.FromMinutes(delayMinutes);
+            _logger.LogError("Exiting in {delay} because {reason}.", delay, reason);
+            Task.Delay(delay).ContinueWith(_ => _runner.Exit());
+        }
+
+        private (double DelayMinutes, string Reason) GetExitDelay()
+        {
+            if (_banned)
             {
-                _runner.Exit();
-                return;
+                return (_options.BannedExitDelayMinutes ?? 60, "the server reported that we are banned");
             }
 
-            var delay = TimeSpan.FromMinutes(_options.SaslFailureExitDelayMinutes ?? 15);
-            _logger.LogError("Exiting in {delay} because SASL authentication failed. Check 'IrcInfo:SaslPassword'.", delay);
-            Task.Delay(delay).ContinueWith(_ => _runner.Exit());
+            if (_saslFailed)
+            {
+                return (_options.SaslFailureExitDelayMinutes ?? 15, "SASL authentication failed (check 'IrcInfo:SaslPassword')");
+            }
+
+            var stable = TimeSpan.FromMinutes(_options.StableConnectionMinutes ?? 5);
+            if (_registeredAt == null || DateTime.UtcNow - _registeredAt < stable)
+            {
+                return (_options.EarlyFailureExitDelayMinutes ?? 5, "the connection failed or ended soon after connecting");
+            }
+
+            return (_options.DisconnectExitDelayMinutes ?? 0.5, "the connection ended after running normally");
         }
 
         private void IrcClient_Registered(object? sender, EventArgs e)
         {
             _logger.LogInformation($"Registered with the IRC server.");
+            _registeredAt = DateTime.UtcNow;
 
             if (sender is not IrcClient client)
             {
@@ -465,6 +502,11 @@ namespace GthxNetBot
         {
             _logger.LogError("Protocol Error {code}: {message} ({parameters})", e.Code, e.Message, e.Parameters);
 
+            if (e.Code == (int)IrcProtocolErrorEnum.YoureBanned)
+            {
+                _banned = true;
+            }
+
             if (e.Code == (int)IrcProtocolErrorEnum.NickInUse)
             {
                 if (_botNick.BotNick.EndsWith("__"))
@@ -532,6 +574,12 @@ namespace GthxNetBot
         private void Client_ErrorMessageReceived(object? sender, IrcErrorMessageEventArgs e)
         {
             _logger.LogError("Error message received: {message}", e.Message);
+
+            // e.g. "Closing Link: ... (K-Lined)" when the server bans us
+            if (e.Message != null && _banMessageRegex.IsMatch(e.Message))
+            {
+                _banned = true;
+            }
         }
 
         private void Client_Error(object? sender, IrcErrorEventArgs e)
