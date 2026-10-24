@@ -16,8 +16,8 @@ The main reasons for this are :
 
 # Setup
 ## Database
-GthxNetBot supports both MariaDB and SQL Server. One of these must be installed with a database created
-for the bot and a user granted all permissions on the database.
+GthxNetBot uses SQL Server. It must be installed with a database created for the bot and a user granted
+all permissions on the database. (MariaDB support was removed with the move to EF Core 10.)
 
 ### SQL Server via .NET Aspire (recommended for development)
 For local development you don't need to install SQL Server manually. The `GthxNetBot.AppHost` project uses
@@ -50,9 +50,9 @@ Then install the .NET 10 SDK
 * Install Docker
 
 # Cloning the source
-GthxNetBot uses a source subrepo, so when cloning to build, be sure use the --recurse-submodules when cloning:
+GthxNetBot uses source subrepos (`Gthx.Data` and the `IrcDotNet` fork), so when cloning to build, be sure use the --recurse-submodules when cloning:
     git clone --recurse-submodules https://github.com/gunnbr/GthxNetBot.git
-Or if you have cloned without doing this, the subrepo can be initialized by running:
+Or if you have cloned without doing this, the subrepos can be initialized by running:
 
     git submodule update --init
 

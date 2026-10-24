@@ -1,34 +1,27 @@
 using System;
 using System.Threading.Tasks;
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
 using Microsoft.Data.SqlClient;
+using Testcontainers.MsSql;
 
 namespace Gthx.Test
 {
     public class SqlServerTestContainerFixture : IAsyncDisposable
     {
         private const string SaPassword = "Your_password123";
-        private readonly TestcontainersContainer _container;
+        private readonly MsSqlContainer _container;
         public string ConnectionString { get; private set; }
 
         public SqlServerTestContainerFixture()
         {
-            _container = new TestcontainersBuilder<TestcontainersContainer>()
-                .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
-                .WithEnvironment("ACCEPT_EULA", "Y")
-                .WithEnvironment("SA_PASSWORD", SaPassword)
-                .WithPortBinding(1433, true)
-                .WithWaitStrategy(
-                    Wait.ForUnixContainer()
-                        .UntilPortIsAvailable(1433))
+            _container = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
+                .WithPassword(SaPassword)
                 .Build();
         }
 
         public async Task InitializeAsync()
         {
             await _container.StartAsync();
-            var mappedPort = _container.GetMappedPublicPort(1433);
+            var mappedPort = _container.GetMappedPublicPort(MsSqlBuilder.MsSqlPort);
             ConnectionString = $"Server=127.0.0.1,{mappedPort};Database=GthxNetBotTest;User Id=sa;Password={SaPassword};TrustServerCertificate=True;";
 
             // Waiting only for the TCP port is not sufficient: SQL Server accepts connections
