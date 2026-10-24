@@ -37,7 +37,7 @@ Done (uncommitted on `feature/sasl-support`):
 Remaining:
 - [ ] Verify the login against Libera.
 - [ ] Merge the `feature/sasl-support` PR into `master`.
-- Note: the fork's `CompleteIrcClientTest` connects to the defunct `irc.freenode.net` and always fails; this was already the case before the SASL work.
+- [ ] Fork: `CompleteIrcClientTest` now connects to `irc.libera.chat` instead of the defunct freenode ([gunnbr/IrcDotNet#3](https://github.com/gunnbr/IrcDotNet/pull/3)). It still fails in `LocalUserModeTest`, because Libera gives new users `+w` by default and the test expects it to be off.
 
 ## 3. Local Docker container — ⬜
 - The Windows dev machine has Podman instead of Docker, and no Podman machine is set up. The bot normally runs on a Linux PC with Docker, and development will move there.
