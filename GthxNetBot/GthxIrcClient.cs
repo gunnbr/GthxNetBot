@@ -19,10 +19,12 @@ namespace GthxNetBot
 
         public string? Server { get; set; }
         public int? Port { get; set; }
+        public bool? UseSsl { get; set; }
         public string? Channels { get; set; }
         public string? Nick { get; set; }
         public string? Password { get; set; }
         public string? RealName { get; set; }
+        public string? SaslPassword { get; set; }
     }
 
     public class GthxIrcClient : IIrcClient
@@ -80,6 +82,29 @@ namespace GthxNetBot
                 Password = _options.Password
             };
 
+            // Enable SASL authentication when a password is available. Libera requires SASL
+            // for connections originating from SASL-only IP ranges. The SASL username is always
+            // the IRC nickname so the connection and the SASL login use a single identity.
+            var saslUsername = _options.Nick;
+            var saslPassword = !string.IsNullOrWhiteSpace(_options.SaslPassword) ? _options.SaslPassword : _options.Password;
+            if (!string.IsNullOrWhiteSpace(saslUsername) && !string.IsNullOrWhiteSpace(saslPassword))
+            {
+                info.UseSasl = true;
+                info.SaslUsername = saslUsername;
+                info.SaslPassword = saslPassword;
+
+                _logger.LogInformation("SASL authentication is enabled for nickname '{Nick}'.", saslUsername);
+
+                if (_options.UseSsl == false)
+                {
+                    _logger.LogWarning("SASL authentication is enabled but TLS (UseSsl) is disabled. Credentials will be sent over an unencrypted connection.");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("SASL authentication is being skipped because no password was found. Set 'IrcInfo:SaslPassword' (or 'IrcInfo:Password') via user secrets or environment variables to enable SASL login for nickname '{Nick}'.", saslUsername);
+            }
+
             _botNick.BotNick = _options.Nick!;
 
             var server = _options.Server;
@@ -88,7 +113,7 @@ namespace GthxNetBot
                 _logger.LogError("No server specified!");
                 return;
             }
-            Connect(server, _options.Port ?? 6667, info);
+            Connect(server, _options.Port ?? 6697, info);
         }
 
         private void Connect(string server, int port, IrcRegistrationInfo registrationInfo)
@@ -97,25 +122,108 @@ namespace GthxNetBot
             _client.Disconnected += IrcClient_Disconnected;
             _client.Registered += IrcClient_Registered;
 
+            // Diagnostic logging around SASL capability negotiation. These fire during
+            // registration (before Connected/Registered), so they must be wired up here.
+            _client.ServerCapabilitiesReceived += Client_ServerCapabilitiesReceived;
+            _client.ActiveCapabilitiesReceived += Client_ActiveCapabilitiesReceived;
+            _client.CapabilityAcknowledged += Client_CapabilityAcknowledged;
+            _client.SaslAuthenticationSucceeded += Client_SaslAuthenticationSucceeded;
+            _client.SaslAuthenticationFailed += Client_SaslAuthenticationFailed;
+
             using (var connectedEvent = new ManualResetEventSlim(false))
             {
                 _logger.LogInformation("Connecting to {server}:{port}", server, port);
                 _client.Connected += (sender2, e2) => connectedEvent.Set();
 
-                // Connect to given server.
-                // TODO: Move port number and SSL flag to be environment variables passed in.
-                _client.Connect(server, port, false, registrationInfo);
+                // Unblock the wait immediately on a failed connect (e.g. TLS handshake failure)
+                // instead of waiting for the full timeout, and log the underlying exception.
+                void ConnectFailedHandler(object? sender2, IrcErrorEventArgs e2)
+                {
+                    LogConnectException("Connection to the IRC server failed", e2.Error);
+                    connectedEvent.Set();
+                }
+                _client.ConnectFailed += ConnectFailedHandler;
 
-                // Wait until connection has succeeded or timed out.
+                // Connect to given server, enabling TLS unless explicitly disabled via config.
+                var useSsl = _options.UseSsl ?? true;
+                _client.Connect(server, port, useSsl, registrationInfo);
+
+                // Wait until connection has succeeded, failed, or timed out.
                 if (!connectedEvent.Wait(10000))
                 {
+                    _client.ConnectFailed -= ConnectFailedHandler;
                     _client.Dispose();
                     _logger.LogError("Connection to '{server}' timed out.", server);
+                    return;
+                }
+
+                _client.ConnectFailed -= ConnectFailedHandler;
+
+                // If the connection failed, the local user will not have been established.
+                if (!_client.IsConnected)
+                {
+                    _logger.LogError("Connection to '{server}' did not succeed.", server);
                     return;
                 }
             }
 
             _logger.LogInformation("Now connected to '{server}'.", server);
+        }
+
+        private void LogConnectException(string context, Exception? error)
+        {
+            if (error == null)
+            {
+                _logger.LogError("{context}: no exception details available.", context);
+                return;
+            }
+
+            // Walk the inner-exception chain so the root cause (e.g. a TLS
+            // AuthenticationException or its underlying Win32/socket error) is visible.
+            var inner = error.InnerException;
+            while (inner != null)
+            {
+                _logger.LogError("{context}: inner exception {type}: {message}", context, inner.GetType().FullName, inner.Message);
+                inner = inner.InnerException;
+            }
+
+            _logger.LogError(error, "{context}: {type}: {message}", context, error.GetType().FullName, error.Message);
+        }
+
+        private void Client_ServerCapabilitiesReceived(object? sender, EventArgs e)
+        {
+            var capabilities = sender is IrcClient client
+                ? string.Join(", ", client.ServerCapabilities)
+                : "(unknown)";
+            _logger.LogInformation("SASL/CAP: Server advertised capabilities: {capabilities}", capabilities);
+        }
+
+        private void Client_ActiveCapabilitiesReceived(object? sender, ActiveCapabilitiesEventArgs e)
+        {
+            _logger.LogInformation("SASL/CAP: Active capabilities: {capabilities}", string.Join(", ", e.Capabilities));
+        }
+
+        private void Client_CapabilityAcknowledged(object? sender, CapabilityAcknowledgedEventArgs e)
+        {
+            var capabilities = string.Join(", ", e.Capabilities);
+            if (e.Acknowledged)
+            {
+                _logger.LogInformation("SASL/CAP: Server ACKed capability request: {capabilities}", capabilities);
+            }
+            else
+            {
+                _logger.LogWarning("SASL/CAP: Server NAKed capability request: {capabilities}", capabilities);
+            }
+        }
+
+        private void Client_SaslAuthenticationSucceeded(object? sender, EventArgs e)
+        {
+            _logger.LogInformation("SASL authentication succeeded.");
+        }
+
+        private void Client_SaslAuthenticationFailed(object? sender, SaslAuthenticationFailedEventArgs e)
+        {
+            _logger.LogError("SASL authentication failed using mechanism {mechanism}: {message}", e.Mechanism, e.Message);
         }
 
         private void IrcClient_Registered(object? sender, EventArgs e)
@@ -386,7 +494,7 @@ namespace GthxNetBot
 
         private void Client_Error(object? sender, IrcErrorEventArgs e)
         {
-            _logger.LogError(e.Error, "IRC error!");
+            LogConnectException("IRC error", e.Error);
             // If we got here, the read has stopped and we're dead in the water. 
             // TODO: Try to reconnect instead of exit?
             _runner.Exit();

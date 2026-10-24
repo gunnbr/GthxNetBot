@@ -20,4 +20,5 @@
   </Project>
   <Project Path="GthxNetBot.AppHost/GthxNetBot.AppHost.csproj" />
   <Project Path="GthxNetBot/GthxNetBot.csproj" />
+  <Project Path="IrcDotNet/source/IrcDotNet/IrcDotNet.csproj" />
 </Solution>
