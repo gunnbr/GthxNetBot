@@ -39,23 +39,9 @@ public class IntegrationTestsStartup
     {
         services.AddLogging(configure => configure.AddConsole().AddSerilog()).AddTransient<GthxBot>();
 
-        var useMariaDb = false;
-        var dbType = _config.GetConnectionString("GthxDb_Type");
-        if (dbType == "mariadb")
-        {
-            Log.Information("Using MariaDB mode");
-        }
         services.AddDbContext<GthxDataContext>(options =>
         {
-            if (useMariaDb)
-            {
-                options.UseMySql(_config.GetConnectionString("GthxDb"),
-                    new MariaDbServerVersion(new Version(10, 3, 29)), x => x.MigrationsAssembly("MariaDbMigrations.Migrations"));
-            }
-            else
-            {
-                options.UseSqlServer(_config.GetConnectionString("GthxDb"), x => x.MigrationsAssembly("SqlServerMigrations.Migrations"));
-            }
+            options.UseSqlServer(_config.GetConnectionString("GthxDb"), x => x.MigrationsAssembly("SqlServerMigrations.Migrations"));
         });
 
         services.TryAddScoped<IGthxData, GthxSqlData>();
@@ -167,27 +153,27 @@ public class IntegrationTests
         _gthx.HandleReceivedMessage(testChannel, testUser, $"OMG! Check this out! https://www.youtube.com/watch?v=I7nVrT00ST4");
         await Task.Delay(5000);
         var replies = _client.GetReplies();
-        Assert.AreEqual(1, replies.Messages.Count);
-        Assert.AreEqual(testChannel, replies.Channel);
-        Assert.AreEqual($"{testUser} linked to YouTube video \"Pro Riders Laughing\" => 1 IRC mentions", replies.Messages[0]);
+        ClassicAssert.AreEqual(1, replies.Messages.Count);
+        ClassicAssert.AreEqual(testChannel, replies.Channel);
+        ClassicAssert.AreEqual($"{testUser} linked to YouTube video \"Pro Riders Laughing\" => 1 IRC mentions", replies.Messages[0]);
 
         // Reference the same video a second time to verify that the count increases
         testUser = "LeroyJenkins";
         _gthx.HandleReceivedMessage(testChannel, testUser, $"I love this video too! https://www.youtube.com/watch?v=I7nVrT00ST4");
         await Task.Delay(5000);
         replies = _client.GetReplies();
-        Assert.AreEqual(1, replies.Messages.Count);
-        Assert.AreEqual(testChannel, replies.Channel);
-        Assert.AreEqual($"{testUser} linked to YouTube video \"Pro Riders Laughing\" => 2 IRC mentions", replies.Messages[0]);
+        ClassicAssert.AreEqual(1, replies.Messages.Count);
+        ClassicAssert.AreEqual(testChannel, replies.Channel);
+        ClassicAssert.AreEqual($"{testUser} linked to YouTube video \"Pro Riders Laughing\" => 2 IRC mentions", replies.Messages[0]);
 
         // Test non-Western characters
         testUser = "AndrewJohnson";
         _gthx.HandleReceivedMessage(testChannel, testUser, $"Are you hungry? https://www.youtube.com/watch?v=RE9gtTLZ5Ic");
         await Task.Delay(5000);
         replies = _client.GetReplies();
-        Assert.AreEqual(1, replies.Messages.Count);
-        Assert.AreEqual(testChannel, replies.Channel);
-        Assert.AreEqual($"{testUser} linked to YouTube video \"BEST Japanese Fried Rice Recipe (焼き飯 - Yakimeshi)\" => 1 IRC mentions", replies.Messages[0]);
+        ClassicAssert.AreEqual(1, replies.Messages.Count);
+        ClassicAssert.AreEqual(testChannel, replies.Channel);
+        ClassicAssert.AreEqual($"{testUser} linked to YouTube video \"BEST Japanese Fried Rice Recipe (焼き飯 - Yakimeshi)\" => 1 IRC mentions", replies.Messages[0]);
 
         // Test 2 messages in a row that query the DB to see if there are concurrency issues
         testUser = "gunnbr";
@@ -195,9 +181,9 @@ public class IntegrationTests
         _gthx.HandleReceivedMessage(testChannel, testUser, $"crash?");
         await Task.Delay(5000);
         replies = _client.GetReplies();
-        Assert.AreEqual(1, replies.Messages.Count);
-        Assert.AreEqual(testChannel, replies.Channel);
-        Assert.AreEqual($"{testUser} linked to YouTube video \"2022 Weekly Beats Week 2: Forest Adventure\" => 1 IRC mentions", replies.Messages[0]);
+        ClassicAssert.AreEqual(1, replies.Messages.Count);
+        ClassicAssert.AreEqual(testChannel, replies.Channel);
+        ClassicAssert.AreEqual($"{testUser} linked to YouTube video \"2022 Weekly Beats Week 2: Forest Adventure\" => 1 IRC mentions", replies.Messages[0]);
     }
 
     [Test]
@@ -209,17 +195,17 @@ public class IntegrationTests
         _gthx.HandleReceivedMessage(testChannel, testUser, $"Your daughter would really like this: https://www.thingiverse.com/thing:2810756");
         await Task.Delay(5000);
         var replies = _client.GetReplies();
-        Assert.AreEqual(1, replies.Messages.Count);
-        Assert.AreEqual(testChannel, replies.Channel);
-        Assert.AreEqual($"{testUser} linked to \"Articulated Butterfly by 8ran\" on thingiverse => 1 IRC mentions", replies.Messages[0]);
+        ClassicAssert.AreEqual(1, replies.Messages.Count);
+        ClassicAssert.AreEqual(testChannel, replies.Channel);
+        ClassicAssert.AreEqual($"{testUser} linked to \"Articulated Butterfly by 8ran\" on thingiverse => 1 IRC mentions", replies.Messages[0]);
 
         // Test the same reference a second time to verify the count increases
         _gthx.HandleReceivedMessage(testChannel, testUser, $"Did you hear what I said? I love this thing! https://www.thingiverse.com/thing:2810756");
         await Task.Delay(5000);
         replies = _client.GetReplies();
-        Assert.AreEqual(1, replies.Messages.Count);
-        Assert.AreEqual(testChannel, replies.Channel);
-        Assert.AreEqual($"{testUser} linked to \"Articulated Butterfly by 8ran\" on thingiverse => 2 IRC mentions", replies.Messages[0]);
+        ClassicAssert.AreEqual(1, replies.Messages.Count);
+        ClassicAssert.AreEqual(testChannel, replies.Channel);
+        ClassicAssert.AreEqual($"{testUser} linked to \"Articulated Butterfly by 8ran\" on thingiverse => 2 IRC mentions", replies.Messages[0]);
     }
 
     /// <summary>
@@ -236,15 +222,15 @@ public class IntegrationTests
 
         _gthx.HandleReceivedMessage(testChannel, testUser, $"{_botNick.BotNick}: {testFactoid} is {testValue}");
         var replies = _client.GetReplies();
-        Assert.AreEqual(1, replies.Messages.Count);
-        Assert.AreEqual(testChannel, replies.Channel);
-        Assert.AreEqual($"{testUser}: Okay.", replies.Messages[0]);
+        ClassicAssert.AreEqual(1, replies.Messages.Count);
+        ClassicAssert.AreEqual(testChannel, replies.Channel);
+        ClassicAssert.AreEqual($"{testUser}: Okay.", replies.Messages[0]);
 
         _gthx.HandleReceivedMessage(testChannel, testUser, $"{testFactoid}?");
         replies = _client.GetReplies();
-        Assert.AreEqual(1, replies.Messages.Count);
-        Assert.AreEqual(testChannel, replies.Channel);
-        Assert.AreEqual($"{testFactoid} is {testValue}", replies.Messages[0]);
+        ClassicAssert.AreEqual(1, replies.Messages.Count);
+        ClassicAssert.AreEqual(testChannel, replies.Channel);
+        ClassicAssert.AreEqual($"{testFactoid} is {testValue}", replies.Messages[0]);
     }
 
     // TODO: Add integration test for "seen user*" to verify the asterisk is handled correctly

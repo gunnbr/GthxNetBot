@@ -78,23 +78,16 @@ namespace GthxNetBot
                             .Trim()
                             .ToLowerInvariant();
 
-                        if (dbType is "mariadb" or "mysql")
+                        // MariaDB/MySQL support was removed with the move to EF Core 10; fail clearly
+                        // for configurations that still request it rather than misusing the connection string.
+                        if (dbType != "sqlserver")
                         {
-                            options.UseMySql(
-                                connectionString,
-                                new MariaDbServerVersion(new Version(10, 3, 29)),
-                                mySqlOptions => mySqlOptions.MigrationsAssembly("MariaDbMigrations"));
+                            throw new InvalidOperationException($"Unsupported ConnectionStrings:GthxDb_Type '{dbType}'. Only 'sqlserver' is supported.");
                         }
-                        else if (dbType == "sqlserver")
-                        {
-                            options.UseSqlServer(
-                                connectionString,
-                                sqlOptions => sqlOptions.MigrationsAssembly("SqlServerMigrations"));
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("Invalid ConnectionStrings:GthxDb_Type. Supported values are 'sqlserver', 'mariadb', or 'mysql'.");
-                        }
+
+                        options.UseSqlServer(
+                            connectionString,
+                            sqlOptions => sqlOptions.MigrationsAssembly("SqlServerMigrations"));
                     });
 
                     // Register IGthxData as scoped

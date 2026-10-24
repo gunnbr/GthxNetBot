@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Data.SqlClient;
 using NUnit.Framework;
@@ -53,6 +54,7 @@ namespace Gthx.Test
     public class GthxSqlDataTest
     {
         private readonly TestServer _server;
+        private readonly IHost _host;
         private readonly GthxDataContext _Db;
         private readonly GthxSqlData _Data;
         private readonly IConfiguration _config;
@@ -85,9 +87,14 @@ namespace Gthx.Test
             try
             {
                 Log.Information("Serilog enabled for GthxSqlDataTests");
-                _server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup<SqlDataTestsStartup>().UseSerilog());
-                _Db = _server.Host.Services.GetRequiredService<GthxDataContext>();
-                _Data = (GthxSqlData)_server.Host.Services.GetService<IGthxData>();
+                _host = new HostBuilder()
+                    .ConfigureAppConfiguration(builder => builder.AddConfiguration(_config))
+                    .ConfigureWebHost(webHostBuilder => webHostBuilder.UseTestServer().UseStartup<SqlDataTestsStartup>())
+                    .UseSerilog()
+                    .Start();
+                _server = _host.GetTestServer();
+                _Db = _host.Services.GetRequiredService<GthxDataContext>();
+                _Data = (GthxSqlData)_host.Services.GetService<IGthxData>();
             }
             catch (Exception ex)
             {
@@ -136,29 +143,29 @@ namespace Gthx.Test
             // Verify initial conditions:
             // 1) No Ref for the factoid exists
             var refData = _Db.Ref.FirstOrDefault(r => r.Item == testFactoid);
-            Assert.IsNull(refData, "Test factoid already in the Ref table");
+            ClassicAssert.IsNull(refData, "Test factoid already in the Ref table");
 
             var factoidData = _Data.GetFactoid(testFactoid);
             // 2) That the factoid doesn't exist and that
             //    if none exists, the return value is null
-            Assert.IsNull(factoidData, "Test factoid already exists");
+            ClassicAssert.IsNull(factoidData, "Test factoid already exists");
 
             // Verify that referencing a factoid that doesn't exist doesn't
             // add a reference for it
             refData = _Db.Ref.FirstOrDefault(r => r.Item == testFactoid);
-            Assert.IsNull(refData, "Asking about an unknown factoid added a reference");
+            ClassicAssert.IsNull(refData, "Asking about an unknown factoid added a reference");
 
             var success = _Data.AddFactoid(testUser, testFactoid, false, testValue, true);
 
             factoidData = _Data.GetFactoid(testFactoid);
             refData = _Db.Ref.FirstOrDefault(r => r.Item == testFactoid);
-            Assert.NotNull(refData, "After asking about a factoid, it still doesn't exist in the Ref table");
-            Assert.AreEqual(1, refData.Count, "Incorrect ref count after first ask");
+            ClassicAssert.NotNull(refData, "After asking about a factoid, it still doesn't exist in the Ref table");
+            ClassicAssert.AreEqual(1, refData.Count, "Incorrect ref count after first ask");
 
             factoidData = _Data.GetFactoid(testFactoid);
             factoidData = _Data.GetFactoid(testFactoid);
             refData = _Db.Ref.FirstOrDefault(r => r.Item == testFactoid);
-            Assert.AreEqual(3, refData.Count, "Incorrect ref count after third ask");
+            ClassicAssert.AreEqual(3, refData.Count, "Incorrect ref count after third ask");
         }
 
         [Test]
@@ -174,7 +181,7 @@ namespace Gthx.Test
             var testValue3 = "boring";
 
             var history = _Data.GetFactoidInfo(testFactoid);
-            Assert.IsNull(history);
+            ClassicAssert.IsNull(history);
 
             _Data.AddFactoid(testUser1, testFactoid, false, testValue1, true);
             _Data.AddFactoid(testUser2, testFactoid, false, testValue2, false);
@@ -184,23 +191,23 @@ namespace Gthx.Test
             _Data.GetFactoid(testFactoid);
 
             history = _Data.GetFactoidInfo(testFactoid);
-            Assert.AreEqual(3, history.RefCount);
+            ClassicAssert.AreEqual(3, history.RefCount);
 
-            Assert.AreEqual(testUser3, history.InfoList[0].User);
-            Assert.AreEqual(testFactoid, history.InfoList[0].Item);
-            Assert.AreEqual(testValue3, history.InfoList[0].Value);
+            ClassicAssert.AreEqual(testUser3, history.InfoList[0].User);
+            ClassicAssert.AreEqual(testFactoid, history.InfoList[0].Item);
+            ClassicAssert.AreEqual(testValue3, history.InfoList[0].Value);
 
-            Assert.AreEqual(testUser3, history.InfoList[1].User);
-            Assert.AreEqual(testFactoid, history.InfoList[1].Item);
-            Assert.IsNull(history.InfoList[1].Value);
+            ClassicAssert.AreEqual(testUser3, history.InfoList[1].User);
+            ClassicAssert.AreEqual(testFactoid, history.InfoList[1].Item);
+            ClassicAssert.IsNull(history.InfoList[1].Value);
 
-            Assert.AreEqual(testUser2, history.InfoList[2].User);
-            Assert.AreEqual(testFactoid, history.InfoList[2].Item);
-            Assert.AreEqual(testValue2, history.InfoList[2].Value);
+            ClassicAssert.AreEqual(testUser2, history.InfoList[2].User);
+            ClassicAssert.AreEqual(testFactoid, history.InfoList[2].Item);
+            ClassicAssert.AreEqual(testValue2, history.InfoList[2].Value);
 
-            Assert.AreEqual(testUser1, history.InfoList[3].User);
-            Assert.AreEqual(testFactoid, history.InfoList[3].Item);
-            Assert.AreEqual(testValue1, history.InfoList[3].Value);
+            ClassicAssert.AreEqual(testUser1, history.InfoList[3].User);
+            ClassicAssert.AreEqual(testFactoid, history.InfoList[3].Item);
+            ClassicAssert.AreEqual(testValue1, history.InfoList[3].Value);
         }
 
         [Test]
@@ -213,27 +220,27 @@ namespace Gthx.Test
             var message = "Be sure to test tells";
 
             var tells = System.Linq.Queryable.Where(_Db.Tell, t => t.Recipient == toUser);
-            Assert.AreEqual(0, tells.Count(), "Tell exists at the start of the test");
+            ClassicAssert.AreEqual(0, tells.Count(), "Tell exists at the start of the test");
 
             var tellData = _Data.GetTell(toUser);
-            Assert.AreEqual(0, tellData.Count, "Tell Data exists at the start of the test");
+            ClassicAssert.AreEqual(0, tellData.Count, "Tell Data exists at the start of the test");
 
             _Data.AddTell(fromUser, toUser, message);
 
             tells = System.Linq.Queryable.Where(_Db.Tell, t => t.Recipient == toUser);
-            Assert.AreEqual(1, tells.Count(), "Tell not added to the DB");
+            ClassicAssert.AreEqual(1, tells.Count(), "Tell not added to the DB");
 
             tellData = _Data.GetTell(toUser);
-            Assert.AreEqual(1, tellData.Count, "Tell not returned when it should be");
-            Assert.AreEqual(toUser, tellData[0].Recipient);
-            Assert.AreEqual(fromUser, tellData[0].Author);
-            Assert.AreEqual(message, tellData[0].Message);
+            ClassicAssert.AreEqual(1, tellData.Count, "Tell not returned when it should be");
+            ClassicAssert.AreEqual(toUser, tellData[0].Recipient);
+            ClassicAssert.AreEqual(fromUser, tellData[0].Author);
+            ClassicAssert.AreEqual(message, tellData[0].Message);
 
             tells = System.Linq.Queryable.Where(_Db.Tell, t => t.Recipient == toUser);
-            Assert.AreEqual(0, tells.Count(), "Tell still exists after being returned");
+            ClassicAssert.AreEqual(0, tells.Count(), "Tell still exists after being returned");
 
             tellData = _Data.GetTell(toUser);
-            Assert.AreEqual(0, tellData.Count, "Tell Data still exists after being returned");
+            ClassicAssert.AreEqual(0, tellData.Count, "Tell Data still exists after being returned");
         }
 
         [Test]
@@ -246,19 +253,19 @@ namespace Gthx.Test
             _Data.UpdateLastSeen(testChannel, "gunner", "message 3");
 
             var lastSeen = _Data.GetLastSeen("gunn");
-            Assert.AreEqual(3, lastSeen.Count);
+            ClassicAssert.AreEqual(3, lastSeen.Count);
             var names = lastSeen.Select(s => s.User).ToList();
-            Assert.IsTrue(names.Contains("gunnbr"));
-            Assert.IsTrue(names.Contains("gunnbr_"));
-            Assert.IsTrue(names.Contains("gunner"));
+            ClassicAssert.IsTrue(names.Contains("gunnbr"));
+            ClassicAssert.IsTrue(names.Contains("gunnbr_"));
+            ClassicAssert.IsTrue(names.Contains("gunner"));
 
             // Test also with an asterisk cause people use that.
             lastSeen = _Data.GetLastSeen("gunn*");
-            Assert.AreEqual(3, lastSeen.Count);
+            ClassicAssert.AreEqual(3, lastSeen.Count);
             names = lastSeen.Select(s => s.User).ToList();
-            Assert.IsTrue(names.Contains("gunnbr"));
-            Assert.IsTrue(names.Contains("gunnbr_"));
-            Assert.IsTrue(names.Contains("gunner"));
+            ClassicAssert.IsTrue(names.Contains("gunnbr"));
+            ClassicAssert.IsTrue(names.Contains("gunnbr_"));
+            ClassicAssert.IsTrue(names.Contains("gunner"));
         }
 
         [Test]
@@ -268,18 +275,18 @@ namespace Gthx.Test
             var testTitle = "My first YouTube video";
 
             var refData = _Data.AddYoutubeReference(testItem);
-            Assert.AreEqual(testItem, refData.Item, "Wrong item returned");
-            Assert.AreEqual(1, refData.Count, "Wrong initial count value");
-            Assert.IsNull(refData.Title, "Test failure: Title already exists");
+            ClassicAssert.AreEqual(testItem, refData.Item, "Wrong item returned");
+            ClassicAssert.AreEqual(1, refData.Count, "Wrong initial count value");
+            ClassicAssert.IsNull(refData.Title, "Test failure: Title already exists");
 
             // Mainly test that this doesn't throw an exception
             _Data.AddYoutubeTitle(testItem, testTitle);
 
             // Verify that we have the title now and that the refcount was updated
             refData = _Data.AddYoutubeReference(testItem);
-            Assert.AreEqual(testItem, refData.Item, "Wrong item returned");
-            Assert.AreEqual(2, refData.Count, "Count not updated");
-            Assert.AreEqual(testTitle, refData.Title, "Title not available in second attempt");
+            ClassicAssert.AreEqual(testItem, refData.Item, "Wrong item returned");
+            ClassicAssert.AreEqual(2, refData.Count, "Count not updated");
+            ClassicAssert.AreEqual(testTitle, refData.Title, "Title not available in second attempt");
         }
 
         [Test]
@@ -289,18 +296,18 @@ namespace Gthx.Test
             var testTitle = "Spiral Gears";
 
             var refData = _Data.AddThingiverseReference(testItem);
-            Assert.AreEqual(testItem, refData.Item.ToString(), "Wrong item returned");
-            Assert.AreEqual(1, refData.Count, "Wrong initial count value");
-            Assert.IsNull(refData.Title, "Test failure: Title already exists");
+            ClassicAssert.AreEqual(testItem, refData.Item.ToString(), "Wrong item returned");
+            ClassicAssert.AreEqual(1, refData.Count, "Wrong initial count value");
+            ClassicAssert.IsNull(refData.Title, "Test failure: Title already exists");
 
             // Mainly test that this doesn't throw an exception
             _Data.AddThingiverseTitle(testItem, testTitle);
 
             // Verify that we have the title now and that the refcount was updated
             refData = _Data.AddThingiverseReference(testItem);
-            Assert.AreEqual(testItem, refData.Item.ToString(), "Wrong item returned");
-            Assert.AreEqual(2, refData.Count, "Count not updated");
-            Assert.AreEqual(testTitle, refData.Title, "Title not available in second attempt");
+            ClassicAssert.AreEqual(testItem, refData.Item.ToString(), "Wrong item returned");
+            ClassicAssert.AreEqual(2, refData.Count, "Count not updated");
+            ClassicAssert.AreEqual(testTitle, refData.Title, "Title not available in second attempt");
         }
     }
 }

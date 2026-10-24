@@ -450,14 +450,14 @@ namespace GthxNetBot
         private void SimpleBot_RawMessageReceived(object? sender, IrcRawMessageEventArgs e)
         {
 #if true
-            _logger.LogDebug("Raw Message Received: {RawContent} {Message}", e.RawContent, e.Message);
+            _logger.LogDebug("Raw Message Received: {RawContent} {Message}", e.RawContent, e.IrcMessage);
 #else
             _logger.LogDebug("RawContent: {RawContent}", e.RawContent);
             _logger.LogDebug("Message:");
-            _logger.LogDebug($"    Source: {e.Message.Source}");
-            _logger.LogDebug($"    Prefix: {e.Message.Prefix}");
-            _logger.LogDebug($"   Command: {e.Message.Command}");
-            _logger.LogDebug($"    Params: {string.Join(",",e.Message.Parameters)}");
+            _logger.LogDebug($"    Source: {e.IrcMessage.Source}");
+            _logger.LogDebug($"    Prefix: {e.IrcMessage.Prefix}");
+            _logger.LogDebug($"   Command: {e.IrcMessage.Command}");
+            _logger.LogDebug($"    Params: {string.Join(",",e.IrcMessage.Parameters)}");
 #endif
         }
 

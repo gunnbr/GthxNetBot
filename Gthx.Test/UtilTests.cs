@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework.Internal;
 using Serilog;
@@ -48,6 +49,7 @@ namespace Gthx.Test
         private readonly IGthxUtil _util;
         private readonly IConfigurationRoot _config;
         private readonly TestServer _server;
+        private readonly IHost _host;
 
         public UtilTests()
         {
@@ -63,8 +65,13 @@ namespace Gthx.Test
             try
             {
                 Log.Information("Serilog enabled for GthxUtilTests");
-                _server = new TestServer(new WebHostBuilder().UseConfiguration(_config).UseStartup<UtilTestStartup>().UseSerilog());
-                _util = _server.Host.Services.GetService<IGthxUtil>();
+                _host = new HostBuilder()
+                    .ConfigureAppConfiguration(builder => builder.AddConfiguration(_config))
+                    .ConfigureWebHost(webHostBuilder => webHostBuilder.UseTestServer().UseStartup<UtilTestStartup>())
+                    .UseSerilog()
+                    .Start();
+                _server = _host.GetTestServer();
+                _util = _host.Services.GetService<IGthxUtil>();
             }
             catch (Exception ex)
             {
@@ -86,69 +93,69 @@ namespace Gthx.Test
             // Verify that 0 seconds works and includes an 's' at the end
             var timeNow = DateTime.UtcNow;
             var sinceString = _util.TimeBetweenString(timeNow, timeNow);
-            Assert.AreEqual("0 seconds", sinceString);
+            ClassicAssert.AreEqual("0 seconds", sinceString);
 
             // Verify that 1 second does not include the 's'
             var futureTime = timeNow + new TimeSpan(0, 0, 1);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("1 second", sinceString);
+            ClassicAssert.AreEqual("1 second", sinceString);
 
             // And that 2 seconds and beyond include the 's' again
             futureTime = timeNow + new TimeSpan(0, 0, 2);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("2 seconds", sinceString);
+            ClassicAssert.AreEqual("2 seconds", sinceString);
 
             // Test minutes
             futureTime = timeNow + new TimeSpan(0, 1, 0);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("1 minute", sinceString);
+            ClassicAssert.AreEqual("1 minute", sinceString);
 
             futureTime = timeNow + new TimeSpan(0, 2, 0);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("2 minutes", sinceString);
+            ClassicAssert.AreEqual("2 minutes", sinceString);
 
             futureTime = timeNow + new TimeSpan(0, 2, 15);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("2 minutes, 15 seconds", sinceString);
+            ClassicAssert.AreEqual("2 minutes, 15 seconds", sinceString);
 
             // Test hours
             futureTime = timeNow + new TimeSpan(1, 0, 0);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("1 hour", sinceString);
+            ClassicAssert.AreEqual("1 hour", sinceString);
 
             futureTime = timeNow + new TimeSpan(2, 0, 0);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("2 hours", sinceString);
+            ClassicAssert.AreEqual("2 hours", sinceString);
 
             futureTime = timeNow + new TimeSpan(3, 16, 41);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("3 hours, 16 minutes, 41 seconds", sinceString);
+            ClassicAssert.AreEqual("3 hours, 16 minutes, 41 seconds", sinceString);
 
             // Test days
             futureTime = timeNow + new TimeSpan(1, 0, 0, 0);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("1 day", sinceString);
+            ClassicAssert.AreEqual("1 day", sinceString);
 
             futureTime = timeNow + new TimeSpan(2, 0, 0, 0);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("2 days", sinceString);
+            ClassicAssert.AreEqual("2 days", sinceString);
 
             futureTime = timeNow + new TimeSpan(3, 11, 58, 5);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("3 days, 11 hours, 58 minutes, 5 seconds", sinceString);
+            ClassicAssert.AreEqual("3 days, 11 hours, 58 minutes, 5 seconds", sinceString);
 
             // Test years
             futureTime = timeNow + new TimeSpan(365, 0, 0, 0);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("1 year", sinceString);
+            ClassicAssert.AreEqual("1 year", sinceString);
 
             futureTime = timeNow + new TimeSpan(730, 0, 0, 0);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("2 years", sinceString);
+            ClassicAssert.AreEqual("2 years", sinceString);
 
             futureTime = timeNow + new TimeSpan(1095, 8, 0, 0);
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
-            Assert.AreEqual("3 years, 8 hours", sinceString);
+            ClassicAssert.AreEqual("3 years, 8 hours", sinceString);
         }
     }
 }
