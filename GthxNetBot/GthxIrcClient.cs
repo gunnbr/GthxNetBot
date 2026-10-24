@@ -25,6 +25,7 @@ namespace GthxNetBot
         public string? Password { get; set; }
         public string? RealName { get; set; }
         public string? SaslPassword { get; set; }
+        public int? SaslFailureExitDelayMinutes { get; set; }
     }
 
     public class GthxIrcClient : IIrcClient
@@ -36,6 +37,8 @@ namespace GthxNetBot
         private readonly IrcOptions _options = new();
         private readonly System.Timers.Timer _whoIsTimer;
         private readonly DateTime _startupTime = DateTime.UtcNow;
+        private volatile bool _saslFailed;
+        private int _exitRequested;
 
         private readonly StandardIrcClient _client = new()
         {
@@ -229,6 +232,34 @@ namespace GthxNetBot
         private void Client_SaslAuthenticationFailed(object? sender, SaslAuthenticationFailedEventArgs e)
         {
             _logger.LogError("SASL authentication failed using mechanism {mechanism}: {message}", e.Mechanism, e.Message);
+
+            // Don't carry on unidentified. Some servers (e.g. Libera for SASL-only IP ranges) drop the
+            // connection anyway, and the container restart policy would then reconnect within seconds,
+            // over and over, which can get the host banned. Disconnect and let ExitBot() delay the exit.
+            _saslFailed = true;
+            Task.Run(() => _client.Disconnect());
+        }
+
+        /// <summary>
+        /// Stops the bot. After a SASL failure, waits first so that a restart policy can't turn a bad
+        /// password into a rapid reconnect loop.
+        /// </summary>
+        private void ExitBot()
+        {
+            if (Interlocked.Exchange(ref _exitRequested, 1) == 1)
+            {
+                return;
+            }
+
+            if (!_saslFailed)
+            {
+                _runner.Exit();
+                return;
+            }
+
+            var delay = TimeSpan.FromMinutes(_options.SaslFailureExitDelayMinutes ?? 15);
+            _logger.LogError("Exiting in {delay} because SASL authentication failed. Check 'IrcInfo:SaslPassword'.", delay);
+            Task.Delay(delay).ContinueWith(_ => _runner.Exit());
         }
 
         private void IrcClient_Registered(object? sender, EventArgs e)
@@ -238,6 +269,12 @@ namespace GthxNetBot
             if (sender is not IrcClient client)
             {
                 _logger.LogError("Registered event didn't get a client!");
+                return;
+            }
+
+            if (_saslFailed)
+            {
+                _logger.LogWarning("Not joining channels because SASL authentication failed.");
                 return;
             }
 
@@ -383,7 +420,7 @@ namespace GthxNetBot
         private void IrcClient_Disconnected(object? sender, EventArgs e)
         {
             _logger.LogError("Disconnected from the IRC server");
-            _runner.Exit();
+            ExitBot();
         }
 
         private void IrcClient_Connected(object? sender, EventArgs e)
@@ -502,7 +539,7 @@ namespace GthxNetBot
             LogConnectException("IRC error", e.Error);
             // If we got here, the read has stopped and we're dead in the water. 
             // TODO: Try to reconnect instead of exit?
-            _runner.Exit();
+            ExitBot();
         }
 
         public bool SendAction(string channel, string action)
