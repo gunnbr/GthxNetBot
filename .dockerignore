@@ -5,5 +5,5 @@
 **/.vscode/
 **/*.user
 .git
-gthx.env
+*.env
 .env

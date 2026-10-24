@@ -111,6 +111,13 @@ To try the bot without IRC, run the console mode against the same database (addr
 
     docker compose run --rm --no-deps gthxbot --console
 
+## The gthxtestbot container
+To trial a new build next to the production bot without touching it, run it as `gthxtestbot`, with its
+own nick and database settings:
+
+    cp gthxtestbot.env.example gthxtestbot.env         # then fill in the test database connection string
+    docker compose -f compose.gthxtestbot.yaml up -d --build
+
 ## Docker (existing database)
 To run just the bot container against a database configured in `gthx.env`, with network access to
 localhost and automatic restart, use:

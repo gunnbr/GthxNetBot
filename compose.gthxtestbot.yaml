@@ -1,0 +1,15 @@
+# The gthxtestbot: the new build running next to (not replacing) the production gthx container,
+# under its own container name and IRC nick, until it's trusted enough to cut over.
+#
+#   cp gthxtestbot.env.example gthxtestbot.env    # then fill in the database connection string
+#   docker compose -f compose.gthxtestbot.yaml up -d --build
+#   docker compose -f compose.gthxtestbot.yaml logs -f
+#
+# Unlike compose.yaml, this uses whatever database gthxtestbot.env names (e.g. Azure SQL).
+services:
+  gthxtestbot:
+    build: .
+    image: gthxnetbot:dev
+    container_name: gthxtestbot
+    env_file: gthxtestbot.env
+    restart: unless-stopped

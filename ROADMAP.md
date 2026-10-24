@@ -18,7 +18,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
-**Next up:** finish phase 3: decide which database the containerized bot uses in production (see below), then cut over.
+**Next up:** finish phase 3: set up the Azure SQL test database for `gthxtestbot`, run it on the local test server, then cut gthx over.
 
 **Testing rule:** never run test bots or probe clients against Libera (we were banned there on 2026-10-24 after phase 3 test runs). Use the local InspIRCd test server on sakura: `10.0.0.125:6667`, plaintext.
 
@@ -58,10 +58,16 @@ Done on the Linux PC (2026-10-24):
 - Added `compose.yaml`: bot + SQL Server 2022 container (persistent `gthx-sql-data` volume, health-checked, on `127.0.0.1:14333`).
 - Verified in the container: EF migrations create the database; over IRC on the local InspIRCd server the bot joins, stores and returns factoids, and answers `status`. Console mode (`--console`) works against the same database.
 
+Decisions (2026-10-24):
+- **Production database is Azure SQL** for both gthx and othx. gthx's catalog should lose "Test" from its name (today it's `GthxTest`).
+- **gthx first; othx later.** othx keeps running its existing `othx2.26` container and MariaDB data until its data is ported to Azure SQL.
+- **Don't touch `gthx2.26` while testing.** The new build runs as a separate `gthxtestbot` container with its own nick (`compose.gthxtestbot.yaml`, `gthxtestbot.env.example`).
+
 To do:
-- [ ] Decide the production database for the container. Today `gthx2.26` (still the 2022 .NET 6 image) uses Azure SQL (`gthxdb.database.windows.net`, catalog `GthxTest`), and `othx2.26` uses MariaDB on sakura, which the new build no longer supports (port othx's data to SQL Server first).
-- [ ] SASL login could not be re-checked from the container: it was skipped against the local server (no NickServ there), and Libera is off-limits for testing. Check it during the production cutover.
-- [ ] Cut over: replace the `gthx2.26` container with the new image (back up the old image first, as was done with `pre-upgrade-backup/*`).
+- [ ] Test database: proposed `CREATE DATABASE Gthx AS COPY OF GthxTest` on `gthxdb` (run in `master`). That gives `gthxtestbot` real data without writing to production, and `Gthx` becomes the renamed catalog at cutover. Needs the user's go-ahead (extra Azure database cost; needs a server-admin/`dbmanager` login).
+- [ ] Run `gthxtestbot` on the local InspIRCd server against that database; exercise factoids, tell, seen, and status.
+- [ ] Optional: add NickServ to the local test server (InspIRCd has no services built in; it needs Anope or Atheme linked to it, which means root changes to `/etc/inspircd`) so SASL can be tested locally.
+- [ ] Cutover: back up the `gthx2.26` image, refresh the `Gthx` copy from `GthxTest`, start the new bot as `gthx` on `Gthx` (with SASL), stop `gthx2.26`, and later drop `GthxTest`.
 
 ## 4. Logging accessible after Azure deploy — ⬜
 - Today the bot logs through Serilog to console/file/Seq, plus email for warnings and above. None of that is easy to reach from Azure.
