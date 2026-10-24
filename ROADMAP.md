@@ -4,7 +4,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 
 | # | Phase | Status |
 |---|-------|--------|
-| 1 | Finish updating to .NET 10 | 🟡 |
+| 1 | Finish updating to .NET 10 | ✅ |
 | 2 | Add SASL support | ✅ |
 | 3 | Deploy as a locally running Docker container on the Linux PC | ⬜ |
 | 4 | Logging that's accessible once deployed to Azure | ⬜ |
@@ -18,21 +18,22 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
-## 1. Finish updating to .NET 10 — 🟡
+**Next up:** phase 3. On the Linux PC, start by running the bot against a live database and IRC, since that wasn't checked after the phase 1 package updates.
+
+## 1. Finish updating to .NET 10 — ✅
 
 Done:
 - All projects target `net10.0`; Dockerfile uses the 10.0 SDK/runtime images; solution is `.slnx`.
 - Solution builds (0 errors). All 30 tests pass, including the SQL Server Testcontainers tests (verified with Podman on Windows using the `docker_engine` pipe).
 - `podman build` of the Dockerfile succeeds.
 
-In progress on branch `feature/net10-cleanup` (plus `feature/sqlserver-only-efcore10` in `Gthx.Data`):
+Merged in [#41](https://github.com/gunnbr/GthxNetBot/pull/41) and [GthxNetData#3](https://github.com/gunnbr/GthxNetData/pull/3) on 2026-10-24:
 - [x] Packages updated: EF Core 10.0.13, `Microsoft.Extensions.*` 10.0.13, `Microsoft.AspNetCore.TestHost` 10.0.13, Serilog 4.4 and its 10.x integrations and current sinks, Aspire 13.6.4, `Microsoft.NET.Test.Sdk` 18.11, NUnit 4.6.1 + adapter 6.3.1, coverlet 10.1. Tests use `ClassicAssert`.
 - [x] `DotNet.Testcontainers` 1.6.0 replaced with `Testcontainers.MsSql` 4.16.0.
 - [x] **MariaDB support dropped** (decided 2026-10-24) because Pomelo has no EF Core 10 release. Removed the `MariaDbMigrations` project and Pomelo; `GthxDb_Type` values other than `sqlserver` now fail at startup with a clear error.
 - [x] `System.Security.Cryptography.Pkcs` pinned to 10.0.13 (EF Core 10 / Aspire pulled in vulnerable versions).
 - [x] Removed the redundant `System.Threading.Tasks.Dataflow` reference; replaced the obsolete `WebHostBuilder` in tests and `IrcRawMessageEventArgs.Message` in the bot.
 - [x] Builds with 0 errors; all 30 tests pass.
-- [ ] Open PRs (Gthx.Data first, then this repo) and merge.
 - Remaining minor warnings, left alone: lowercase `init` migration class name (renaming a migration is risky), and an unused mock event.
 
 **Follow-up — othx:** the `othx` deployment uses MariaDB. It must stay on the current release until its data is ported to SQL Server (plan this before or during phase 3/5).
