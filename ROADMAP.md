@@ -6,7 +6,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 |---|-------|--------|
 | 1 | Finish updating to .NET 10 | 🟡 |
 | 2 | Add SASL support | 🟡 |
-| 3 | Deploy as a locally running Docker container | ⬜ |
+| 3 | Deploy as a locally running Docker container | 🟡 |
 | 4 | Switch to deploy to Azure | ⬜ |
 | 5 | Build on GitHub with build/test status badges on the main page | ⬜ |
 | 6 | Automatically deploy to Azure from GitHub | ⬜ |
@@ -27,7 +27,7 @@ Remaining:
 
 ## 2. Add SASL support — 🟡
 
-Done (uncommitted on `feature/sasl-support`):
+Done (on `feature/sasl-support`, PR #40):
 - `GthxIrcClient`: SASL using the nick plus `SaslPassword` (falls back to `Password`), TLS on by default (port 6697), CAP/SASL diagnostic logging, faster connect-failure handling.
 - AppHost passes `sasl-password` as a secret parameter; the bot has a `UserSecretsId`.
 - SASL PLAIN support committed to the fork and merged to its `master` ([gunnbr/IrcDotNet#2](https://github.com/gunnbr/IrcDotNet/pull/2), commit `40864f9`). Upstream IrcDotNet looks abandoned, so the fork is the source of truth.
@@ -38,7 +38,7 @@ Remaining:
 - [ ] Merge the `feature/sasl-support` PR into `master`.
 - [ ] Fork: `CompleteIrcClientTest` now connects to `irc.libera.chat` instead of the defunct freenode ([gunnbr/IrcDotNet#3](https://github.com/gunnbr/IrcDotNet/pull/3)). It still fails in `LocalUserModeTest`, because Libera gives new users `+w` by default and the test expects it to be off.
 
-## 3. Local Docker container — ⬜
+## 3. Local Docker container — 🟡
 - `podman build -t gthxnetbot .` builds the image successfully on Windows; the submodules are restored inside the container with no external package feed.
 - Still to do: run the container locally with config/secrets and a database (and decide how it reaches the DB). The bot normally runs on a Linux PC with Docker.
 - Clone with `git clone --recurse-submodules` (or run `git submodule update --init`) so that `Gthx.Data` and `IrcDotNet` are present before building.
