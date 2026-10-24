@@ -18,13 +18,12 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 
 Done:
 - All projects target `net10.0`; Dockerfile uses the 10.0 SDK/runtime images; solution is `.slnx`.
-- Solution builds (0 errors). 21/30 tests pass; the 9 failures are SQL Server integration tests that need Docker (Testcontainers), which isn't available on the dev machine yet.
+- Solution builds (0 errors). All 30 tests pass, including the SQL Server Testcontainers tests (verified with Podman on Windows using the `docker_engine` pipe).
 
 Remaining:
 - [ ] Bump outdated packages to their .NET 10-era versions: `Microsoft.Extensions.*` 7.0.0, EF Core 9.0.0, `Microsoft.AspNetCore.TestHost` 7.0.17, `Serilog.*` 7.0.0, `Microsoft.NET.Test.Sdk`, NUnit 3 / adapter, coverlet, `DotNet.Testcontainers` 1.6.0 (very old; the replacement is `Testcontainers.MsSql`).
 - [ ] Remove the redundant `System.Threading.Tasks.Dataflow` reference (NU1510).
 - [ ] Replace the obsolete `WebHostBuilder` / `UseSerilog(IWebHostBuilder)` in tests (ASPDEPR004 / CS0618).
-- [ ] Get the integration tests running (needs Docker).
 
 ## 2. Add SASL support — 🟡
 
@@ -40,7 +39,8 @@ Remaining:
 - [ ] Fork: `CompleteIrcClientTest` now connects to `irc.libera.chat` instead of the defunct freenode ([gunnbr/IrcDotNet#3](https://github.com/gunnbr/IrcDotNet/pull/3)). It still fails in `LocalUserModeTest`, because Libera gives new users `+w` by default and the test expects it to be off.
 
 ## 3. Local Docker container — ⬜
-- The Windows dev machine has Podman instead of Docker, and no Podman machine is set up. The bot normally runs on a Linux PC with Docker, and development will move there.
+- `podman build -t gthxnetbot .` builds the image successfully on Windows; the submodules are restored inside the container with no external package feed.
+- Still to do: run the container locally with config/secrets and a database (and decide how it reaches the DB). The bot normally runs on a Linux PC with Docker.
 - Clone with `git clone --recurse-submodules` (or run `git submodule update --init`) so that `Gthx.Data` and `IrcDotNet` are present before building.
 
 ## 4–6. Azure + GitHub CI/CD — ⬜
