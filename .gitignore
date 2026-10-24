@@ -343,3 +343,7 @@ ASALocalRun/
 healthchecksdb
 # .NET upgrade assistant scratch/planning artifacts
 .github/upgrades/
+
+# Local Docker configuration with secrets (see gthx.env.example and compose.yaml)
+gthx.env
+.env

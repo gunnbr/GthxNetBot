@@ -1,0 +1,9 @@
+# Keep host build output, IDE state and local secrets out of the Docker build context.
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/*.user
+.git
+gthx.env
+.env

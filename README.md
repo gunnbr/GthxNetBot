@@ -89,14 +89,31 @@ menu item to run through Visual Studio
 
 ## Command line
     dotnet run
-Or find the compiled executables in the bin/Debug/net6.0
+Or find the compiled executables in bin/Debug/net10.0
 
 To run the full Aspire orchestration (SQL Server container + bot) from the command line:
 
     dotnet run --project GthxNetBot.AppHost
 
-## Docker
-To run with environment overrides and network access to localhost and automatic restart, use:
+## Docker Compose (bot + local SQL Server)
+`compose.yaml` runs the bot alongside a SQL Server container whose data is kept in the `gthx-sql-data`
+volume. The database is created and migrated when the bot starts.
+
+    cp gthx.env.example gthx.env                       # then edit: nick, channels, SASL password, email
+    echo 'SQL_SA_PASSWORD=<strong password>' > .env    # SQL Server sa password
+    docker compose up -d --build
+    docker compose logs -f gthxbot
+
+`gthx.env` and `.env` hold secrets; both are ignored by git and excluded from the Docker build context.
+SQL Server is also published on `127.0.0.1:14333` for inspecting the data with a SQL client.
+
+To try the bot without IRC, run the console mode against the same database (address the bot as `gnetbot`):
+
+    docker compose run --rm --no-deps gthxbot --console
+
+## Docker (existing database)
+To run just the bot container against a database configured in `gthx.env`, with network access to
+localhost and automatic restart, use:
 
     docker run -d --env-file ./gthx.env --network="host" --restart unless-stopped gthxnetbot:latest
 

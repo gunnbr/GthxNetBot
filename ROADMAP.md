@@ -6,7 +6,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 |---|-------|--------|
 | 1 | Finish updating to .NET 10 | ✅ |
 | 2 | Add SASL support | ✅ |
-| 3 | Deploy as a locally running Docker container on the Linux PC | ⬜ |
+| 3 | Deploy as a locally running Docker container on the Linux PC | 🟡 |
 | 4 | Logging that's accessible once deployed to Azure | ⬜ |
 | 5 | Switch to deploy to Azure | ⬜ |
 | 6 | Automatic version numbers suited to CI/CD | ⬜ |
@@ -18,7 +18,9 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
-**Next up:** phase 3. On the Linux PC, start by running the bot against a live database and IRC, since that wasn't checked after the phase 1 package updates.
+**Next up:** finish phase 3: decide which database the containerized bot uses in production (see below), then cut over.
+
+**Testing rule:** never run test bots or probe clients against Libera (we were banned there on 2026-10-24 after phase 3 test runs). Use the local InspIRCd test server on sakura: `10.0.0.125:6667`, plaintext.
 
 ## 1. Finish updating to .NET 10 — ✅
 
@@ -45,9 +47,21 @@ Merged in [#41](https://github.com/gunnbr/GthxNetBot/pull/41) and [GthxNetData#3
 - SASL support lives in the `gunnbr/IrcDotNet` fork ([#2](https://github.com/gunnbr/IrcDotNet/pull/2)), included as a git submodule and project reference. Upstream IrcDotNet looks abandoned, so the fork is the source of truth.
 - Login verified against Libera as `gthxtest`. Merged in [#40](https://github.com/gunnbr/GthxNetBot/pull/40) on 2026-10-24.
 
-## 3. Local Docker container on the Linux PC — ⬜
+## 3. Local Docker container on the Linux PC — 🟡
 - Clone with `git clone --recurse-submodules` (or run `git submodule update --init`) so that `Gthx.Data` and `IrcDotNet` are present before building.
-- To do: run the container with config/secrets and a database (and decide how it reaches the DB).
+
+Done on the Linux PC (2026-10-24):
+- Solution builds and all 30 tests pass on Linux with Docker (Testcontainers SQL Server included).
+- **Fixed: the phase 1 image couldn't start** ("Microsoft.AspNetCore.App not found"). `Serilog.AspNetCore` pulled the ASP.NET Core shared framework into a plain generic-host app; replaced it with `Serilog.Extensions.Hosting` + `Serilog.Sinks.Console` and referenced `Microsoft.Extensions.Hosting` directly, so the `dotnet/runtime` image works.
+- Missing required `IrcInfo` settings now fail at startup, naming the keys, instead of leaving a running container that never connects.
+- Added `.dockerignore` (host `bin/`/`obj/` and the secret-holding `gthx.env`/`.env` were being sent into the build context) and git-ignored `gthx.env`/`.env`.
+- Added `compose.yaml`: bot + SQL Server 2022 container (persistent `gthx-sql-data` volume, health-checked, on `127.0.0.1:14333`).
+- Verified in the container: EF migrations create the database; over IRC on the local InspIRCd server the bot joins, stores and returns factoids, and answers `status`. Console mode (`--console`) works against the same database.
+
+To do:
+- [ ] Decide the production database for the container. Today `gthx2.26` (still the 2022 .NET 6 image) uses Azure SQL (`gthxdb.database.windows.net`, catalog `GthxTest`), and `othx2.26` uses MariaDB on sakura, which the new build no longer supports (port othx's data to SQL Server first).
+- [ ] SASL login could not be re-checked from the container: it was skipped against the local server (no NickServ there), and Libera is off-limits for testing. Check it during the production cutover.
+- [ ] Cut over: replace the `gthx2.26` container with the new image (back up the old image first, as was done with `pre-upgrade-backup/*`).
 
 ## 4. Logging accessible after Azure deploy — ⬜
 - Today the bot logs through Serilog to console/file/Seq, plus email for warnings and above. None of that is easy to reach from Azure.

@@ -57,13 +57,18 @@ namespace GthxNetBot
             _whoIsTimer.Elapsed += HandleWhoIsTimer;
 
             config.GetSection(IrcOptions.IrcInfo).Bind(_options);
-            if (string.IsNullOrWhiteSpace(_options.Server) ||
-                string.IsNullOrWhiteSpace(_options.Channels) ||
-                string.IsNullOrWhiteSpace(_options.Nick) ||
-                string.IsNullOrWhiteSpace(_options.RealName))
+            var missing = new List<string>();
+            if (string.IsNullOrWhiteSpace(_options.Server)) missing.Add("Server");
+            if (string.IsNullOrWhiteSpace(_options.Channels)) missing.Add("Channels");
+            if (string.IsNullOrWhiteSpace(_options.Nick)) missing.Add("Nick");
+            if (string.IsNullOrWhiteSpace(_options.RealName)) missing.Add("RealName");
+            if (missing.Count > 0)
             {
-                _logger.LogError("Missing required IRC parameters!");
-                return;
+                // Fail at startup instead of running without ever connecting, which would leave a
+                // container that looks healthy but does nothing.
+                var names = string.Join(", ", missing.ConvertAll(name => $"{IrcOptions.IrcInfo}:{name}"));
+                _logger.LogError("Missing required IRC parameters: {Names}", names);
+                throw new InvalidOperationException($"Missing required IRC parameters: {names}");
             }
 
             _logger.LogError($"GthxNetBot starting for bot '{_options.Nick}'...");

@@ -1,0 +1,41 @@
+# Runs the bot in a container alongside a local SQL Server container.
+#
+#   cp gthx.env.example gthx.env     # IRC settings, SASL password, email
+#   echo 'SQL_SA_PASSWORD=<strong password>' > .env
+#   docker compose up -d --build
+#
+# The bot's connection string is set here to point at the "sql" service, overriding any
+# ConnectionStrings__GthxDb in gthx.env. The database is created and migrated on startup.
+services:
+  sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD:?Set SQL_SA_PASSWORD in .env}
+    volumes:
+      - gthx-sql-data:/var/opt/mssql
+    # Only reachable from this machine, for inspecting the data with a SQL client.
+    ports:
+      - "127.0.0.1:14333:1433"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' -b -o /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  gthxbot:
+    build: .
+    image: gthxnetbot:dev
+    env_file: gthx.env
+    environment:
+      ConnectionStrings__GthxDb: "Server=sql,1433;Database=Gthx;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True;"
+      ConnectionStrings__GthxDb_Type: sqlserver
+    depends_on:
+      sql:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  gthx-sql-data:
