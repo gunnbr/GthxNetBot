@@ -120,6 +120,19 @@ own nick and database settings:
 
 `testing/services/` sets up NickServ on the local test IRC server so SASL logins can be tested there.
 
+## The production gthx container
+`compose.gthx.yaml` runs the production bot as container `gthx`, connecting with TLS and SASL:
+
+    cp gthx.production.env.example gthx.production.env    # then fill in the SASL password and connection string
+    docker compose -f compose.gthx.yaml up -d --build
+
+The example settings point at the local test IRC server, so a cutover can be rehearsed with the same
+files (this needs the TLS listener from `testing/tls/`). Switching the commented "Libera" lines on is
+the cutover itself.
+
+The bot checks the server's TLS certificate against the system's CAs. `IrcInfo__TrustedCaCertificate`
+can name one more CA to trust, for a test server with a private certificate; leave it unset for Libera.
+
 ## Docker (existing database)
 To run just the bot container against a database configured in `gthx.env`, with network access to
 localhost and automatic restart, use:

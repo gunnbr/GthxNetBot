@@ -1,0 +1,27 @@
+# The production gthx bot: container "gthx", nick "gthx", SASL over TLS.
+#
+#   cp gthx.production.env.example gthx.production.env    # then fill in the password and connection string
+#   docker compose -f compose.gthx.yaml up -d --build
+#   docker compose -f compose.gthx.yaml logs -f
+#
+# gthx.production.env starts out pointing at the local test IRC server, for a cutover rehearsal (which
+# needs the TLS listener from testing/tls/README.md). Switching it to Libera is the cutover itself.
+services:
+  gthx:
+    build: .
+    image: gthxnetbot:release
+    container_name: gthx
+    env_file: gthx.production.env
+    volumes:
+      # The private test CA, only used while IrcInfo__TrustedCaCertificate points at it
+      - type: bind
+        source: ./testing/tls/out/ca.pem
+        target: /certs/ca.pem
+        read_only: true
+        bind:
+          create_host_path: false
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+        max-file: "5"
