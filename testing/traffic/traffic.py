@@ -168,7 +168,7 @@ class Soak:
         self.expect(u, f"{BOT}: status?", "status", contains="OK")
 
     def google(self, u):
-        self.expect(u, f"google reprap extruder for {self.other(u).nick}", "google", contains="lmgtfy")
+        self.expect(u, f"{BOT}: google reprap extruder for {self.other(u).nick}", "google", contains="lmgtfy")
 
     def youtube(self, u):
         video = random.choice(YOUTUBE_IDS)
