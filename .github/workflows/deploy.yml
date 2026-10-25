@@ -1,0 +1,82 @@
+# Tests, builds the image into Azure Container Registry, and deploys infra/main.bicep (including the
+# container app running that image) to Azure. The deploy job uses the "production" environment, so it
+# waits for approval when that environment has required reviewers.
+#
+# Azure sign-in uses OpenID Connect (no stored Azure password). Repository variables:
+#   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID, AZURE_RESOURCE_GROUP
+# Repository secret:
+#   BUDGET_CONTACT_EMAIL (where budget alerts go)
+# Until AZURE_CLIENT_ID is set, the build and deploy jobs are skipped. See infra/README.md.
+name: Build and deploy to Azure
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    needs: test
+    if: vars.AZURE_CLIENT_ID != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      image-tag: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push the image
+        run: |
+          registry=$(az acr list -g "${{ vars.AZURE_RESOURCE_GROUP }}" --query '[0].name' -o tsv)
+          login_server=$(az acr show -n "$registry" --query loginServer -o tsv)
+          az acr login -n "$registry"
+          docker build --pull -t "$login_server/gthxnetbot:${{ github.sha }}" .
+          docker push "$login_server/gthxnetbot:${{ github.sha }}"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy
+        env:
+          IMAGE_TAG: ${{ needs.build.outputs.image-tag }}
+          BUDGET_CONTACT_EMAIL: ${{ secrets.BUDGET_CONTACT_EMAIL }}
+        run: |
+          az deployment group create \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --name "gthx-${{ github.run_number }}" \
+            --parameters infra/main.bicepparam \
+            --query 'properties.provisioningState' -o tsv

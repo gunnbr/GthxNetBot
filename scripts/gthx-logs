@@ -1,0 +1,65 @@
+#!/bin/sh
+# Shows the Azure-hosted bot's logs from Log Analytics, or streams them live.
+#
+#   scripts/gthx-logs                  # last hour, Information and above
+#   scripts/gthx-logs -s 1d -l Warning # last day, warnings and errors
+#   scripts/gthx-logs -g tell          # messages containing "tell"
+#   scripts/gthx-logs -f               # stream live output from the container
+#
+# Needs the Azure CLI, signed in (az login) with read access to the resource group.
+set -eu
+
+RESOURCE_GROUP=${GTHX_RESOURCE_GROUP:-rg-gthx-prod}
+WORKSPACE=${GTHX_WORKSPACE:-log-gthx-prod}
+APP=${GTHX_CONTAINER_APP:-ca-gthx-prod}
+SINCE=1h
+LEVEL=Information
+GREP=
+FOLLOW=
+
+usage() {
+    sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'
+    exit "${1:-0}"
+}
+
+while getopts "s:l:g:fh" opt; do
+    case $opt in
+        s) SINCE=$OPTARG ;;
+        l) LEVEL=$OPTARG ;;
+        g) GREP=$OPTARG ;;
+        f) FOLLOW=1 ;;
+        h) usage 0 ;;
+        *) usage 1 ;;
+    esac
+done
+
+if [ -n "$FOLLOW" ]; then
+    exec az containerapp logs show -g "$RESOURCE_GROUP" -n "$APP" --type console --follow --format text
+fi
+
+case $LEVEL in
+    Verbose) LEVELS='"Verbose","Debug","Information","Warning","Error","Fatal","Raw"' ;;
+    Debug) LEVELS='"Debug","Information","Warning","Error","Fatal","Raw"' ;;
+    Information) LEVELS='"Information","Warning","Error","Fatal","Raw"' ;;
+    Warning) LEVELS='"Warning","Error","Fatal","Raw"' ;;
+    Error) LEVELS='"Error","Fatal","Raw"' ;;
+    *) echo "Unknown level '$LEVEL'" >&2; exit 1 ;;
+esac
+
+# Lines that aren't JSON (such as an unhandled exception's stack trace) are shown with level "Raw".
+GREP_ESCAPED=$(printf '%s' "$GREP" | sed "s/'/\\\\'/g")
+QUERY="ContainerAppConsoleLogs_CL
+| where TimeGenerated > ago($SINCE) and ContainerAppName_s == '$APP'
+| extend e = parse_json(Log_s)
+| extend IsJson = isnotnull(e['@t'])
+| extend Level = iff(IsJson, coalesce(tostring(e['@l']), 'Information'), 'Raw')
+| extend Message = iff(IsJson, tostring(e['@m']), Log_s), Exception = tostring(e['@x'])
+| where Level in ($LEVELS)
+| where '$GREP_ESCAPED' == '' or Message contains '$GREP_ESCAPED' or Exception contains '$GREP_ESCAPED'
+| order by TimeGenerated asc
+| project Time = format_datetime(TimeGenerated, 'yyyy-MM-dd HH:mm:ss'), Level = substring(Level, 0, 3), Message, Exception"
+
+WORKSPACE_ID=$(az monitor log-analytics workspace show -g "$RESOURCE_GROUP" -n "$WORKSPACE" --query customerId -o tsv)
+az monitor log-analytics query -w "$WORKSPACE_ID" --analytics-query "$QUERY" \
+    --query '[].[Time, Level, Message, Exception]' -o tsv |
+    awk -F '\t' '{ printf "%s %s %s\n", $1, $2, $3; if ($4 != "") print "    " $4 }'

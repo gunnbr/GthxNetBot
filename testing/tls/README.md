@@ -8,7 +8,13 @@ bot is told to trust, so the bot's certificate check is exercised for real.
 
 1. Make the CA and server certificate (written to `out/`, which is git-ignored):
 
-       ./make-certs.sh
+       ./make-certs.sh                                     # 10.0.0.125 and irc.gunnbr.org
+       ./make-certs.sh 10.0.0.125 irc.gunnbr.org <other public name>...
+
+   If the server is also reachable from outside under another name (for a bot running in Azure), pass
+   that name as an extra argument. Running the script again keeps the CA and replaces only the server
+   certificate, so the bots that trust the CA keep working; reinstall `server.pem` and `server.key` (step 2)
+   and restart InspIRCd.
 
 2. Install them and the config (needs sudo, since `/etc/inspircd` belongs to `irc`):
 
