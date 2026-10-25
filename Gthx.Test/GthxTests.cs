@@ -508,6 +508,12 @@ namespace Gthx.Test
             ClassicAssert.AreEqual(1, replies.Messages.Count);
             ClassicAssert.AreEqual(testChannel, replies.Channel);
             ClassicAssert.AreEqual($"{testGoogleUser}: http://lmgtfy.com/?q=does+3%3d4%3f", replies.Messages[0]);
+
+            // "Google" at the start of a sentence is capitalized
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: Google plastic For {testGoogleUser}");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual($"{testGoogleUser}: http://lmgtfy.com/?q=plastic", replies.Messages[0]);
         }
 
         [Test]
