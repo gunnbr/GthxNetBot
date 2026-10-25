@@ -18,7 +18,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
-**Next up:** finish phase 3. `gthxtestbot` has been running on the local test server since 2026-10-24 (baseline: 52 MiB, 14 threads, 0 restarts). The cutover waits until Libera lifts the ban on this IP; the user contacted Libera staff on 2026-10-24.
+**Next up:** finish phase 3. `gthxtestbot` has been running on the local test server since 2026-10-24 (baseline: 52 MiB, 14 threads, 0 restarts). The cutover waits until Libera lifts the ban on this IP; the user contacted Libera staff on 2026-10-24. Synthetic channel traffic (`testing/traffic/`) runs against it; check its log for `NO REPLY`, `COUNT DID NOT INCREASE` and the hourly `SUMMARY` lines. After the fixes in #45 (lurkers? crash, capitalized tell and google), 11+ hours of traffic on 2026-10-25 had no restarts or errors, every request answered (median 0.18 s), and flat memory (about 62 MB plus about 45 MB of .NET code memory). Run the traffic from a separate git worktree (for example `git worktree add ../GthxNetBot-soak <branch>`), because its script is bind-mounted and switching branches in the main checkout can remove it.
 
 **Testing rule:** never run test bots or probe clients against Libera (we were banned there on 2026-10-24 after phase 3 test runs). Use the local InspIRCd test server on sakura: `10.0.0.125:6667`, plaintext.
 
@@ -96,6 +96,7 @@ Known issues:
 ## 10. Reported bugs — ⬜
 - To do: collect from GitHub issues.
 - [ ] `GthxSqlDataTest` logs to the Windows-only path `c:\tmp\GthxSqlTests.json`; make it portable for Linux/CI.
+- [ ] Thingiverse titles ([#39](https://github.com/gunnbr/GthxNetBot/issues/39)): thingiverse.com answers the bot's title fetch with 403 Forbidden (probably bot protection), and when a title fetch fails the bot says nothing at all instead of its "unknown title" reply. Found on 2026-10-25 by the soak traffic; production on the 2022 build likely has the same problem.
 - [ ] IrcDotNet fork: `CompleteIrcClientTest` now targets `irc.libera.chat` ([#3](https://github.com/gunnbr/IrcDotNet/pull/3)) but fails in `LocalUserModeTest`, because Libera gives new users `+w` by default and the test expects it to be off.
 
 ## 11. New features — ⬜
