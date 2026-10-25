@@ -1,0 +1,23 @@
+# Synthetic channel traffic for soak-testing gthxtestbot on the local test IRC server.
+#
+#   docker compose up -d
+#   docker compose logs -f   # reply times; problems show as "NO REPLY" / "COUNT DID NOT INCREASE"; hourly "SUMMARY"
+#
+# It writes test data (soaktest* factoids, tells, seen records) to whatever database the bot uses.
+services:
+  traffic:
+    image: python:3.12-alpine
+    container_name: soaktraffic
+    command: ["python", "-u", "/app/traffic.py"]
+    volumes:
+      - ./traffic.py:/app/traffic.py:ro
+    environment:
+      IRC_HOST: 10.0.0.125
+      IRC_PORT: "6667"
+      IRC_CHANNEL: "#gthxtestchannel"
+      BOT_NICK: gthxtestbot
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
