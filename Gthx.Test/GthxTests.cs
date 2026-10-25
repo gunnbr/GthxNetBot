@@ -1,4 +1,4 @@
-using Gthx.Bot;
+﻿using Gthx.Bot;
 using Gthx.Bot.Interfaces;
 using Gthx.Data;
 using Gthx.Test.Mocks;
@@ -410,6 +410,16 @@ namespace Gthx.Test
             ClassicAssert.AreEqual(testUser, _data.TellFromUser);
             ClassicAssert.AreEqual(testTellToUser, _data.TellToUser);
             ClassicAssert.AreEqual(testMessage, _data.TellMessage);
+
+            // "Tell" at the start of a sentence is capitalized, and a message ending in "!" must not be taken
+            // as a factoid query
+            testMessage = "Thanks for the suggestions! That worked great!";
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: Tell {testTellToUser} {testMessage}");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual($"{testUser}: I'll pass that on when {testTellToUser} is around.", replies.Messages[0]);
+            ClassicAssert.AreEqual(testTellToUser, _data.TellToUser);
+            ClassicAssert.AreEqual(testMessage, _data.TellMessage);
         }
 
         [Test]
@@ -498,6 +508,12 @@ namespace Gthx.Test
             ClassicAssert.AreEqual(1, replies.Messages.Count);
             ClassicAssert.AreEqual(testChannel, replies.Channel);
             ClassicAssert.AreEqual($"{testGoogleUser}: http://lmgtfy.com/?q=does+3%3d4%3f", replies.Messages[0]);
+
+            // "Google" at the start of a sentence is capitalized
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: Google plastic For {testGoogleUser}");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual($"{testGoogleUser}: http://lmgtfy.com/?q=plastic", replies.Messages[0]);
         }
 
         [Test]
