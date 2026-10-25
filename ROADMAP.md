@@ -18,9 +18,9 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
-**Next up:** finish phase 3. `gthxtestbot` has been running on the local test server since 2026-10-24 (baseline: 52 MiB, 14 threads, 0 restarts). The cutover waits until Libera lifts the ban on this IP; the user contacted Libera staff on 2026-10-24. Synthetic channel traffic (`testing/traffic/`) runs against it; check its log for `NO REPLY`, `COUNT DID NOT INCREASE` and the hourly `SUMMARY` lines. After the fixes in #45 (lurkers? crash, capitalized tell and google), 11+ hours of traffic on 2026-10-25 had no restarts or errors, every request answered (median 0.18 s), and flat memory (about 62 MB plus about 45 MB of .NET code memory). Run the traffic from a separate git worktree (for example `git worktree add ../GthxNetBot-soak <branch>`), because its script is bind-mounted and switching branches in the main checkout can remove it.
+**Next up:** finish phase 3. Since 2026-10-25 the production container `gthx` has been rehearsing the cutover on the local test server (SASL over TLS, `Gthx` database), replacing `gthxtestbot`. The cutover waits until Libera lifts the ban on this IP; the user contacted Libera staff on 2026-10-24. Synthetic channel traffic (`testing/traffic/`) runs against it (`BOT_NICK=gthx`); check its log for `NO REPLY`, `COUNT DID NOT INCREASE` and the hourly `SUMMARY` lines. After the fixes in #45 (lurkers? crash, capitalized tell and google), 11+ hours of traffic on 2026-10-25 had no restarts or errors, every request answered (median 0.18 s), and flat memory (about 62 MB plus about 45 MB of .NET code memory). Run the traffic from a separate git worktree (for example `git worktree add ../GthxNetBot-soak <branch>`), because its script is bind-mounted and switching branches in the main checkout can remove it.
 
-**Testing rule:** never run test bots or probe clients against Libera (we were banned there on 2026-10-24 after phase 3 test runs). Use the local InspIRCd test server on sakura: `10.0.0.125:6667`, plaintext.
+**Testing rule:** never run test bots or probe clients against Libera (we were banned there on 2026-10-24 after phase 3 test runs). Use the local InspIRCd test server on sakura: `10.0.0.125:6667` plaintext, or `10.0.0.125:6697` TLS (certificate from the private CA in `testing/tls/`).
 
 ## 1. Finish updating to .NET 10 — ✅
 
@@ -68,6 +68,7 @@ To do:
 - [x] `gthxtestbot` runs on the local InspIRCd server against `Gthx` (2026-10-24). Verified over IRC: existing factoids and `info` history from the copied data; set, `is also`, and forget; tell (acknowledged and delivered); seen; status. Replies take about 0.16 s (about 1.2 s for the first query after startup).
 - [x] NickServ on the local test server (2026-10-24): Anope 2.0.20 in Docker (`testing/services/`), linked to InspIRCd 4 over `127.0.0.1:7000`. InspIRCd 4 requires TLS for server links from non-loopback addresses, so the link must stay on loopback. `gthxtestbot` is registered and logs in with SASL PLAIN (WHOIS shows it logged in).
 - [x] **No rapid reconnect loops** (2026-10-24). The bot exits whenever the connection ends and `restart: unless-stopped` restarts it at once (Docker backs off only up to 1 minute, and resets after a run of 10 s or more), so failures used to mean reconnecting about once a minute, or every ~12 s when the connection failed. Libera reportedly also drops the connection when SASL fails for an IP that requires it. Now every exit waits first, chosen by cause: reported ban (465 or a K/G/Z/D-line `ERROR`) 60 min; SASL failure 15 min (and no channels are joined); connection failed or ended within 5 min of registering 5 min; disconnect after running normally 30 s. All are configurable (`IrcInfo:*ExitDelayMinutes`, `IrcInfo:StableConnectionMinutes`). Each path verified, using the local test server and a fake IRC server for the ban and drop cases.
+- [x] **Cutover rehearsal** (2026-10-25): `compose.gthx.yaml` runs the production container `gthx` (nick `gthx`) against the `Gthx` copy on the local test server, with SASL over TLS on 6697, the way it will connect to Libera. The local server got a TLS listener with a certificate from a private CA (`testing/tls/`), and `gthx` is registered with the local NickServ. `gthxtestbot` is stopped, and the soak traffic now runs against `gthx` (`BOT_NICK=gthx`).
 - [ ] Cutover: back up the `gthx2.26` image, refresh the `Gthx` copy from `GthxTest`, start the new bot as `gthx` on `Gthx` (with SASL), stop `gthx2.26`, and later drop `GthxTest`.
 
 ## 4. Logging accessible after Azure deploy — ⬜
@@ -91,6 +92,7 @@ To do:
 ## 9. Security — ⬜
 Known issues:
 - [x] `MailKit` 4.15.1 vulnerability [GHSA-9j88-vvj5-vhgr](https://github.com/advisories/GHSA-9j88-vvj5-vhgr): fixed in phase 1 (by `Serilog.Sinks.Email` 4.2.1).
+- [x] **The bot didn't check the IRC server's TLS certificate** (fixed 2026-10-25). IrcDotNet accepts any certificate unless `ValidateSslCertificate` is handled, so anyone able to intercept the connection could pose as the server and collect the SASL password. The bot now rejects certificates with any policy error; `IrcInfo:TrustedCaCertificate` can add a private CA for a test server. Also fixed: after a failed TLS handshake the bot logged "Now connected" and hung instead of exiting.
 - To do: review for other issues (secrets handling, dependency audit in CI).
 
 ## 10. Reported bugs — ⬜
