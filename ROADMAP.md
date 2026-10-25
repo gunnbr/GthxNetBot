@@ -18,7 +18,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
-**Next up:** finish phase 3: let `gthxtestbot` run on the local test server for a while, then cut gthx over (see the phase 3 checklist).
+**Next up:** finish phase 3. `gthxtestbot` has been running on the local test server since 2026-10-24 (baseline: 52 MiB, 14 threads, 0 restarts). The cutover waits until Libera lifts the ban on this IP; the user contacted Libera staff on 2026-10-24.
 
 **Testing rule:** never run test bots or probe clients against Libera (we were banned there on 2026-10-24 after phase 3 test runs). Use the local InspIRCd test server on sakura: `10.0.0.125:6667`, plaintext.
 
