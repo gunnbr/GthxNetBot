@@ -598,16 +598,10 @@ namespace GthxNetBot
 
         public Task<List<string>> GetUsersInChannelAsync(string channel)
         {
-            return Task.Run(() =>
-            {
-                var users = new List<string>
-                {
-                    "gunnbr",
-                    _botNick.BotNick,
-                    "LurkerBot"
-                };
-                return users;
-            });
+            // IrcDotNet keeps each joined channel's member list up to date from NAMES, JOIN, PART, etc.
+            var ircChannel = _client.Channels.FirstOrDefault(c => string.Equals(c.Name, channel, StringComparison.OrdinalIgnoreCase));
+            var users = ircChannel?.Users.Select(u => u.User.NickName).ToList() ?? new List<string>();
+            return Task.FromResult(users);
         }
 
         /// <summary>
