@@ -1,0 +1,19 @@
+# Anope IRC services (NickServ, ChanServ, SASL) for the local InspIRCd test server, so the bot's
+# SASL login can be tested without a public network. See README.md in this folder for setup,
+# including the InspIRCd side (inspircd-services.example.conf).
+#
+#   cp anope.env.example anope.env     # then set ANOPE_UPLINK_PASSWORD
+#   docker compose up -d
+services:
+  anope:
+    image: anope/anope:2.0.20
+    container_name: anope
+    # Host networking so services can link to InspIRCd over loopback (127.0.0.1:7000).
+    network_mode: host
+    env_file: anope.env
+    volumes:
+      - anope-data:/data
+    restart: unless-stopped
+
+volumes:
+  anope-data:

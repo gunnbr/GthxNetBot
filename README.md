@@ -118,6 +118,8 @@ own nick and database settings:
     cp gthxtestbot.env.example gthxtestbot.env         # then fill in the test database connection string
     docker compose -f compose.gthxtestbot.yaml up -d --build
 
+`testing/services/` sets up NickServ on the local test IRC server so SASL logins can be tested there.
+
 ## Docker (existing database)
 To run just the bot container against a database configured in `gthx.env`, with network access to
 localhost and automatic restart, use:

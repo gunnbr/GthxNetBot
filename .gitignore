@@ -347,3 +347,6 @@ healthchecksdb
 # Local Docker configuration with secrets (see gthx.env.example and compose.yaml)
 *.env
 .env
+
+# Filled-in InspIRCd services config (contains the link password)
+testing/services/inspircd-services.conf
