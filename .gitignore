@@ -350,3 +350,6 @@ healthchecksdb
 
 # Filled-in InspIRCd services config (contains the link password)
 testing/services/inspircd-services.conf
+
+# Generated test CA and server certificate/keys for the local TLS listener (see testing/tls/README.md)
+testing/tls/out/
