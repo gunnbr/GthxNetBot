@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,6 +28,12 @@ namespace GthxNetBot
         public string? Password { get; set; }
         public string? RealName { get; set; }
         public string? SaslPassword { get; set; }
+
+        /// <summary>
+        /// Path to a PEM or DER CA certificate to trust in addition to the system's CAs, for a test
+        /// server whose certificate comes from a private CA. Leave unset for public networks.
+        /// </summary>
+        public string? TrustedCaCertificate { get; set; }
 
         // How long to wait before exiting after losing the connection, by cause. Every exit is followed
         // by a container restart and a reconnect, so these keep failures from turning into a rapid
@@ -155,6 +163,9 @@ namespace GthxNetBot
             _client.SaslAuthenticationSucceeded += Client_SaslAuthenticationSucceeded;
             _client.SaslAuthenticationFailed += Client_SaslAuthenticationFailed;
 
+            // IrcDotNet accepts any server certificate unless this handler says otherwise.
+            _client.ValidateSslCertificate += Client_ValidateSslCertificate;
+
             using (var connectedEvent = new ManualResetEventSlim(false))
             {
                 _logger.LogInformation("Connecting to {server}:{port}", server, port);
@@ -162,8 +173,10 @@ namespace GthxNetBot
 
                 // Unblock the wait immediately on a failed connect (e.g. TLS handshake failure)
                 // instead of waiting for the full timeout, and log the underlying exception.
+                var connectFailed = false;
                 void ConnectFailedHandler(object? sender2, IrcErrorEventArgs e2)
                 {
+                    connectFailed = true;
                     LogConnectException("Connection to the IRC server failed", e2.Error);
                     connectedEvent.Set();
                 }
@@ -185,9 +198,10 @@ namespace GthxNetBot
 
                 _client.ConnectFailed -= ConnectFailedHandler;
 
-                // If the connection failed, the local user will not have been established.
-                if (!_client.IsConnected)
+                // After a failed TLS handshake the socket is still open, so IsConnected alone isn't enough.
+                if (connectFailed || !_client.IsConnected)
                 {
+                    _client.Dispose();
                     _logger.LogError("Connection to '{server}' did not succeed.", server);
                     ExitBot();
                     return;
@@ -195,6 +209,50 @@ namespace GthxNetBot
             }
 
             _logger.LogInformation("Now connected to '{server}'.", server);
+        }
+
+        private void Client_ValidateSslCertificate(object? sender, IrcValidateSslCertificateEventArgs e)
+        {
+            e.IsValid = IsServerCertificateValid(e.Certificate, e.SslPolicyErrors);
+        }
+
+        private bool IsServerCertificateValid(X509Certificate certificate, SslPolicyErrors errors)
+        {
+            if (errors == SslPolicyErrors.None)
+            {
+                return true;
+            }
+
+            // A chain error alone may only mean the certificate comes from the configured private CA.
+            if (errors == SslPolicyErrors.RemoteCertificateChainErrors && !string.IsNullOrWhiteSpace(_options.TrustedCaCertificate))
+            {
+                try
+                {
+                    using var trustedCa = X509CertificateLoader.LoadCertificateFromFile(_options.TrustedCaCertificate);
+                    using var serverCertificate = new X509Certificate2(certificate);
+                    using var chain = new X509Chain();
+                    chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+                    chain.ChainPolicy.CustomTrustStore.Add(trustedCa);
+                    chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                    if (chain.Build(serverCertificate))
+                    {
+                        return true;
+                    }
+
+                    var status = string.Join(", ", chain.ChainStatus.Select(s => s.StatusInformation.Trim()));
+                    _logger.LogError("The server's TLS certificate '{subject}' doesn't chain to the trusted CA in {path}: {status}",
+                        certificate.Subject, _options.TrustedCaCertificate, status);
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Couldn't check the server's TLS certificate against the trusted CA in {path}", _options.TrustedCaCertificate);
+                    return false;
+                }
+            }
+
+            _logger.LogError("Rejecting the server's TLS certificate '{subject}': {errors}", certificate.Subject, errors);
+            return false;
         }
 
         private void LogConnectException(string context, Exception? error)
