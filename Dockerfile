@@ -12,4 +12,6 @@ RUN dotnet publish GthxNetBot/GthxNetBot.csproj -c release -o /app
 FROM mcr.microsoft.com/dotnet/runtime:10.0
 WORKDIR /app
 COPY --from=build /app .
+# Run as the image's unprivileged "app" user; the bot writes no files.
+USER $APP_UID
 ENTRYPOINT ["dotnet", "GthxNetBot.dll"]

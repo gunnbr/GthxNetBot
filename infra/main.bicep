@@ -45,7 +45,7 @@ param ircChannels string
 param ircNick string = 'gthx'
 param ircRealName string = 'Gthx Reprap Factoid Bot'
 
-@description('Mount the Key Vault secret irc-trusted-ca (a PEM CA certificate) and trust it, for a test server with a private certificate. Leave false for Libera.')
+@description('Trust the CA certificate in the Key Vault secret irc-trusted-ca (PEM text), for a test server with a private certificate. Leave false for Libera.')
 param useTrustedCa bool = false
 
 @description('Send warnings and errors by email. Needs the email-* Key Vault secrets.')
@@ -229,7 +229,8 @@ var baseEnv = [
     value: 'Serilog.Formatting.Compact.RenderedCompactJsonFormatter, Serilog.Formatting.Compact'
   }
 ]
-var caEnv = useTrustedCa ? [{ name: 'IrcInfo__TrustedCaCertificate', value: '/certs/ca.pem' }] : []
+// Passed as text rather than a mounted file, so it doesn't matter which user the bot runs as.
+var caEnv = useTrustedCa ? [{ name: 'IrcInfo__TrustedCaCertificate', secretRef: 'irc-trusted-ca' }] : []
 var emailEnv = enableEmail
   ? [
       { name: 'EmailConfiguration__FromName', secretRef: 'email-from' }
@@ -280,30 +281,8 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = if (deployApp && !empty(
             memory: '0.5Gi'
           }
           env: concat(baseEnv, caEnv, emailEnv)
-          volumeMounts: useTrustedCa
-            ? [
-                {
-                  volumeName: 'certs'
-                  mountPath: '/certs'
-                }
-              ]
-            : []
         }
       ]
-      volumes: useTrustedCa
-        ? [
-            {
-              name: 'certs'
-              storageType: 'Secret'
-              secrets: [
-                {
-                  secretRef: 'irc-trusted-ca'
-                  path: 'ca.pem'
-                }
-              ]
-            }
-          ]
-        : []
       // An IRC bot must run as exactly one copy: two would fight over the nick.
       scale: {
         minReplicas: 1

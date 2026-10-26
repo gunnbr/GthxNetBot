@@ -2,15 +2,19 @@
 # Creates a private CA (once) and a TLS certificate for the local test IRC server, in ./out (git-ignored).
 # The bot trusts the CA through IrcInfo__TrustedCaCertificate; nothing else trusts it.
 #
-#   ./make-certs.sh [server IP] [server name] [more server names...]
+#   ./make-certs.sh <server IP> <server name> [more server names...]
 #
 # Running it again keeps the CA and replaces the server certificate (the old one is kept as *.old), so
 # clients that trust the CA keep working. Pass any extra public names the server is reached by as
-# arguments rather than writing them into this file.
+# arguments rather than writing them into this file. (The server's names aren't kept in the repository.)
 set -eu
-IP=${1:-10.0.0.125}
-NAME=${2:-irc.gunnbr.org}
-[ $# -ge 2 ] && shift 2 || shift $#
+if [ $# -lt 2 ]; then
+    echo "usage: $0 <server IP> <server name> [more server names...]" >&2
+    exit 2
+fi
+IP=$1
+NAME=$2
+shift 2
 SAN="IP:$IP,DNS:$NAME"
 for extra in "$@"; do
     SAN="$SAN,DNS:$extra"

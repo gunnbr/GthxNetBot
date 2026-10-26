@@ -157,5 +157,25 @@ namespace Gthx.Test
             sinceString = _util.TimeBetweenString(timeNow, futureTime);
             ClassicAssert.AreEqual("3 years, 8 hours", sinceString);
         }
+
+        [Test]
+        public void TestCleanTitle()
+        {
+            // Control characters and runs of whitespace become single spaces
+            ClassicAssert.AreEqual("One two three", GthxUtil.CleanTitle("  One\r\ntwo\t\0 three\u0007 "));
+
+            // Long titles are cut off
+            var longTitle = GthxUtil.CleanTitle(new string('a', 400));
+            ClassicAssert.AreEqual(new string('a', 300) + "...", longTitle);
+        }
+
+        [Test]
+        public void TestLimitedReadStream()
+        {
+            using var stream = new LimitedReadStream(new MemoryStream(new byte[100]), 30);
+            var buffer = new byte[64];
+            ClassicAssert.AreEqual(30, stream.Read(buffer, 0, buffer.Length));
+            ClassicAssert.AreEqual(0, stream.Read(buffer, 0, buffer.Length));
+        }
     }
 }

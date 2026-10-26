@@ -38,7 +38,7 @@ namespace Gthx.Bot
             _logger.LogDebug($"GthxBot instantiated");
 
             _botNick.BotNickChangedEvent += BotNick_NickChangedEvent;
-            _matchNick = new Regex($@"^{_botNick.BotNick}(:|;|,|-|\s)+(?'message'.+)");
+            _matchNick = new Regex($@"^{Regex.Escape(_botNick.BotNick)}(:|;|,|-|\s)+(?'message'.+)");
 
             _messageReader.MessageProducedHandler += HandleIncomingMessage;
         }
@@ -89,7 +89,7 @@ namespace Gthx.Bot
         private void BotNick_NickChangedEvent(object? sender, System.EventArgs e)
         {
             _logger.LogInformation("Bot nick changed to {nick}", _botNick.BotNick);
-            _matchNick = new Regex($@"^{_botNick.BotNick}(:|;|,|-|\s)+(?'message'.+)");
+            _matchNick = new Regex($@"^{Regex.Escape(_botNick.BotNick)}(:|;|,|-|\s)+(?'message'.+)");
         }
 
         public void HandleReceivedMessage(string channel, string user, string message)

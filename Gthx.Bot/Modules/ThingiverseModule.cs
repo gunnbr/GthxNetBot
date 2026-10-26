@@ -11,7 +11,7 @@ namespace Gthx.Bot.Modules
 {
     public class ThingiverseModule : IGthxModule
     {
-        private readonly Regex _thingiRegex = new Regex(@$"http(s)?:\/\/www.thingiverse.com\/thing:(?'id'\d+)");
+        private readonly Regex _thingiRegex = new Regex(@$"http(s)?:\/\/www\.thingiverse\.com\/thing:(?'id'\d+)");
 
         private readonly IGthxData _data;
         private readonly IIrcClient _client;
