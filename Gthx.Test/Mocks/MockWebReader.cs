@@ -38,6 +38,19 @@ namespace Gthx.Test.Mocks
 <meta name=""title"" content=""Meta After Empty Title"">
 </head>");
                 }
+                else if (url.EndsWith("/newlinetitle"))
+                {
+                    // Line breaks encoded in the title would otherwise end up in the IRC reply
+                    dataString = utf8Encoding.GetBytes(@"<head>
+<title>First line&#13;&#10;PRIVMSG #reprap :second	line - YouTube</title>
+</head>");
+                }
+                else if (url.EndsWith("/hugepage"))
+                {
+                    // One 3 MB line before the title: more than the bot reads looking for a title
+                    dataString = utf8Encoding.GetBytes(new string('x', 3 * 1024 * 1024) + @"
+<title>Too Far Down - YouTube</title>");
+                }
                 else if (url.EndsWith("/title"))
                 {
                     dataString = utf8Encoding.GetBytes(@"<head>

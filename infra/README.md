@@ -25,7 +25,7 @@ The container app reads these through Key Vault references. They must exist befo
 |---|---|---|
 | `irc-server` | `IrcInfo__Server` | Kept out of the repo. |
 | `irc-sasl-password` | `IrcInfo__SaslPassword` | The NickServ password for the bot's nick on that server. |
-| `irc-trusted-ca` | file `/certs/ca.pem` | Only when `useTrustedCa` is true: the PEM CA certificate of a test server with a private certificate (`testing/tls/out/ca.pem`). |
+| `irc-trusted-ca` | `IrcInfo__TrustedCaCertificate` | Only when `useTrustedCa` is true: the PEM text of the CA certificate of a test server with a private certificate (`testing/tls/out/ca.pem`). |
 | `email-from`, `email-to`, `email-server`, `email-port`, `email-username`, `email-password` | `EmailConfiguration__*` | Only when `enableEmail` is true. |
 
 To change one, set a new version and restart the app; it picks up the latest version:

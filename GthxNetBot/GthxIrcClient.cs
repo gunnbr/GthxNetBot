@@ -31,8 +31,9 @@ namespace GthxNetBot
         public string? SaslPassword { get; set; }
 
         /// <summary>
-        /// Path to a PEM or DER CA certificate to trust in addition to the system's CAs, for a test
-        /// server whose certificate comes from a private CA. Leave unset for public networks.
+        /// A CA certificate to trust in addition to the system's CAs, for a test server whose certificate
+        /// comes from a private CA: either the path to a PEM or DER file, or the PEM text itself.
+        /// Leave unset for public networks.
         /// </summary>
         public string? TrustedCaCertificate { get; set; }
 
@@ -234,7 +235,7 @@ namespace GthxNetBot
             {
                 try
                 {
-                    using var trustedCa = X509CertificateLoader.LoadCertificateFromFile(_options.TrustedCaCertificate);
+                    using var trustedCa = LoadTrustedCa(_options.TrustedCaCertificate);
                     using var serverCertificate = new X509Certificate2(certificate);
                     using var chain = new X509Chain();
                     chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
@@ -246,19 +247,33 @@ namespace GthxNetBot
                     }
 
                     var status = string.Join(", ", chain.ChainStatus.Select(s => s.StatusInformation.Trim()));
-                    _logger.LogError("The server's TLS certificate '{subject}' doesn't chain to the trusted CA in {path}: {status}",
-                        certificate.Subject, _options.TrustedCaCertificate, status);
+                    _logger.LogError("The server's TLS certificate '{subject}' doesn't chain to the trusted CA {ca}: {status}",
+                        certificate.Subject, DescribeTrustedCa(_options.TrustedCaCertificate), status);
                     return false;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Couldn't check the server's TLS certificate against the trusted CA in {path}", _options.TrustedCaCertificate);
+                    _logger.LogError(ex, "Couldn't check the server's TLS certificate against the trusted CA {ca}", DescribeTrustedCa(_options.TrustedCaCertificate));
                     return false;
                 }
             }
 
             _logger.LogError("Rejecting the server's TLS certificate '{subject}': {errors}", certificate.Subject, errors);
             return false;
+        }
+
+        private static bool IsPemText(string trustedCa) => trustedCa.TrimStart().StartsWith("-----BEGIN");
+
+        private static X509Certificate2 LoadTrustedCa(string trustedCa)
+        {
+            return IsPemText(trustedCa)
+                ? X509Certificate2.CreateFromPem(trustedCa)
+                : X509CertificateLoader.LoadCertificateFromFile(trustedCa);
+        }
+
+        private static string DescribeTrustedCa(string trustedCa)
+        {
+            return IsPemText(trustedCa) ? "(PEM from settings)" : $"in {trustedCa}";
         }
 
         private void LogConnectException(string context, Exception? error)

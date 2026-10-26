@@ -18,6 +18,18 @@ namespace Gthx.Bot
         private readonly Regex _titleRegex = new(@"<title>(?'title'[^<]*) - [^<]*<\/title>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
         private readonly Regex _metaRegex = new("<meta name=\"title\" content=\"(?'title'[^\"]*)\"", RegexOptions.IgnoreCase | RegexOptions.Multiline);
         private readonly Regex _youtubeUrlRegex = new(@"^https?:\/\/(www\.youtube\.com|youtu\.be)\/", RegexOptions.IgnoreCase);
+        private static readonly Regex _whitespaceRegex = new(@"\s+");
+
+        /// <summary>
+        /// Most of a web page that's read looking for its title. The title is normally near the top,
+        /// and the limit keeps a huge page (or one enormous line) from using up the bot's memory.
+        /// </summary>
+        private const int MaxPageBytes = 2 * 1024 * 1024;
+
+        /// <summary>
+        /// Longest title the bot repeats; anything longer is cut off.
+        /// </summary>
+        private const int MaxTitleLength = 300;
 
         public GthxUtil(IWebReader webReader, ILogger<GthxUtil> logger)
         {
@@ -138,7 +150,7 @@ namespace Gthx.Bot
 
             _logger.LogInformation("Getting title from {URL}", url);
 
-            var webStream = await _webReader.GetStreamFromUrlAsync(url);
+            var webStream = new LimitedReadStream(await _webReader.GetStreamFromUrlAsync(url), MaxPageBytes);
 
             _logger.LogInformation("Finished waiting for the web stream...");
 
@@ -173,7 +185,28 @@ namespace Gthx.Bot
                 return string.Empty;
             }
 
-            return HttpUtility.HtmlDecode(encodedTitle);
+            return CleanTitle(HttpUtility.HtmlDecode(encodedTitle));
+        }
+
+        /// <summary>
+        /// Makes a title from a web page safe to repeat on IRC: control characters (including line breaks,
+        /// which IRC can't send) and runs of whitespace become single spaces, and long titles are cut off.
+        /// </summary>
+        public static string CleanTitle(string title)
+        {
+            var noControls = new StringBuilder(title.Length);
+            foreach (var c in title)
+            {
+                noControls.Append(char.IsControl(c) ? ' ' : c);
+            }
+
+            var cleaned = _whitespaceRegex.Replace(noControls.ToString(), " ").Trim();
+            if (cleaned.Length > MaxTitleLength)
+            {
+                cleaned = cleaned[..MaxTitleLength].TrimEnd() + "...";
+            }
+
+            return cleaned;
         }
 
         /// <summary>
@@ -194,7 +227,7 @@ namespace Gthx.Bot
                     title.ValueKind == JsonValueKind.String)
                 {
                     _logger.LogInformation("Found oEmbed title: {Title}", title.GetString());
-                    return title.GetString();
+                    return CleanTitle(title.GetString() ?? string.Empty);
                 }
             }
             catch (Exception ex) when (ex is HttpRequestException or JsonException)

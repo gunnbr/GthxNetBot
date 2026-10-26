@@ -134,7 +134,8 @@ files (this needs the TLS listener from `testing/tls/`). Switching the commented
 the cutover itself.
 
 The bot checks the server's TLS certificate against the system's CAs. `IrcInfo__TrustedCaCertificate`
-can name one more CA to trust, for a test server with a private certificate; leave it unset for Libera.
+can name one more CA to trust (a file path, or the PEM text itself), for a test server with a private
+certificate; leave it unset for Libera.
 
 ## Docker (existing database)
 To run just the bot container against a database configured in `gthx.env`, with network access to

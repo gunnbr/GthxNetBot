@@ -571,6 +571,24 @@ namespace Gthx.Test
             ClassicAssert.AreEqual(testChannel, replies.Channel);
             ClassicAssert.AreEqual($"{testUser} linked to YouTube video \"oEmbed Title & \"Quotes\"\" => 1 IRC mentions", replies.Messages[0]);
 
+            // Test a title with encoded line breaks and a tab, which can't be sent on IRC
+            testUser = "Sneaky";
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"Look: https://youtu.be/newlinetitle");
+            await Task.Delay(500);
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual(testChannel, replies.Channel);
+            ClassicAssert.AreEqual($"{testUser} linked to YouTube video \"First line PRIVMSG #reprap :second line\" => 1 IRC mentions", replies.Messages[0]);
+
+            // Test a page too big to read all of: the title past the limit isn't found
+            testUser = "BigPage";
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"Huge: https://youtu.be/hugepage");
+            await Task.Delay(1000);
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual(testChannel, replies.Channel);
+            ClassicAssert.AreEqual($"{testUser} linked to a YouTube video with an unknown title => 1 IRC mentions", replies.Messages[0]);
+
             // Test a page whose <title> is empty but whose <meta> element has the title
             testUser = "CloudUser";
             _gthx.HandleReceivedMessage(testChannel, testUser, $"From a server: https://youtu.be/emptytitle");
@@ -635,6 +653,13 @@ namespace Gthx.Test
             ClassicAssert.AreEqual(1, replies.Messages.Count);
             ClassicAssert.AreEqual(testChannel, replies.Channel);
             ClassicAssert.AreEqual($"{testUser} linked to thing 4052802 on thingiverse => 1 IRC mentions", replies.Messages[0]);
+
+            // A look-alike host isn't Thingiverse, so the bot doesn't fetch it
+            testUser = "Phisher";
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"Free stuff: https://wwwXthingiverse.com/thing:2810756");
+            await Task.Delay(500);
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(0, replies.Messages.Count);
         }
 
         [Test]
