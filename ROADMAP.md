@@ -71,13 +71,23 @@ To do:
 - [x] **Cutover rehearsal** (2026-10-25): `compose.gthx.yaml` runs the production container `gthx` (nick `gthx`) against the `Gthx` copy on the local test server, with SASL over TLS on 6697, the way it will connect to Libera. The local server got a TLS listener with a certificate from a private CA (`testing/tls/`), and `gthx` is registered with the local NickServ. `gthxtestbot` is stopped, and the soak traffic now runs against `gthx` (`BOT_NICK=gthx`).
 - [ ] Cutover: back up the `gthx2.26` image, refresh the `Gthx` copy from `GthxTest`, start the new bot as `gthx` on `Gthx` (with SASL), stop `gthx2.26`, and later drop `GthxTest`.
 
-## 4. Logging accessible after Azure deploy — ⬜
-- Today the bot logs through Serilog to console/file/Seq, plus email for warnings and above. None of that is easy to reach from Azure.
-- To do: choose a destination (e.g. Azure Monitor / Application Insights via OpenTelemetry, or a hosted Seq) and wire it up before deploying.
+## 4. Logging accessible after Azure deploy — 🟡
+Decided 2026-10-25 (budget: at most $25/month for logging):
+- The container's console output goes to a Log Analytics workspace through Azure Container Apps. This needs no logging code, and it also captures crashes printed outside Serilog. In Azure the console writes one compact JSON object per line (`Serilog.Formatting.Compact`, switched on by environment variables in `infra/main.bicep`), so queries can filter on level and properties.
+- Cost: a daily ingestion cap of 0.15 GB keeps it inside the free 5 GB/month, so about $0. A $25/month budget alert on the workspace is a backstop.
+- Reading from home: `scripts/gthx-logs` (Log Analytics query, or `-f` to stream live) or the portal's Logs page. Error emails stay, including the deliberate one on every startup.
+- Rejected: hosted Seq (a second always-on container), shipping to the home Seq (opens a port, and logs are lost when home is down), and a new Application Insights resource (same billing, more code, misses crashes).
+- [ ] Verify after the first Azure deploy.
 
-## 5. Switch to deploy to Azure — ⬜
-- Reorganize Azure resource groups. Everything is in `FirstTests` (created long ago while experimenting), which isn't a fitting home for a real service. Create a properly named group for the gthx resources (e.g. the `gthxdb` SQL server and its databases, plus the container instances) and move or recreate them there.
-- `.github/workflows/main.yml` already builds and deploys to Azure Container Instances on push to `master`, but it runs no tests, uses outdated action versions (`azure/login@v1`, `actions/checkout@master`), and doesn't pass `IrcInfo__SaslPassword` / `UseSsl` / `Port`. Its runs on 2026-08-23 and after merging #40 (2026-10-24) both failed at the Azure login step, so nothing was deployed.
+## 5. Switch to deploy to Azure — 🟡
+Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Container Instances, password-based secrets in GitHub) never worked and was removed.
+- `infra/main.bicep`: resource group `rg-gthx-prod` (westus) holding Log Analytics, a user-assigned managed identity, Azure Container Registry (Basic, pulled with the identity), Key Vault (RBAC), and a Container Apps environment and app (one replica, 0.25 vCPU / 0.5 GiB), plus budgets. Estimated total about $25/month, including the SQL database.
+- Secrets: the IRC server name, the NickServ password and the email settings live in Key Vault and reach the container as Key Vault references. The database uses the managed identity (Entra authentication), so it has no password.
+- `.github/workflows/ci.yml` runs the tests on PRs. `deploy.yml` tests, builds and pushes the image, and deploys the template on pushes to `master`, after approval for the `production` environment. Azure sign-in uses OpenID Connect (`infra/setup-github-oidc.sh`), so no Azure password is stored in GitHub.
+- Until the Libera ban is lifted, the Azure bot connects to the home test server, whose name is a Key Vault secret and never appears in the repo. Its certificate comes from the private CA in `testing/tls/`.
+- [ ] One-time setup (`infra/README.md`): resource group and bootstrap deploy, Key Vault secrets, SQL Entra admin and database user, OIDC app, GitHub variables and environment.
+- [ ] First deploy; stop the local `gthx` rehearsal container when the Azure one connects, since both use the nick `gthx`.
+- [ ] Move the `gthxdb` server into `rg-gthx-prod`, and delete the leftovers in `FirstTests`: the 2020 container group and its network profile and vnet, the classic Application Insights resource, the old `GthxIrcLogs` workspace and the `okopipi` registry.
 
 ## 6. Automatic version numbers — ⬜
 - Today the version is set by hand: `GthxBot.Version = "2.26 2022-12-28"` in `Gthx.Bot/GthxBot.cs` (shown by the status command), `<Version>1.0.1</Version>` in `Gthx.Data.csproj`, and release notes in `History.txt`.
