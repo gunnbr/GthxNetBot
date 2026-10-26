@@ -102,14 +102,14 @@ namespace Gthx.Bot
                 // TODO: See if there's a better/more reliable way to determine this.
                 wasDirectlyAddressed = true;
             }
-            else
+
+            // People often start a private message with the bot's nick too ("/msg gthx gthx: foo is bar"),
+            // so remove it there as well as in channels.
+            var nickMatch = _matchNick.Match(message);
+            if (nickMatch.Success)
             {
-                var nickMatch = _matchNick.Match(message);
-                if (nickMatch.Success)
-                {
-                    wasDirectlyAddressed = true;
-                    message = nickMatch.Groups["message"].Value;
-                }
+                wasDirectlyAddressed = true;
+                message = nickMatch.Groups["message"].Value;
             }
 
             using IServiceScope messageScope = _scopeFactory.CreateScope();

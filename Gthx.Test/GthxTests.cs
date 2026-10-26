@@ -160,6 +160,30 @@ namespace Gthx.Test
         }
 
         [Test]
+        public void TestFactoidSettingInPM()
+        {
+            // Issue #24: "/msg gthx gthx: foo is bar" replied "Okay." but set the factoid "gthx: foo"
+            var testFactoid = "pmFactoid";
+            var testValue = "set in a query";
+            var testUser = "SomeUser";
+
+            _gthx.HandleReceivedMessage(testUser, testUser, $"{testFactoid} is {testValue}");
+            var replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual(testUser, replies.Channel);
+            ClassicAssert.AreEqual(testFactoid, _data.FactoidItem);
+            ClassicAssert.AreEqual(testValue, _data.FactoidValue);
+
+            _gthx.HandleReceivedMessage(testUser, testUser, $"{_client.BotNick}: {testFactoid} is {testValue}");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual(testUser, replies.Channel);
+            ClassicAssert.AreEqual($"{testUser}: Okay.", replies.Messages[0]);
+            ClassicAssert.AreEqual(testFactoid, _data.FactoidItem);
+            ClassicAssert.AreEqual(testValue, _data.FactoidValue);
+        }
+
+        [Test]
         public void TestLockedFactoidSetting()
         {
             var testFactoid = "locked factoid";
