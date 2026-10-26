@@ -74,7 +74,7 @@ namespace GthxNetBot
                             },
                             new BatchingOptions
                             {
-                                BufferingTimeLimit = TimeSpan.FromSeconds(30),
+                                BufferingTimeLimit = TimeSpan.FromSeconds(10),
                                 EagerlyEmitFirstEvent = false,
                             },
                             restrictedToMinimumLevel: LogEventLevel.Warning);
