@@ -131,7 +131,8 @@ Review on 2026-10-26: no known vulnerable or deprecated NuGet packages; EF Core 
 Still to do (these change Azure or GitHub settings, so they're the owner's call):
 - [ ] **Turn on Microsoft Entra-only authentication on `gthxdb`.** It still accepts SQL logins, including the admin login `gthxzeus`, whose password leaked into a session transcript on 2026-10-24. Entra-only turns off every SQL login, so the leaked password stops mattering and there's no password left to change. It also stops `gthx2.26` and the local `gthxtestbot`/rehearsal containers, which use the SQL login, so do it after the Libera cutover has settled (or change the password now and do this then). Command: `az sql server ad-only-auth enable -g rg-gthx-prod -n gthxdb`.
 - [ ] **Split the GitHub deploy identity.** The `github-master` federated credential (used by the build job, which doesn't wait for approval) signs in as the same identity as the approved deploy, which is Contributor on `rg-gthx-prod` (now including `gthxdb`) and can grant itself Key Vault Secrets Officer. Give the build job its own identity with only `AcrPush`, so only an approved deploy can change Azure.
-- [ ] **GitHub repository settings:** turn on secret scanning and push protection (free for public repositories); set the default workflow token to read-only and stop workflows from approving pull requests (both workflows already ask only for what they need); optionally protect `master` by requiring the CI check.
+- [ ] **GitHub repository settings:** turn on secret scanning and push protection (free for public repositories); set the default workflow token to read-only and stop workflows from approving pull requests (both workflows already ask only for what they need).
+- [x] **`master` is protected** (2026-10-26) by a "Protect master" ruleset: no force pushes or deletion, changes go through a pull request, and the CI `test` check must pass before merging. No review is required (GitHub doesn't let you approve your own PR). Repository admins can bypass it for an emergency push.
 - [ ] IrcDotNet fork: the bot never finishes registering without a SASL password (no `CAP END`; see phase 10). Not a risk for the Azure bot, which always uses SASL.
 - Optional, not planned: SQL auditing to the Log Analytics workspace (counts against the 0.15 GB/day cap), and Microsoft Defender for SQL (about $15/month).
 
@@ -150,6 +151,7 @@ Still to do (these change Azure or GitHub settings, so they're the owner's call)
 - [ ] Dependabot and a CI build ([GthxNetData#4](https://github.com/gunnbr/GthxNetData/pull/4)): monthly grouped NuGet and Actions update PRs, and a build check on every PR.
 - [x] This repo's Dependabot config moves the `Gthx.Data` submodule to GthxNetData's latest master once a month ([#56](https://github.com/gunnbr/GthxNetBot/pull/56)). The submodule now points at GthxNetData's master (`23cbe97`, the merge of #3) instead of the feature-branch commit; the files are the same.
 - [ ] Keep EF Core in step: GthxNetBot references `Microsoft.EntityFrameworkCore.Design` and Gthx.Data references `Microsoft.EntityFrameworkCore.SqlServer` and `.Tools`. When one repo updates EF Core, update the other to the same version.
+- [x] `master` is protected by the same "Protect master" ruleset as this repo, with the CI `build` check required (2026-10-26).
 - [ ] Repository settings: Dependabot security updates are on; turn on secret scanning and push protection.
 - [ ] The README says the data component is shared with the gthx website; check whether the website still uses it before changing the schema.
 
