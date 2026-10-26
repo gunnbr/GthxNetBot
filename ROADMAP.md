@@ -105,10 +105,11 @@ Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Conta
 
 ## 7. GitHub build with status badges — ✅
 - [x] `ci.yml` runs the tests on every PR, and `deploy.yml` runs them again before each deploy. Fixed in [#49](https://github.com/gunnbr/GthxNetBot/pull/49): the solution leaves `Gthx.Test` out of Release builds, so `dotnet test` on the solution passed without running a single test. CI now tests the project directly.
-- [x] Status badges in `README.md`: CI (the latest PR test run) and the deploy workflow on `master`. A deploy that is rejected at the approval step counts as a failed run, so it turns the deploy badge red until the next approved deploy.
+- [x] Status badges in `README.md`: CI (the latest PR test run) and the deploy workflow on `master`. A deploy that is rejected at the approval step counts as a failed run and turns the deploy badge red until the next approved deploy; documentation-only pushes no longer start one.
 
 ## 8. Automatic deploy to Azure from GitHub — ✅
 - Done in phase 5 ([#48](https://github.com/gunnbr/GthxNetBot/pull/48)): every push to `master` tests, builds and pushes the image to Azure Container Registry, then deploys after the owner approves the `production` environment. Azure sign-in uses OpenID Connect.
+- [x] Pushes that change only Markdown files (`**.md`) skip the workflow, so documentation updates don't need a rejected deploy ([#54](https://github.com/gunnbr/GthxNetBot/pull/54)). Run it by hand (`workflow_dispatch`) if one is ever needed.
 
 ## 9. Security — 🟡
 Known issues:

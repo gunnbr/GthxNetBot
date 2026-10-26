@@ -13,6 +13,9 @@ on:
   push:
     branches:
       - master
+    # A push that changes only documentation doesn't need a new image or deploy.
+    paths-ignore:
+      - '**.md'
   workflow_dispatch:
 
 permissions:
