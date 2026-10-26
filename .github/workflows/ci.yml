@@ -19,6 +19,7 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # The solution doesn't build Gthx.Test in Release, so test the project itself.
       # The SQL Server tests start a container with Testcontainers, using the runner's Docker.
       - name: Test
-        run: dotnet test --configuration Release
+        run: dotnet test Gthx.Test/Gthx.Test.csproj --configuration Release
