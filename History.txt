@@ -1,3 +1,17 @@
+Version 3.0 Oct. 2026
+---------------------
+Version numbers are now automatic: 3.0.<commits since version.json changed>+<commit>,
+  shown by the status command, CTCP VERSION and the startup log line. Bump the
+  major/minor version in version.json. Changes are described in the GitHub PRs.
+Update to .NET 10.
+Log in with SASL over TLS, and check the server's TLS certificate.
+Wait before reconnecting, longer after a ban or a SASL failure.
+Run in Azure Container Apps, deployed from GitHub, with logs in Log Analytics
+  and batched error emails.
+Quit IRC on SIGTERM and take the nick back quickly during deploys.
+Get YouTube titles from oEmbed.
+Drop MariaDB support.
+
 Version 2.26 Dec. 28, 2022
 --------------------------
 Change handling of startup errors to log failures to initialize the database.

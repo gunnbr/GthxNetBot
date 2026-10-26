@@ -9,7 +9,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 3 | Deploy as a locally running Docker container on the Linux PC | ✅ |
 | 4 | Logging that's accessible once deployed to Azure | ✅ |
 | 5 | Switch to deploy to Azure | 🟡 |
-| 6 | Automatic version numbers suited to CI/CD | ⬜ |
+| 6 | Automatic version numbers suited to CI/CD | ✅ |
 | 7 | Build on GitHub with build/test status badges on the main page | ✅ |
 | 8 | Automatically deploy to Azure from GitHub | ✅ |
 | 9 | Fix known security problems | 🟡 |
@@ -99,9 +99,12 @@ Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Conta
 - [x] Moved the `gthxdb` server (with `Gthx` and `GthxTest`) into `rg-gthx-prod` (2026-10-26); the bot kept reading and writing `Gthx` through the move. Then deleted the empty `FirstTests` and `GthxNetBot` groups and the unused `NetworkWatcherRG` (Azure recreates a network watcher on its own if a vnet is ever added).
 - [ ] At the Libera cutover, decide whether to start from a fresh copy of `GthxTest`. Nothing has written to `GthxTest` since `gthx2.26` stopped on 2026-10-24, and a row-by-row comparison on 2026-10-26 found all of its data in `Gthx`. `Gthx` also holds testing changes since then: soak-test factoid history, seen entries and higher reference counts. Delete `GthxTest` once the new bot has settled on Libera.
 
-## 6. Automatic version numbers — ⬜
-- Today the version is set by hand: `GthxBot.Version = "2.26 2022-12-28"` in `Gthx.Bot/GthxBot.cs` (shown by the status command), `<Version>1.0.1</Version>` in `Gthx.Data.csproj`, and release notes in `History.txt`.
-- To do: derive versions from git (e.g. tags plus commit height, via a tool such as MinVer or Nerdbank.GitVersioning), stamp them into the assemblies and the Docker image tag, and have the status command read the assembly's informational version.
+## 6. Automatic version numbers — ✅
+- Versions come from Nerdbank.GitVersioning: `version.json` holds the major/minor (`3.0`, restarted for the .NET 10 / Azure rewrite) and the patch is the number of commits since that line last changed, e.g. `3.0.14+a1b2c3d4e5`, where the suffix is the commit. Every build gets it, including local ones; `Directory.Build.props` adds the package to the bot's projects but not to the submodules.
+- The `status` command, the CTCP `VERSION` reply and the startup log line (so each startup email) show it. The deploy tags the image with both the version and the commit SHA.
+- `.git` is part of the Docker build context so the build can count commits, and CI checks out the full history.
+- No git tag per deploy: the version already identifies the commit, and every merge to `master` deploys, so tags would only add noise.
+- `History.txt` has a 3.0 summary; later changes are described in the PRs.
 
 ## 7. GitHub build with status badges — ✅
 - [x] `ci.yml` runs the tests on every PR, and `deploy.yml` runs them again before each deploy. Fixed in [#49](https://github.com/gunnbr/GthxNetBot/pull/49): the solution leaves `Gthx.Test` out of Release builds, so `dotnet test` on the solution passed without running a single test. CI now tests the project directly.

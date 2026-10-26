@@ -5,6 +5,7 @@ WORKDIR /source
 COPY . .
 # Publish the bot project explicitly. Publishing the solution would also include the
 # Aspire AppHost executable and emit ambiguous/overlapping output into /app.
+# The version comes from version.json and the git history (.git is part of the build context).
 RUN dotnet publish GthxNetBot/GthxNetBot.csproj -c release -o /app
 
 # final stage/image
