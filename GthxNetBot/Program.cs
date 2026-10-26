@@ -5,7 +5,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Configuration;
 using Serilog.Events;
+using Serilog.Formatting.Display;
+using Serilog.Sinks.Email;
 using System;
 
 namespace GthxNetBot
@@ -54,14 +57,26 @@ namespace GthxNetBot
                         // Wire the full SMTP configuration (server, port, credentials, subject) so
                         // error notifications are actually delivered, and restrict the sink to
                         // Warning and above so routine Debug/Information logs are not emailed.
+                        // Events are batched so a burst (like the startup messages) arrives as one
+                        // email, as the old 2.x sink did by default.
                         configuration.WriteTo.Email(
-                            from: emailOptions.FromName,
-                            to: emailOptions.ToEmail,
-                            host: emailOptions.MailServer,
-                            port: emailOptions.Port.Value,
-                            connectionSecurity: MailKit.Security.SecureSocketOptions.Auto,
-                            credentials: new System.Net.NetworkCredential(emailOptions.UserName, emailOptions.Password),
-                            subject: emailOptions.EmailSubject,
+                            new EmailSinkOptions
+                            {
+                                From = emailOptions.FromName,
+                                To = [emailOptions.ToEmail],
+                                Host = emailOptions.MailServer,
+                                Port = emailOptions.Port.Value,
+                                ConnectionSecurity = MailKit.Security.SecureSocketOptions.Auto,
+                                Credentials = new System.Net.NetworkCredential(emailOptions.UserName, emailOptions.Password),
+                                Subject = new MessageTemplateTextFormatter(emailOptions.EmailSubject),
+                                Body = new MessageTemplateTextFormatter(
+                                    "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] {Message}{NewLine}{Exception}"),
+                            },
+                            new BatchingOptions
+                            {
+                                BufferingTimeLimit = TimeSpan.FromSeconds(30),
+                                EagerlyEmitFirstEvent = false,
+                            },
                             restrictedToMinimumLevel: LogEventLevel.Warning);
                     }
                 })
