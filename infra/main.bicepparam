@@ -11,6 +11,9 @@ param budgetContactEmail = readEnvironmentVariable('BUDGET_CONTACT_EMAIL', '')
 param ircChannels = '#gthxtestchannel'
 param useTrustedCa = true
 
+// Warnings and errors are emailed. The mail settings are the Key Vault secrets email-*.
+param enableEmail = true
+
 param sqlServerFqdn = 'gthxdb.database.windows.net'
 param sqlDatabaseName = 'Gthx'
 
