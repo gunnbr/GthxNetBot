@@ -1,9 +1,9 @@
 # Keep host build output, IDE state and local secrets out of the Docker build context.
+# .git stays in: the build computes the version from the git history (see version.json).
 **/bin/
 **/obj/
 **/.vs/
 **/.vscode/
 **/*.user
-.git
 *.env
 .env

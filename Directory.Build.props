@@ -1,0 +1,11 @@
+<Project>
+  <!--
+    Version numbers come from version.json plus the number of commits since its "version" last changed
+    (Nerdbank.GitVersioning), e.g. 3.0.14+a1b2c3d4e5, where the suffix is the commit. Bump major/minor by
+    editing version.json.
+    The submodules (Gthx.Data, IrcDotNet) keep their own versions.
+  -->
+  <ItemGroup Condition="!$(MSBuildProjectDirectory.StartsWith('$(MSBuildThisFileDirectory)Gthx.Data')) And !$(MSBuildProjectDirectory.StartsWith('$(MSBuildThisFileDirectory)IrcDotNet'))">
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.10.94" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

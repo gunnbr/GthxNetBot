@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -11,7 +12,12 @@ namespace Gthx.Bot
 {
     public class GthxBot
     {
-        public static readonly string Version = "2.26 2022-12-28";
+        /// <summary>
+        /// The build's version, such as 3.0.14+a1b2c3d4e5 (the suffix is the commit). Set at build time from
+        /// version.json and the git history.
+        /// </summary>
+        public static readonly string Version =
+            typeof(GthxBot).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
 
         private readonly IIrcClient _ircClient;
         private readonly IBotNick _botNick;

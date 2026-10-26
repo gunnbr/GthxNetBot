@@ -42,6 +42,14 @@ jobs:
       - uses: actions/checkout@v5
         with:
           submodules: true
+          # The version number counts commits, so it needs the full history.
+          fetch-depth: 0
+
+      - name: Get the version number
+        id: version
+        run: |
+          dotnet tool install nbgv --version 3.10.94 --tool-path "$RUNNER_TEMP/nbgv"
+          echo "version=$("$RUNNER_TEMP/nbgv/nbgv" get-version --variable SimpleVersion)" >> "$GITHUB_OUTPUT"
 
       - uses: azure/login@v2
         with:
@@ -54,8 +62,10 @@ jobs:
           registry=$(az acr list -g "${{ vars.AZURE_RESOURCE_GROUP }}" --query '[0].name' -o tsv)
           login_server=$(az acr show -n "$registry" --query loginServer -o tsv)
           az acr login -n "$registry"
-          docker build --pull -t "$login_server/gthxnetbot:${{ github.sha }}" .
-          docker push "$login_server/gthxnetbot:${{ github.sha }}"
+          docker build --pull \
+            -t "$login_server/gthxnetbot:${{ github.sha }}" \
+            -t "$login_server/gthxnetbot:${{ steps.version.outputs.version }}" .
+          docker push --all-tags "$login_server/gthxnetbot"
 
   deploy:
     needs: build

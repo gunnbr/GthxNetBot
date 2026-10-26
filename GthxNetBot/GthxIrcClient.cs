@@ -102,7 +102,7 @@ namespace GthxNetBot
                 throw new InvalidOperationException($"Missing required IRC parameters: {names}");
             }
 
-            _logger.LogError($"GthxNetBot starting for bot '{_options.Nick}'...");
+            _logger.LogError($"GthxNetBot {GthxBot.Version} starting for bot '{_options.Nick}'...");
 
             // Container Apps (and docker stop) sends SIGTERM when replacing or stopping the bot.
             _sigtermRegistration = PosixSignalRegistration.Create(PosixSignal.SIGTERM, HandleSigterm);
