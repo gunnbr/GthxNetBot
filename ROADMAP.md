@@ -147,11 +147,11 @@ Open GitHub issues, triaged on 2026-10-26 (feature requests are in phase 11):
 - [ ] IrcDotNet fork: `CompleteIrcClientTest` now targets `irc.libera.chat` ([#3](https://github.com/gunnbr/IrcDotNet/pull/3)) but fails in `LocalUserModeTest`, because Libera gives new users `+w` by default and the test expects it to be off.
 - [ ] IrcDotNet fork: without a SASL password the bot never finishes signing in. The non-SASL path sends `CAP LS` after `NICK`/`USER` (`IrcClient.cs`) but never `CAP END`, so the server holds registration until it times out (60 s on InspIRCd). Doesn't affect the Azure bot, which always uses SASL; found on 2026-10-26 while testing #54.
 
-Already fixed, so the issues can be closed:
-- [ ] Special characters in YouTube titles ([#22](https://github.com/gunnbr/GthxNetBot/issues/22)): titles now come from YouTube's oEmbed JSON; the video in the issue comes back as `CppCon 2018: Jason Turner “Surprises in Object Lifetime”`.
-- [ ] Unhandled exception when YouTube isn't available ([#7](https://github.com/gunnbr/GthxNetBot/issues/7)): `GetAndSaveTitle` now catches and logs the error.
-- [ ] More information in the starting message ([#3](https://github.com/gunnbr/GthxNetBot/issues/3)): it now includes the version and commit (phase 6).
-- [ ] Getting our nick back when the old instance quits ([#2](https://github.com/gunnbr/GthxNetBot/issues/2)): the bot takes the nick back as soon as it's free; every deploy since #51 shows it happening.
+Already fixed; closed with a comment on 2026-10-26:
+- [x] Special characters in YouTube titles ([#22](https://github.com/gunnbr/GthxNetBot/issues/22)): titles now come from YouTube's oEmbed JSON; the video in the issue comes back as `CppCon 2018: Jason Turner “Surprises in Object Lifetime”`.
+- [x] Unhandled exception when YouTube isn't available ([#7](https://github.com/gunnbr/GthxNetBot/issues/7)): `GetAndSaveTitle` now catches and logs the error.
+- [x] More information in the starting message ([#3](https://github.com/gunnbr/GthxNetBot/issues/3)): it now includes the version and commit (phase 6).
+- [x] Getting our nick back when the old instance quits ([#2](https://github.com/gunnbr/GthxNetBot/issues/2)): the bot takes the nick back as soon as it's free; every deploy since #51 shows it happening.
 
 ## 11. New features — ⬜
 Requests from GitHub issues:
@@ -164,8 +164,8 @@ Requests from GitHub issues:
 ## 12. Gthx.Data repository — 🟡
 `Gthx.Data` is a submodule from its own repository, [gunnbr/GthxNetData](https://github.com/gunnbr/GthxNetData), so its packages, workflows and settings are looked after there.
 - [x] Dependabot and a CI build ([GthxNetData#4](https://github.com/gunnbr/GthxNetData/pull/4)): monthly grouped NuGet and Actions update PRs, and a build check on every PR.
-- [x] This repo's Dependabot config moves the `Gthx.Data` submodule to GthxNetData's latest master once a month ([#56](https://github.com/gunnbr/GthxNetBot/pull/56)). The submodule now points at GthxNetData's master (`23cbe97`, the merge of #3) instead of the feature-branch commit; the files are the same.
-- [ ] Keep EF Core in step (GthxNetBot moved to 10.0.14 in #58; GthxNetData's #6 does the same there, then the submodule needs moving): GthxNetBot references `Microsoft.EntityFrameworkCore.Design` and Gthx.Data references `Microsoft.EntityFrameworkCore.SqlServer` and `.Tools`. When one repo updates EF Core, update the other to the same version.
+- [x] This repo's Dependabot config moves the `Gthx.Data` submodule to GthxNetData's latest master once a month ([#56](https://github.com/gunnbr/GthxNetBot/pull/56)).
+- [x] EF Core versions match: GthxNetBot (#58) and GthxNetData (its #6) both moved to 10.0.14, and the submodule now points at GthxNetData's master (`fcd24d6`, which also has its Dependabot Actions update, #5). GthxNetBot references `Microsoft.EntityFrameworkCore.Design` and Gthx.Data references `Microsoft.EntityFrameworkCore.SqlServer` and `.Tools`; when one repo updates EF Core, update the other to the same version.
 - [x] `master` is protected by the same "Protect master" ruleset as this repo, with the CI `build` check required (2026-10-26).
 - [ ] Repository settings: Dependabot security updates are on; turn on secret scanning and push protection.
 - [ ] The README says the data component is shared with the gthx website; check whether the website still uses it before changing the schema.
