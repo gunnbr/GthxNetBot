@@ -4,7 +4,7 @@
 # build pulls the latest 10.0 images every time.
 version: 2
 updates:
-  # The bot's own projects; the Gthx.Data and IrcDotNet submodules are updated in their own repos.
+  # The bot's own projects; the Gthx.Data and IrcDotNet submodules' packages are updated in their own repos.
   - package-ecosystem: nuget
     directories:
       - /Gthx.Bot
@@ -26,3 +26,12 @@ updates:
       actions:
         patterns: ["*"]
 
+
+  # Moves the Gthx.Data submodule to the latest master of gunnbr/GthxNetData. (IrcDotNet stays where it
+  # is: the fork's master isn't what the bot is built and tested against.)
+  - package-ecosystem: gitsubmodule
+    directory: /
+    schedule:
+      interval: monthly
+    allow:
+      - dependency-name: Gthx.Data

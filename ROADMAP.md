@@ -15,6 +15,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 9 | Fix known security problems | 🟡 |
 | 10 | Fix reported bugs | ⬜ |
 | 11 | Implement new features | ⬜ |
+| 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | 🟡 |
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
@@ -143,6 +144,14 @@ Still to do (these change Azure or GitHub settings, so they're the owner's call)
 
 ## 11. New features — ⬜
 - To do: gather the list.
+
+## 12. Gthx.Data repository — 🟡
+`Gthx.Data` is a submodule from its own repository, [gunnbr/GthxNetData](https://github.com/gunnbr/GthxNetData), so its packages, workflows and settings are looked after there.
+- [ ] Dependabot and a CI build ([GthxNetData#4](https://github.com/gunnbr/GthxNetData/pull/4)): monthly grouped NuGet and Actions update PRs, and a build check on every PR.
+- [x] This repo's Dependabot config moves the `Gthx.Data` submodule to GthxNetData's latest master once a month ([#56](https://github.com/gunnbr/GthxNetBot/pull/56)). The submodule now points at GthxNetData's master (`23cbe97`, the merge of #3) instead of the feature-branch commit; the files are the same.
+- [ ] Keep EF Core in step: GthxNetBot references `Microsoft.EntityFrameworkCore.Design` and Gthx.Data references `Microsoft.EntityFrameworkCore.SqlServer` and `.Tools`. When one repo updates EF Core, update the other to the same version.
+- [ ] Repository settings: Dependabot security updates are on; turn on secret scanning and push protection.
+- [ ] The README says the data component is shared with the gthx website; check whether the website still uses it before changing the schema.
 
 ---
 _Last updated: 2026-10-26_
