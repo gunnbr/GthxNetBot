@@ -10,7 +10,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 4 | Logging that's accessible once deployed to Azure | ✅ |
 | 5 | Switch to deploy to Azure | 🟡 |
 | 6 | Automatic version numbers suited to CI/CD | ⬜ |
-| 7 | Build on GitHub with build/test status badges on the main page | 🟡 |
+| 7 | Build on GitHub with build/test status badges on the main page | ✅ |
 | 8 | Automatically deploy to Azure from GitHub | ✅ |
 | 9 | Fix known security problems | 🟡 |
 | 10 | Fix reported bugs | ⬜ |
@@ -103,9 +103,9 @@ Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Conta
 - Today the version is set by hand: `GthxBot.Version = "2.26 2022-12-28"` in `Gthx.Bot/GthxBot.cs` (shown by the status command), `<Version>1.0.1</Version>` in `Gthx.Data.csproj`, and release notes in `History.txt`.
 - To do: derive versions from git (e.g. tags plus commit height, via a tool such as MinVer or Nerdbank.GitVersioning), stamp them into the assemblies and the Docker image tag, and have the status command read the assembly's informational version.
 
-## 7. GitHub build with status badges — 🟡
+## 7. GitHub build with status badges — ✅
 - [x] `ci.yml` runs the tests on every PR, and `deploy.yml` runs them again before each deploy. Fixed in [#49](https://github.com/gunnbr/GthxNetBot/pull/49): the solution leaves `Gthx.Test` out of Release builds, so `dotnet test` on the solution passed without running a single test. CI now tests the project directly.
-- [ ] Status badges in `README.md`.
+- [x] Status badges in `README.md`: CI (the latest PR test run) and the deploy workflow on `master`. A deploy that is rejected at the approval step counts as a failed run, so it turns the deploy badge red until the next approved deploy.
 
 ## 8. Automatic deploy to Azure from GitHub — ✅
 - Done in phase 5 ([#48](https://github.com/gunnbr/GthxNetBot/pull/48)): every push to `master` tests, builds and pushes the image to Azure Container Registry, then deploys after the owner approves the `production` environment. Azure sign-in uses OpenID Connect.
