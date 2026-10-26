@@ -1,7 +1,7 @@
 # Local IRC services for testing
 
 Anope 2.0 services (NickServ, ChanServ, SASL) linked to the local InspIRCd 4 test server on sakura
-(`irc.gunnbr.org`, `10.0.0.125:6667`). This lets the bot's SASL login be tested without connecting a test
+(`10.0.0.125:6667`). This lets the bot's SASL login be tested without connecting a test
 bot to a public network.
 
 ## Setup
