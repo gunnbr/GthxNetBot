@@ -94,7 +94,9 @@ Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Conta
 - [x] Nick handoff during deploys ([#51](https://github.com/gunnbr/GthxNetBot/pull/51)): Container Apps starts the new copy before it stops the old one, so the new copy comes up as `gthx_`. It used to take `gthx` back only at its 2-minute WHOIS check, and the old copy was killed without quitting. Now the old copy quits IRC on SIGTERM, and the new one reclaims the nick as soon as it sees the QUIT. On #51's own deploy the new copy had `gthx` back 20 s after starting, the moment the old copy disconnected.
 - [ ] Switch to Libera once the ban is lifted: in `main.bicepparam` set `ircChannels` to the production list and `useTrustedCa = false`; set the `irc-server` secret to `irc.libera.chat` and `irc-sasl-password` to the Libera NickServ password; deploy. Then retire `gthx2.26` (keep a backup of its image) and later drop `GthxTest`.
 - [ ] Optional: turn on error emails in Azure (`enableEmail` and the `email-*` Key Vault secrets).
-- [ ] Move the `gthxdb` server into `rg-gthx-prod`, and delete the leftovers in `FirstTests`: the 2020 container group and its network profile and vnet, the classic Application Insights resource, the old `GthxIrcLogs` workspace and the `okopipi` registry.
+- [x] Deleted the 2020 leftovers in `FirstTests` (2026-10-26): the container group and its network profile and vnet, the classic Application Insights resource and its smart detection rule and action group, the `GthxIrcLogs` workspace, the `okopipi` registry, and the two service principals the old workflow used (their secrets had expired in 2021).
+- [ ] Move the `gthxdb` server (with `Gthx` and `GthxTest`) into `rg-gthx-prod`, then delete the empty `FirstTests` group. Don't delete `FirstTests` before the move: it would take the database with it.
+- [ ] At the Libera cutover, decide whether to start from a fresh copy of `GthxTest`. Nothing has written to `GthxTest` since `gthx2.26` stopped on 2026-10-24, and a row-by-row comparison on 2026-10-26 found all of its data in `Gthx`. `Gthx` also holds testing changes since then: soak-test factoid history, seen entries and higher reference counts. Delete `GthxTest` once the new bot has settled on Libera.
 
 ## 6. Automatic version numbers — ⬜
 - Today the version is set by hand: `GthxBot.Version = "2.26 2022-12-28"` in `Gthx.Bot/GthxBot.cs` (shown by the status command), `<Version>1.0.1</Version>` in `Gthx.Data.csproj`, and release notes in `History.txt`.
@@ -111,7 +113,7 @@ Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Conta
 Known issues:
 - [x] `MailKit` 4.15.1 vulnerability [GHSA-9j88-vvj5-vhgr](https://github.com/advisories/GHSA-9j88-vvj5-vhgr): fixed in phase 1 (by `Serilog.Sinks.Email` 4.2.1).
 - [x] **The bot didn't check the IRC server's TLS certificate** (fixed 2026-10-25). IrcDotNet accepts any certificate unless `ValidateSslCertificate` is handled, so anyone able to intercept the connection could pose as the server and collect the SASL password. The bot now rejects certificates with any policy error; `IrcInfo:TrustedCaCertificate` can add a private CA for a test server. Also fixed: after a failed TLS handshake the bot logged "Now connected" and hung instead of exiting.
-- [ ] Delete the 2020 GitHub Actions secrets (`AZURE_CREDENTIALS`, `REGISTRY_*`, `IRC_*`, `EMAIL_*`, `CONNECTION_STRING` and so on) and the service principal behind `AZURE_CREDENTIALS`; nothing uses them now.
+- [x] Deleted the 18 GitHub Actions secrets from the 2020 workflow (`AZURE_CREDENTIALS`, `REGISTRY_*`, `IRC_*`, `EMAIL_*`, `CONNECTION_STRING` and so on) and the service principals behind them (2026-10-26).
 - [ ] Change the SQL login password on `gthxdb`. The Azure bot uses its managed identity; only the local rehearsal container still uses the password.
 - To do: review for other issues (secrets handling, dependency audit in CI).
 
