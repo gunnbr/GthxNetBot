@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Security;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -64,6 +65,8 @@ namespace GthxNetBot
         private volatile bool _banned;
         private DateTime? _registeredAt;
         private int _exitRequested;
+        private volatile bool _quitting;
+        private readonly PosixSignalRegistration _sigtermRegistration;
 
         private readonly StandardIrcClient _client = new()
         {
@@ -100,6 +103,9 @@ namespace GthxNetBot
             }
 
             _logger.LogError($"GthxNetBot starting for bot '{_options.Nick}'...");
+
+            // Container Apps (and docker stop) sends SIGTERM when replacing or stopping the bot.
+            _sigtermRegistration = PosixSignalRegistration.Create(PosixSignal.SIGTERM, HandleSigterm);
 
             _logger.LogInformation("Starting GthxIrcClient");
             Start();
@@ -335,6 +341,47 @@ namespace GthxNetBot
             Task.Delay(delay).ContinueWith(_ => _runner.Exit());
         }
 
+        /// <summary>
+        /// Quits IRC and exits right away instead of being killed, so the server frees our nickname at once.
+        /// During a deploy the new copy is already connected under a fallback nick, and it takes the
+        /// nickname back as soon as it sees this QUIT.
+        /// </summary>
+        private void HandleSigterm(PosixSignalContext context)
+        {
+            // Exit through Main so the host is disposed and the logs are flushed.
+            context.Cancel = true;
+
+            // Exit now, not after ExitBot()'s reconnect delay, when the QUIT closes the connection.
+            if (Interlocked.Exchange(ref _exitRequested, 1) == 1)
+            {
+                _runner.Exit();
+                return;
+            }
+
+            _logger.LogWarning("Received SIGTERM. Quitting IRC and exiting.");
+            _quitting = true;
+            if (_client.IsConnected)
+            {
+                using var disconnected = new ManualResetEventSlim(false);
+                _client.Disconnected += (_, _) => disconnected.Set();
+                try
+                {
+                    _client.Quit("Restarting");
+                    // The server closes the connection after the QUIT, normally well within a second.
+                    if (!disconnected.Wait(TimeSpan.FromSeconds(5)))
+                    {
+                        _logger.LogWarning("The server didn't close the connection after QUIT; exiting anyway.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Couldn't quit IRC cleanly");
+                }
+            }
+
+            _runner.Exit();
+        }
+
         private (double DelayMinutes, string Reason) GetExitDelay()
         {
             if (_banned)
@@ -514,6 +561,12 @@ namespace GthxNetBot
 
         private void IrcClient_Disconnected(object? sender, EventArgs e)
         {
+            if (_quitting)
+            {
+                _logger.LogInformation("Disconnected from the IRC server after quitting");
+                return;
+            }
+
             _logger.LogError("Disconnected from the IRC server");
             ExitBot();
         }
@@ -593,6 +646,22 @@ namespace GthxNetBot
         {
 #if true
             _logger.LogDebug("Raw Message Received: {RawContent} {Message}", e.RawContent, e.IrcMessage);
+
+            // When whoever has our preferred nickname quits or changes nick, take it back right away
+            // instead of waiting for the next WHOIS check.
+            var sourceNick = (e.Message.Source as IrcUser)?.NickName;
+            if (sourceNick != null && sourceNick == _options.Nick && _botNick.BotNick != _options.Nick)
+            {
+                if (e.Message.Command == "QUIT")
+                {
+                    _logger.LogWarning("{nick} quit, which opened our preferred nickname.", sourceNick);
+                    HandlePreferredNameAvailable();
+                }
+                else if (e.Message.Command == "NICK" && e.Message.Parameters.Count > 0)
+                {
+                    HandleNicknameChanged(sourceNick, e.Message.Parameters[0]);
+                }
+            }
 #else
             _logger.LogDebug("RawContent: {RawContent}", e.RawContent);
             _logger.LogDebug("Message:");
