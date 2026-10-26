@@ -562,6 +562,24 @@ namespace Gthx.Test
             ClassicAssert.AreEqual(testChannel, replies.Channel);
             ClassicAssert.AreEqual($"{testUser} linked to YouTube video \"Rum & \"Coke\"\" => 1 IRC mentions", replies.Messages[0]);
 
+            // Test fetching a new title from YouTube's oEmbed endpoint
+            testUser = "EmbedFan";
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"oEmbed knows this one: https://youtu.be/oembed");
+            await Task.Delay(500);
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual(testChannel, replies.Channel);
+            ClassicAssert.AreEqual($"{testUser} linked to YouTube video \"oEmbed Title & \"Quotes\"\" => 1 IRC mentions", replies.Messages[0]);
+
+            // Test a page whose <title> is empty but whose <meta> element has the title
+            testUser = "CloudUser";
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"From a server: https://youtu.be/emptytitle");
+            await Task.Delay(500);
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual(testChannel, replies.Channel);
+            ClassicAssert.AreEqual($"{testUser} linked to YouTube video \"Meta After Empty Title\" => 1 IRC mentions", replies.Messages[0]);
+
             // Test message when no title is found
             testUser = "AnotherNick";
             _gthx.HandleReceivedMessage(testChannel, testUser, $"Does thie one work for you? https://youtu.be/notitle");
