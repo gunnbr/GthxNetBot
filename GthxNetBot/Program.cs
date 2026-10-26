@@ -151,6 +151,13 @@ namespace GthxNetBot
                 var bot = host.Services.GetRequiredService<IBotRunner>();
                 bot.Run();
             }
+            catch (Exception ex)
+            {
+                // Without this, a startup failure (such as a database login or migration error) only
+                // reached the console as an unhandled exception: not timestamped, and never emailed.
+                Log.Fatal(ex, "GthxNetBot {Version:l} failed to start", GthxBot.Version);
+                Environment.ExitCode = 1;
+            }
             finally
             {
                 host.Dispose();
