@@ -6,19 +6,19 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 |---|-------|--------|
 | 1 | Finish updating to .NET 10 | ✅ |
 | 2 | Add SASL support | ✅ |
-| 3 | Deploy as a locally running Docker container on the Linux PC | 🟡 |
-| 4 | Logging that's accessible once deployed to Azure | ⬜ |
-| 5 | Switch to deploy to Azure | ⬜ |
+| 3 | Deploy as a locally running Docker container on the Linux PC | ✅ |
+| 4 | Logging that's accessible once deployed to Azure | ✅ |
+| 5 | Switch to deploy to Azure | 🟡 |
 | 6 | Automatic version numbers suited to CI/CD | ⬜ |
-| 7 | Build on GitHub with build/test status badges on the main page | ⬜ |
-| 8 | Automatically deploy to Azure from GitHub | ⬜ |
+| 7 | Build on GitHub with build/test status badges on the main page | 🟡 |
+| 8 | Automatically deploy to Azure from GitHub | ✅ |
 | 9 | Fix known security problems | ⬜ |
 | 10 | Fix reported bugs | ⬜ |
 | 11 | Implement new features | ⬜ |
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
-**Next up:** finish phase 3. Since 2026-10-25 the production container `gthx` has been rehearsing the cutover on the local test server (SASL over TLS, `Gthx` database), replacing `gthxtestbot`. The cutover waits until Libera lifts the ban on this IP; the user contacted Libera staff on 2026-10-24. Synthetic channel traffic (`testing/traffic/`) runs against it (`BOT_NICK=gthx`); check its log for `NO REPLY`, `COUNT DID NOT INCREASE` and the hourly `SUMMARY` lines. After the fixes in #45 (lurkers? crash, capitalized tell and google), 11+ hours of traffic on 2026-10-25 had no restarts or errors, every request answered (median 0.18 s), and flat memory (about 62 MB plus about 45 MB of .NET code memory). Run the traffic from a separate git worktree (for example `git worktree add ../GthxNetBot-soak <branch>`), because its script is bind-mounted and switching branches in the main checkout can remove it.
+**Next up:** finish phase 5 by moving the Azure bot to Libera once Libera lifts the ban on the home IP (the user contacted Libera staff on 2026-10-24). Since 2026-10-26 the new build runs in Azure Container Apps as `gthx`, connected to the home test server and using the `Gthx` database; the soak traffic (`testing/traffic/`, `BOT_NICK=gthx`) runs against it from home. Production on Libera is still the 2022 `gthx2.26` container, currently stopped. Run the traffic from a separate git worktree (for example `git worktree add ../GthxNetBot-soak <branch>`), because its script is bind-mounted and switching branches in the main checkout can remove it; check its log for `NO REPLY`, `COUNT DID NOT INCREASE` and the hourly `SUMMARY` lines.
 
 **Testing rule:** never run test bots or probe clients against Libera (we were banned there on 2026-10-24 after phase 3 test runs). Use the local InspIRCd test server on sakura: `10.0.0.125:6667` plaintext, or `10.0.0.125:6697` TLS (certificate from the private CA in `testing/tls/`).
 
@@ -47,7 +47,9 @@ Merged in [#41](https://github.com/gunnbr/GthxNetBot/pull/41) and [GthxNetData#3
 - SASL support lives in the `gunnbr/IrcDotNet` fork ([#2](https://github.com/gunnbr/IrcDotNet/pull/2)), included as a git submodule and project reference. Upstream IrcDotNet looks abandoned, so the fork is the source of truth.
 - Login verified against Libera as `gthxtest`. Merged in [#40](https://github.com/gunnbr/GthxNetBot/pull/40) on 2026-10-24.
 
-## 3. Local Docker container on the Linux PC — 🟡
+## 3. Local Docker container on the Linux PC — ✅
+The local container did its job: it proved the new build on Linux and in Docker, against the real data, over SASL and TLS, with a long soak. Production goes to Azure (phase 5) instead of a local container, so the Libera cutover is tracked there.
+
 - Clone with `git clone --recurse-submodules` (or run `git submodule update --init`) so that `Gthx.Data` and `IrcDotNet` are present before building.
 
 Done on the Linux PC (2026-10-24):
@@ -69,15 +71,16 @@ To do:
 - [x] NickServ on the local test server (2026-10-24): Anope 2.0.20 in Docker (`testing/services/`), linked to InspIRCd 4 over `127.0.0.1:7000`. InspIRCd 4 requires TLS for server links from non-loopback addresses, so the link must stay on loopback. `gthxtestbot` is registered and logs in with SASL PLAIN (WHOIS shows it logged in).
 - [x] **No rapid reconnect loops** (2026-10-24). The bot exits whenever the connection ends and `restart: unless-stopped` restarts it at once (Docker backs off only up to 1 minute, and resets after a run of 10 s or more), so failures used to mean reconnecting about once a minute, or every ~12 s when the connection failed. Libera reportedly also drops the connection when SASL fails for an IP that requires it. Now every exit waits first, chosen by cause: reported ban (465 or a K/G/Z/D-line `ERROR`) 60 min; SASL failure 15 min (and no channels are joined); connection failed or ended within 5 min of registering 5 min; disconnect after running normally 30 s. All are configurable (`IrcInfo:*ExitDelayMinutes`, `IrcInfo:StableConnectionMinutes`). Each path verified, using the local test server and a fake IRC server for the ban and drop cases.
 - [x] **Cutover rehearsal** (2026-10-25): `compose.gthx.yaml` runs the production container `gthx` (nick `gthx`) against the `Gthx` copy on the local test server, with SASL over TLS on 6697, the way it will connect to Libera. The local server got a TLS listener with a certificate from a private CA (`testing/tls/`), and `gthx` is registered with the local NickServ. `gthxtestbot` is stopped, and the soak traffic now runs against `gthx` (`BOT_NICK=gthx`).
-- [ ] Cutover: back up the `gthx2.26` image, refresh the `Gthx` copy from `GthxTest`, start the new bot as `gthx` on `Gthx` (with SASL), stop `gthx2.26`, and later drop `GthxTest`.
+- [x] Soak results (2026-10-25): after the fixes in [#45](https://github.com/gunnbr/GthxNetBot/pull/45) (lurkers? crash, capitalized tell and google), 11+ hours of traffic with no restarts or errors, every request answered (median 0.18 s), and flat memory (about 62 MB plus about 45 MB of .NET code memory).
+- [x] The local `gthx` container was stopped on 2026-10-26 when the Azure bot took over the nick. `compose.gthx.yaml` stays for local rehearsals.
 
-## 4. Logging accessible after Azure deploy — 🟡
+## 4. Logging accessible after Azure deploy — ✅
 Decided 2026-10-25 (budget: at most $25/month for logging):
 - The container's console output goes to a Log Analytics workspace through Azure Container Apps. This needs no logging code, and it also captures crashes printed outside Serilog. In Azure the console writes one compact JSON object per line (`Serilog.Formatting.Compact`, switched on by environment variables in `infra/main.bicep`), so queries can filter on level and properties.
 - Cost: a daily ingestion cap of 0.15 GB keeps it inside the free 5 GB/month, so about $0. A $25/month budget alert on the workspace is a backstop.
 - Reading from home: `scripts/gthx-logs` (Log Analytics query, or `-f` to stream live) or the portal's Logs page. Error emails stay, including the deliberate one on every startup.
 - Rejected: hosted Seq (a second always-on container), shipping to the home Seq (opens a port, and logs are lost when home is down), and a new Application Insights resource (same billing, more code, misses crashes).
-- [ ] Verify after the first Azure deploy.
+- [x] Verified after the first Azure deploy (2026-10-26): the logs reach `log-gthx-prod`, and `scripts/gthx-logs` reads them. Lines show up in Log Analytics a minute or two after they're written; `-f` streams them live.
 
 ## 5. Switch to deploy to Azure — 🟡
 Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Container Instances, password-based secrets in GitHub) never worked and was removed.
@@ -85,24 +88,31 @@ Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Conta
 - Secrets: the IRC server name, the NickServ password and the email settings live in Key Vault and reach the container as Key Vault references. The database uses the managed identity (Entra authentication), so it has no password.
 - `.github/workflows/ci.yml` runs the tests on PRs. `deploy.yml` tests, builds and pushes the image, and deploys the template on pushes to `master`, after approval for the `production` environment. Azure sign-in uses OpenID Connect (`infra/setup-github-oidc.sh`), so no Azure password is stored in GitHub.
 - Until the Libera ban is lifted, the Azure bot connects to the home test server, whose name is a Key Vault secret and never appears in the repo. Its certificate comes from the private CA in `testing/tls/`.
-- [ ] One-time setup (`infra/README.md`): resource group and bootstrap deploy, Key Vault secrets, SQL Entra admin and database user, OIDC app, GitHub variables and environment.
-- [ ] First deploy; stop the local `gthx` rehearsal container when the Azure one connects, since both use the nick `gthx`.
+- [x] One-time setup (`infra/README.md`), done 2026-10-25: resource group and bootstrap deploy, Key Vault secrets, SQL Entra admin and database user, OIDC app, GitHub variables and the `production` environment (the owner must approve each deploy).
+- [x] First deploy ([#48](https://github.com/gunnbr/GthxNetBot/pull/48), 2026-10-26). The bot connects to the home test server over TLS with SASL, reads and writes `Gthx` through its managed identity, and answers the soak traffic as quickly as it did at home.
+- [x] YouTube titles from Azure ([#50](https://github.com/gunnbr/GthxNetBot/pull/50)): YouTube serves the Azure host a page whose `<title>` is empty, so new links got "unknown title". The bot now asks YouTube's oEmbed endpoint first, and the page parsing skips empty titles and no longer captures the rest of the page.
+- [x] Nick handoff during deploys ([#51](https://github.com/gunnbr/GthxNetBot/pull/51)): Container Apps starts the new copy before it stops the old one, so the new copy comes up as `gthx_`. It used to take `gthx` back only at its 2-minute WHOIS check, and the old copy was killed without quitting. Now the old copy quits IRC on SIGTERM, and the new one reclaims the nick as soon as it sees the QUIT. On #51's own deploy the new copy had `gthx` back 20 s after starting, the moment the old copy disconnected.
+- [ ] Switch to Libera once the ban is lifted: in `main.bicepparam` set `ircChannels` to the production list and `useTrustedCa = false`; set the `irc-server` secret to `irc.libera.chat` and `irc-sasl-password` to the Libera NickServ password; deploy. Then retire `gthx2.26` (keep a backup of its image) and later drop `GthxTest`.
+- [ ] Optional: turn on error emails in Azure (`enableEmail` and the `email-*` Key Vault secrets).
 - [ ] Move the `gthxdb` server into `rg-gthx-prod`, and delete the leftovers in `FirstTests`: the 2020 container group and its network profile and vnet, the classic Application Insights resource, the old `GthxIrcLogs` workspace and the `okopipi` registry.
 
 ## 6. Automatic version numbers — ⬜
 - Today the version is set by hand: `GthxBot.Version = "2.26 2022-12-28"` in `Gthx.Bot/GthxBot.cs` (shown by the status command), `<Version>1.0.1</Version>` in `Gthx.Data.csproj`, and release notes in `History.txt`.
 - To do: derive versions from git (e.g. tags plus commit height, via a tool such as MinVer or Nerdbank.GitVersioning), stamp them into the assemblies and the Docker image tag, and have the status command read the assembly's informational version.
 
-## 7. GitHub build with status badges — ⬜
-- Plan: a separate build/test workflow for PRs and pushes, with a status badge in `README.md`.
+## 7. GitHub build with status badges — 🟡
+- [x] `ci.yml` runs the tests on every PR, and `deploy.yml` runs them again before each deploy. Fixed in [#49](https://github.com/gunnbr/GthxNetBot/pull/49): the solution leaves `Gthx.Test` out of Release builds, so `dotnet test` on the solution passed without running a single test. CI now tests the project directly.
+- [ ] Status badges in `README.md`.
 
-## 8. Automatic deploy to Azure from GitHub — ⬜
-- Rework the existing deploy workflow once phases 5–7 are in place.
+## 8. Automatic deploy to Azure from GitHub — ✅
+- Done in phase 5 ([#48](https://github.com/gunnbr/GthxNetBot/pull/48)): every push to `master` tests, builds and pushes the image to Azure Container Registry, then deploys after the owner approves the `production` environment. Azure sign-in uses OpenID Connect.
 
 ## 9. Security — ⬜
 Known issues:
 - [x] `MailKit` 4.15.1 vulnerability [GHSA-9j88-vvj5-vhgr](https://github.com/advisories/GHSA-9j88-vvj5-vhgr): fixed in phase 1 (by `Serilog.Sinks.Email` 4.2.1).
 - [x] **The bot didn't check the IRC server's TLS certificate** (fixed 2026-10-25). IrcDotNet accepts any certificate unless `ValidateSslCertificate` is handled, so anyone able to intercept the connection could pose as the server and collect the SASL password. The bot now rejects certificates with any policy error; `IrcInfo:TrustedCaCertificate` can add a private CA for a test server. Also fixed: after a failed TLS handshake the bot logged "Now connected" and hung instead of exiting.
+- [ ] Delete the 2020 GitHub Actions secrets (`AZURE_CREDENTIALS`, `REGISTRY_*`, `IRC_*`, `EMAIL_*`, `CONNECTION_STRING` and so on) and the service principal behind `AZURE_CREDENTIALS`; nothing uses them now.
+- [ ] Change the SQL login password on `gthxdb`. The Azure bot uses its managed identity; only the local rehearsal container still uses the password.
 - To do: review for other issues (secrets handling, dependency audit in CI).
 
 ## 10. Reported bugs — ⬜
@@ -115,4 +125,4 @@ Known issues:
 - To do: gather the list.
 
 ---
-_Last updated: 2026-10-24_
+_Last updated: 2026-10-26_
