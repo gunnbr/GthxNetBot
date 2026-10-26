@@ -10,9 +10,9 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 4 | Logging that's accessible once deployed to Azure | ✅ |
 | 5 | Switch to deploy to Azure | 🟡 |
 | 6 | Automatic version numbers suited to CI/CD | ⬜ |
-| 7 | Build on GitHub with build/test status badges on the main page | 🟡 |
+| 7 | Build on GitHub with build/test status badges on the main page | ✅ |
 | 8 | Automatically deploy to Azure from GitHub | ✅ |
-| 9 | Fix known security problems | ⬜ |
+| 9 | Fix known security problems | 🟡 |
 | 10 | Fix reported bugs | ⬜ |
 | 11 | Implement new features | ⬜ |
 
@@ -66,7 +66,7 @@ Decisions (2026-10-24):
 - **Don't touch `gthx2.26` while testing.** The new build runs as a separate `gthxtestbot` container with its own nick (`compose.gthxtestbot.yaml`, `gthxtestbot.env.example`).
 
 To do:
-- [x] Test database: `Gthx` created on 2026-10-24 as a Basic-tier copy of `GthxTest` on server `gthxdb` (resource group `FirstTests`). `gthxtestbot` gets real data without writing to production, and `Gthx` becomes the renamed catalog at cutover.
+- [x] Test database: `Gthx` created on 2026-10-24 as a Basic-tier copy of `GthxTest` on server `gthxdb` (then in resource group `FirstTests`, moved to `rg-gthx-prod` on 2026-10-26). `gthxtestbot` gets real data without writing to production, and `Gthx` becomes the renamed catalog at cutover.
 - [x] `gthxtestbot` runs on the local InspIRCd server against `Gthx` (2026-10-24). Verified over IRC: existing factoids and `info` history from the copied data; set, `is also`, and forget; tell (acknowledged and delivered); seen; status. Replies take about 0.16 s (about 1.2 s for the first query after startup).
 - [x] NickServ on the local test server (2026-10-24): Anope 2.0.20 in Docker (`testing/services/`), linked to InspIRCd 4 over `127.0.0.1:7000`. InspIRCd 4 requires TLS for server links from non-loopback addresses, so the link must stay on loopback. `gthxtestbot` is registered and logs in with SASL PLAIN (WHOIS shows it logged in).
 - [x] **No rapid reconnect loops** (2026-10-24). The bot exits whenever the connection ends and `restart: unless-stopped` restarts it at once (Docker backs off only up to 1 minute, and resets after a run of 10 s or more), so failures used to mean reconnecting about once a minute, or every ~12 s when the connection failed. Libera reportedly also drops the connection when SASL fails for an IP that requires it. Now every exit waits first, chosen by cause: reported ban (465 or a K/G/Z/D-line `ERROR`) 60 min; SASL failure 15 min (and no channels are joined); connection failed or ended within 5 min of registering 5 min; disconnect after running normally 30 s. All are configurable (`IrcInfo:*ExitDelayMinutes`, `IrcInfo:StableConnectionMinutes`). Each path verified, using the local test server and a fake IRC server for the ban and drop cases.
@@ -93,25 +93,29 @@ Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Conta
 - [x] YouTube titles from Azure ([#50](https://github.com/gunnbr/GthxNetBot/pull/50)): YouTube serves the Azure host a page whose `<title>` is empty, so new links got "unknown title". The bot now asks YouTube's oEmbed endpoint first, and the page parsing skips empty titles and no longer captures the rest of the page.
 - [x] Nick handoff during deploys ([#51](https://github.com/gunnbr/GthxNetBot/pull/51)): Container Apps starts the new copy before it stops the old one, so the new copy comes up as `gthx_`. It used to take `gthx` back only at its 2-minute WHOIS check, and the old copy was killed without quitting. Now the old copy quits IRC on SIGTERM, and the new one reclaims the nick as soon as it sees the QUIT. On #51's own deploy the new copy had `gthx` back 20 s after starting, the moment the old copy disconnected.
 - [ ] Switch to Libera once the ban is lifted: in `main.bicepparam` set `ircChannels` to the production list and `useTrustedCa = false`; set the `irc-server` secret to `irc.libera.chat` and `irc-sasl-password` to the Libera NickServ password; deploy. Then retire `gthx2.26` (keep a backup of its image) and later drop `GthxTest`.
-- [ ] Optional: turn on error emails in Azure (`enableEmail` and the `email-*` Key Vault secrets).
-- [ ] Move the `gthxdb` server into `rg-gthx-prod`, and delete the leftovers in `FirstTests`: the 2020 container group and its network profile and vnet, the classic Application Insights resource, the old `GthxIrcLogs` workspace and the `okopipi` registry.
+- [x] Error emails from Azure ([#53](https://github.com/gunnbr/GthxNetBot/pull/53), 2026-10-26): `enableEmail = true`, with the mail settings in the `email-*` Key Vault secrets (copied from `gthx2.26`). Warnings and errors are emailed, including the deliberate one on every startup.
+- [x] Batched error emails and a quieter deploy ([#54](https://github.com/gunnbr/GthxNetBot/pull/54)): `Serilog.Sinks.Email` 4.x sent one email per line, where the 2.x sink batched them; the sink now batches for up to 10 seconds in the old line format. Also dropped the "Couldn't quit IRC cleanly" warning that appeared on deploys when the server closed the connection before `Quit()` finished.
+- [x] Deleted the 2020 leftovers in `FirstTests` (2026-10-26): the container group and its network profile and vnet, the classic Application Insights resource and its smart detection rule and action group, the `GthxIrcLogs` workspace, the `okopipi` registry, and the two service principals the old workflow used (their secrets had expired in 2021).
+- [x] Moved the `gthxdb` server (with `Gthx` and `GthxTest`) into `rg-gthx-prod` (2026-10-26); the bot kept reading and writing `Gthx` through the move. Then deleted the empty `FirstTests` and `GthxNetBot` groups and the unused `NetworkWatcherRG` (Azure recreates a network watcher on its own if a vnet is ever added).
+- [ ] At the Libera cutover, decide whether to start from a fresh copy of `GthxTest`. Nothing has written to `GthxTest` since `gthx2.26` stopped on 2026-10-24, and a row-by-row comparison on 2026-10-26 found all of its data in `Gthx`. `Gthx` also holds testing changes since then: soak-test factoid history, seen entries and higher reference counts. Delete `GthxTest` once the new bot has settled on Libera.
 
 ## 6. Automatic version numbers — ⬜
 - Today the version is set by hand: `GthxBot.Version = "2.26 2022-12-28"` in `Gthx.Bot/GthxBot.cs` (shown by the status command), `<Version>1.0.1</Version>` in `Gthx.Data.csproj`, and release notes in `History.txt`.
 - To do: derive versions from git (e.g. tags plus commit height, via a tool such as MinVer or Nerdbank.GitVersioning), stamp them into the assemblies and the Docker image tag, and have the status command read the assembly's informational version.
 
-## 7. GitHub build with status badges — 🟡
+## 7. GitHub build with status badges — ✅
 - [x] `ci.yml` runs the tests on every PR, and `deploy.yml` runs them again before each deploy. Fixed in [#49](https://github.com/gunnbr/GthxNetBot/pull/49): the solution leaves `Gthx.Test` out of Release builds, so `dotnet test` on the solution passed without running a single test. CI now tests the project directly.
-- [ ] Status badges in `README.md`.
+- [x] Status badges in `README.md`: CI (the latest PR test run) and the deploy workflow on `master`. A deploy that is rejected at the approval step counts as a failed run and turns the deploy badge red until the next approved deploy; documentation-only pushes no longer start one.
 
 ## 8. Automatic deploy to Azure from GitHub — ✅
 - Done in phase 5 ([#48](https://github.com/gunnbr/GthxNetBot/pull/48)): every push to `master` tests, builds and pushes the image to Azure Container Registry, then deploys after the owner approves the `production` environment. Azure sign-in uses OpenID Connect.
+- [x] Pushes that change only Markdown files (`**.md`) skip the workflow, so documentation updates don't need a rejected deploy ([#54](https://github.com/gunnbr/GthxNetBot/pull/54)). Run it by hand (`workflow_dispatch`) if one is ever needed.
 
-## 9. Security — ⬜
+## 9. Security — 🟡
 Known issues:
 - [x] `MailKit` 4.15.1 vulnerability [GHSA-9j88-vvj5-vhgr](https://github.com/advisories/GHSA-9j88-vvj5-vhgr): fixed in phase 1 (by `Serilog.Sinks.Email` 4.2.1).
 - [x] **The bot didn't check the IRC server's TLS certificate** (fixed 2026-10-25). IrcDotNet accepts any certificate unless `ValidateSslCertificate` is handled, so anyone able to intercept the connection could pose as the server and collect the SASL password. The bot now rejects certificates with any policy error; `IrcInfo:TrustedCaCertificate` can add a private CA for a test server. Also fixed: after a failed TLS handshake the bot logged "Now connected" and hung instead of exiting.
-- [ ] Delete the 2020 GitHub Actions secrets (`AZURE_CREDENTIALS`, `REGISTRY_*`, `IRC_*`, `EMAIL_*`, `CONNECTION_STRING` and so on) and the service principal behind `AZURE_CREDENTIALS`; nothing uses them now.
+- [x] Deleted the 18 GitHub Actions secrets from the 2020 workflow (`AZURE_CREDENTIALS`, `REGISTRY_*`, `IRC_*`, `EMAIL_*`, `CONNECTION_STRING` and so on) and the service principals behind them (2026-10-26).
 - [ ] Change the SQL login password on `gthxdb`. The Azure bot uses its managed identity; only the local rehearsal container still uses the password.
 - To do: review for other issues (secrets handling, dependency audit in CI).
 
@@ -120,6 +124,7 @@ Known issues:
 - [ ] `GthxSqlDataTest` logs to the Windows-only path `c:\tmp\GthxSqlTests.json`; make it portable for Linux/CI.
 - [ ] Thingiverse titles ([#39](https://github.com/gunnbr/GthxNetBot/issues/39)): thingiverse.com answers the bot's title fetch with 403 Forbidden (probably bot protection), and when a title fetch fails the bot says nothing at all instead of its "unknown title" reply. Found on 2026-10-25 by the soak traffic; production on the 2022 build likely has the same problem.
 - [ ] IrcDotNet fork: `CompleteIrcClientTest` now targets `irc.libera.chat` ([#3](https://github.com/gunnbr/IrcDotNet/pull/3)) but fails in `LocalUserModeTest`, because Libera gives new users `+w` by default and the test expects it to be off.
+- [ ] IrcDotNet fork: without a SASL password the bot never finishes signing in. The non-SASL path sends `CAP LS` after `NICK`/`USER` (`IrcClient.cs`) but never `CAP END`, so the server holds registration until it times out (60 s on InspIRCd). Doesn't affect the Azure bot, which always uses SASL; found on 2026-10-26 while testing #54.
 
 ## 11. New features — ⬜
 - To do: gather the list.

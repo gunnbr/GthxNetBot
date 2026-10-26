@@ -1,4 +1,7 @@
 # GthxNetBot
+[![CI](https://github.com/gunnbr/GthxNetBot/actions/workflows/ci.yml/badge.svg)](https://github.com/gunnbr/GthxNetBot/actions/workflows/ci.yml)
+[![Build and deploy to Azure](https://github.com/gunnbr/GthxNetBot/actions/workflows/deploy.yml/badge.svg?branch=master)](https://github.com/gunnbr/GthxNetBot/actions/workflows/deploy.yml)
+
 This is the gthx IRC bot reimplemented in C# instead of the original python.
 The main reasons for this are :
 * Gthx was originally created to properly handle unicode, but python is a real pain to work with unicode. (Or at least Python2 certainly is!)

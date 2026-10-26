@@ -373,6 +373,12 @@ namespace GthxNetBot
                         _logger.LogWarning("The server didn't close the connection after QUIT; exiting anyway.");
                     }
                 }
+                catch (ObjectDisposedException)
+                {
+                    // The server closed the connection after the QUIT before Quit() finished disconnecting
+                    // its socket. That's the outcome we want.
+                    _logger.LogDebug("The connection closed while quitting.");
+                }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Couldn't quit IRC cleanly");
