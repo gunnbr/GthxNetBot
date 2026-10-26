@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -13,8 +15,9 @@ namespace Gthx.Bot
     {
         private readonly IWebReader _webReader;
         private readonly ILogger<GthxUtil> _logger;
-        private readonly Regex _titleRegex = new(@"<title>(?'title'.*) - .*<\/title>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        private readonly Regex _metaRegex = new("<meta name=\"title\" content=\"(?'title'.*)\"", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private readonly Regex _titleRegex = new(@"<title>(?'title'[^<]*) - [^<]*<\/title>", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private readonly Regex _metaRegex = new("<meta name=\"title\" content=\"(?'title'[^\"]*)\"", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private readonly Regex _youtubeUrlRegex = new(@"^https?:\/\/(www\.youtube\.com|youtu\.be)\/", RegexOptions.IgnoreCase);
 
         public GthxUtil(IWebReader webReader, ILogger<GthxUtil> logger)
         {
@@ -124,6 +127,15 @@ namespace Gthx.Bot
         /// <returns></returns>
         public async Task<string> GetTitle(string url)
         {
+            if (_youtubeUrlRegex.IsMatch(url))
+            {
+                var oEmbedTitle = await GetYoutubeOEmbedTitle(url);
+                if (!string.IsNullOrWhiteSpace(oEmbedTitle))
+                {
+                    return oEmbedTitle;
+                }
+            }
+
             _logger.LogInformation("Getting title from {URL}", url);
 
             var webStream = await _webReader.GetStreamFromUrlAsync(url);
@@ -137,8 +149,10 @@ namespace Gthx.Bot
             while ((line = await reader.ReadLineAsync()) != null)
             {
 
+                // YouTube sometimes serves a page whose <title> is just " - YouTube" (the script fills it in later),
+                // so an empty title doesn't count; keep looking for the meta title.
                 var titleMatch = _titleRegex.Match(line);
-                if (titleMatch.Success)
+                if (titleMatch.Success && !string.IsNullOrWhiteSpace(titleMatch.Groups["title"].Value))
                 {
                     _logger.LogInformation("Found title: {Title}", titleMatch.Groups["title"].Value);
                     encodedTitle = titleMatch.Groups["title"].Value;
@@ -146,7 +160,7 @@ namespace Gthx.Bot
                 }
 
                 var metaMatch = _metaRegex.Match(line);
-                if (metaMatch.Success)
+                if (metaMatch.Success && !string.IsNullOrWhiteSpace(metaMatch.Groups["title"].Value))
                 {
                     _logger.LogInformation("Found meta title: {Title}", metaMatch.Groups["title"].Value);
                     encodedTitle = metaMatch.Groups["title"].Value;
@@ -160,6 +174,35 @@ namespace Gthx.Bot
             }
 
             return HttpUtility.HtmlDecode(encodedTitle);
+        }
+
+        /// <summary>
+        /// Gets a YouTube video's title from YouTube's oEmbed endpoint, which doesn't depend on the
+        /// watch page's HTML (YouTube serves a different page to some clients, such as cloud hosts).
+        /// </summary>
+        /// <returns>The title, or null if oEmbed has none (e.g. a private or deleted video)</returns>
+        private async Task<string?> GetYoutubeOEmbedTitle(string url)
+        {
+            var oEmbedUrl = $"https://www.youtube.com/oembed?format=json&url={Uri.EscapeDataString(url)}";
+            _logger.LogInformation("Getting YouTube title from {URL}", oEmbedUrl);
+            try
+            {
+                await using var stream = await _webReader.GetStreamFromUrlAsync(oEmbedUrl);
+                using var json = await JsonDocument.ParseAsync(stream);
+                if (json.RootElement.ValueKind == JsonValueKind.Object &&
+                    json.RootElement.TryGetProperty("title", out var title) &&
+                    title.ValueKind == JsonValueKind.String)
+                {
+                    _logger.LogInformation("Found oEmbed title: {Title}", title.GetString());
+                    return title.GetString();
+                }
+            }
+            catch (Exception ex) when (ex is HttpRequestException or JsonException)
+            {
+                _logger.LogWarning("No oEmbed title for {URL}: {Message}", url, ex.Message);
+            }
+
+            return null;
         }
 
     }

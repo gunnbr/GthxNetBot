@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,7 +20,25 @@ namespace Gthx.Test.Mocks
 
                 // Create the data to write to the stream.
                 byte[] dataString;
-                if (url.EndsWith("/title"))
+                if (url.StartsWith("https://www.youtube.com/oembed?"))
+                {
+                    // Only the "oembed" test video has oEmbed data; for the rest YouTube answers 404 and the
+                    // title comes from the page.
+                    if (!url.EndsWith("%2Foembed"))
+                    {
+                        throw new HttpRequestException("Response status code does not indicate success: 404 (Not Found).");
+                    }
+
+                    dataString = utf8Encoding.GetBytes(@"{""title"":""oEmbed Title & \""Quotes\"""",""type"":""video""}");
+                }
+                else if (url.EndsWith("/emptytitle"))
+                {
+                    dataString = utf8Encoding.GetBytes(@"<head>
+<title> - YouTube</title>
+<meta name=""title"" content=""Meta After Empty Title"">
+</head>");
+                }
+                else if (url.EndsWith("/title"))
                 {
                     dataString = utf8Encoding.GetBytes(@"<head>
 <title>Dummy Title - YouTube</title>
