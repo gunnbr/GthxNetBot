@@ -81,7 +81,7 @@ namespace Gthx.Test
 
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_config)
-                .WriteTo.File(new JsonFormatter(), @"c:\tmp\GthxSqlTests.json", shared: true)
+                .WriteTo.File(new JsonFormatter(), Path.Combine(Path.GetTempPath(), "GthxSqlTests.json"), shared: true)
                 .CreateLogger();
 
             try

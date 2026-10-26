@@ -45,7 +45,9 @@ public class IntegrationTestsStartup
         });
 
         services.TryAddScoped<IGthxData, GthxSqlData>();
-        services.TryAddSingleton<IWebReader, WebReader>();
+        // No live web access in tests (#37): MockGthxUtil supplies the titles, and MockWebReader keeps
+        // anything else from reaching the internet.
+        services.TryAddSingleton<IWebReader, MockWebReader>();
         services.TryAddSingleton<IGthxUtil, MockGthxUtil>();
         services.TryAddSingleton<MockIrcClient>();
         services.TryAddSingleton<IIrcClient>(sp => sp.GetRequiredService<MockIrcClient>());
