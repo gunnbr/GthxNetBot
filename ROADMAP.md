@@ -13,7 +13,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 7 | Build on GitHub with build/test status badges on the main page | ✅ |
 | 8 | Automatically deploy to Azure from GitHub | ✅ |
 | 9 | Fix known security problems | 🟡 |
-| 10 | Fix reported bugs | ⬜ |
+| 10 | Fix reported bugs | 🟡 |
 | 11 | Implement new features | ⬜ |
 | 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | 🟡 |
 
@@ -136,21 +136,36 @@ Still to do (these change Azure or GitHub settings, so they're the owner's call)
 - [ ] IrcDotNet fork: the bot never finishes registering without a SASL password (no `CAP END`; see phase 10). Not a risk for the Azure bot, which always uses SASL.
 - Optional, not planned: SQL auditing to the Log Analytics workspace (counts against the 0.15 GB/day cap), and Microsoft Defender for SQL (about $15/month).
 
-## 10. Reported bugs — ⬜
-- To do: collect from GitHub issues.
-- [ ] `GthxSqlDataTest` logs to the Windows-only path `c:\tmp\GthxSqlTests.json`; make it portable for Linux/CI.
+## 10. Reported bugs — 🟡
+Open GitHub issues, triaged on 2026-10-26 (feature requests are in phase 11):
+- [x] Factoids don't get set in queries ([#24](https://github.com/gunnbr/GthxNetBot/issues/24)). A private message that starts with the bot's nick (`/msg gthx gthx: foo is bar`) kept the nick, so it set the factoid `gthx: foo` (and a question got no reply). The nick is now removed in private messages too. Confirmed on the test server before the fix.
 - [ ] Thingiverse titles ([#39](https://github.com/gunnbr/GthxNetBot/issues/39)): thingiverse.com answers the bot's title fetch with 403 Forbidden (probably bot protection), and when a title fetch fails the bot says nothing at all instead of its "unknown title" reply. Found on 2026-10-25 by the soak traffic; production on the 2022 build likely has the same problem.
+- [ ] Unit tests need live network access to YouTube and Thingiverse ([#37](https://github.com/gunnbr/GthxNetBot/issues/37)).
+- [ ] EF errors don't appear in the log ([#23](https://github.com/gunnbr/GthxNetBot/issues/23)).
+- [ ] Not detecting disconnection ([#25](https://github.com/gunnbr/GthxNetBot/issues/25)): probably fixed. The IrcDotNet fork turns on TCP keepalive and treats a zero-byte read or socket error as a disconnect, and the bot exits on disconnect so Container Apps restarts it. Verify by cutting a connection on the test server, then close the issue.
+- [ ] `GthxSqlDataTest` logs to the Windows-only path `c:\tmp\GthxSqlTests.json`; make it portable for Linux/CI.
 - [ ] IrcDotNet fork: `CompleteIrcClientTest` now targets `irc.libera.chat` ([#3](https://github.com/gunnbr/IrcDotNet/pull/3)) but fails in `LocalUserModeTest`, because Libera gives new users `+w` by default and the test expects it to be off.
 - [ ] IrcDotNet fork: without a SASL password the bot never finishes signing in. The non-SASL path sends `CAP LS` after `NICK`/`USER` (`IrcClient.cs`) but never `CAP END`, so the server holds registration until it times out (60 s on InspIRCd). Doesn't affect the Azure bot, which always uses SASL; found on 2026-10-26 while testing #54.
 
+Already fixed; closed with a comment on 2026-10-26:
+- [x] Special characters in YouTube titles ([#22](https://github.com/gunnbr/GthxNetBot/issues/22)): titles now come from YouTube's oEmbed JSON; the video in the issue comes back as `CppCon 2018: Jason Turner “Surprises in Object Lifetime”`.
+- [x] Unhandled exception when YouTube isn't available ([#7](https://github.com/gunnbr/GthxNetBot/issues/7)): `GetAndSaveTitle` now catches and logs the error.
+- [x] More information in the starting message ([#3](https://github.com/gunnbr/GthxNetBot/issues/3)): it now includes the version and commit (phase 6).
+- [x] Getting our nick back when the old instance quits ([#2](https://github.com/gunnbr/GthxNetBot/issues/2)): the bot takes the nick back as soon as it's free; every deploy since #51 shows it happening.
+
 ## 11. New features — ⬜
-- To do: gather the list.
+Requests from GitHub issues:
+- [ ] Limit the length of factoids ([#11](https://github.com/gunnbr/GthxNetBot/issues/11)), so long sentences with "is" aren't stored as factoids (around 30 characters looked right).
+- [ ] Relax the format for piping factoids to a user ([#33](https://github.com/gunnbr/GthxNetBot/issues/33)): make the `?`/`!` and the spaces in `foo? | bar` optional.
+- [ ] `!remindme <in time> <message>` ([#30](https://github.com/gunnbr/GthxNetBot/issues/30)).
+- [ ] Email the admin when certain keywords are said ([#4](https://github.com/gunnbr/GthxNetBot/issues/4)).
+- [ ] Update the documentation ([#28](https://github.com/gunnbr/GthxNetBot/issues/28)): setting up the database, and the ways to configure the bot.
 
 ## 12. Gthx.Data repository — 🟡
 `Gthx.Data` is a submodule from its own repository, [gunnbr/GthxNetData](https://github.com/gunnbr/GthxNetData), so its packages, workflows and settings are looked after there.
-- [ ] Dependabot and a CI build ([GthxNetData#4](https://github.com/gunnbr/GthxNetData/pull/4)): monthly grouped NuGet and Actions update PRs, and a build check on every PR.
-- [x] This repo's Dependabot config moves the `Gthx.Data` submodule to GthxNetData's latest master once a month ([#56](https://github.com/gunnbr/GthxNetBot/pull/56)). The submodule now points at GthxNetData's master (`23cbe97`, the merge of #3) instead of the feature-branch commit; the files are the same.
-- [ ] Keep EF Core in step: GthxNetBot references `Microsoft.EntityFrameworkCore.Design` and Gthx.Data references `Microsoft.EntityFrameworkCore.SqlServer` and `.Tools`. When one repo updates EF Core, update the other to the same version.
+- [x] Dependabot and a CI build ([GthxNetData#4](https://github.com/gunnbr/GthxNetData/pull/4)): monthly grouped NuGet and Actions update PRs, and a build check on every PR.
+- [x] This repo's Dependabot config moves the `Gthx.Data` submodule to GthxNetData's latest master once a month ([#56](https://github.com/gunnbr/GthxNetBot/pull/56)).
+- [x] EF Core versions match: GthxNetBot (#58) and GthxNetData (its #6) both moved to 10.0.14, and the submodule now points at GthxNetData's master (`fcd24d6`, which also has its Dependabot Actions update, #5). GthxNetBot references `Microsoft.EntityFrameworkCore.Design` and Gthx.Data references `Microsoft.EntityFrameworkCore.SqlServer` and `.Tools`; when one repo updates EF Core, update the other to the same version.
 - [x] `master` is protected by the same "Protect master" ruleset as this repo, with the CI `build` check required (2026-10-26).
 - [ ] Repository settings: Dependabot security updates are on; turn on secret scanning and push protection.
 - [ ] The README says the data component is shared with the gthx website; check whether the website still uses it before changing the schema.
