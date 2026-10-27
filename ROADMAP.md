@@ -8,7 +8,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 2 | Add SASL support | ✅ |
 | 3 | Deploy as a locally running Docker container on the Linux PC | ✅ |
 | 4 | Logging that's accessible once deployed to Azure | ✅ |
-| 5 | Switch to deploy to Azure | 🟡 |
+| 5 | Switch to deploy to Azure | ✅ |
 | 6 | Automatic version numbers suited to CI/CD | ✅ |
 | 7 | Build on GitHub with build/test status badges on the main page | ✅ |
 | 8 | Automatically deploy to Azure from GitHub | ✅ |
@@ -22,7 +22,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
-**Next up:** finish phase 5 by moving the Azure bot to Libera. **Libera lifted the ban on the home IP on 2026-10-26**, so nothing blocks the cutover now; the steps are in phase 5. Merge [#63](https://github.com/gunnbr/GthxNetBot/pull/63) first (CI passes): it has the IrcDotNet `CAP END` fix and stops fetching Thingiverse titles. Since 2026-10-26 the new build runs in Azure Container Apps as `gthx`, connected to the home test server and using the `Gthx` database; the soak traffic (`testing/traffic/`, `BOT_NICK=gthx`) runs against it from home. Production on Libera is still the 2022 `gthx2.26` container, stopped since 2026-10-24, so `gthx` has been missing from the Libera channels since then. Run the traffic from a separate git worktree (for example `git worktree add ../GthxNetBot-soak <branch>`), because its script is bind-mounted and switching branches in the main checkout can remove it; check its log for `NO REPLY`, `COUNT DID NOT INCREASE` and the hourly `SUMMARY` lines.
+**Next up:** phase 5 is done: since 2026-10-27 the bot runs in Azure Container Apps as `gthx` on Libera, and the 2022 `gthx2.26` container is retired. Next are phase 14 (check the backups and keep a copy at home), the security settings in phase 9 that are the owner's call, and the feature requests in phase 11. The soak traffic (`testing/traffic/`) is stopped; to use it again, point it at a test bot on the local server, never at Libera.
 
 **Testing rule:** never run test bots or probe clients against Libera (we were banned there on 2026-10-24 after phase 3 test runs; the ban was lifted on 2026-10-26). Only the production bot connects to Libera. Use the local InspIRCd test server on sakura: `10.0.0.125:6667` plaintext, or `10.0.0.125:6697` TLS (certificate from the private CA in `testing/tls/`).
 
@@ -86,7 +86,7 @@ Decided 2026-10-25 (budget: at most $25/month for logging):
 - Rejected: hosted Seq (a second always-on container), shipping to the home Seq (opens a port, and logs are lost when home is down), and a new Application Insights resource (same billing, more code, misses crashes).
 - [x] Verified after the first Azure deploy (2026-10-26): the logs reach `log-gthx-prod`, and `scripts/gthx-logs` reads them. Lines show up in Log Analytics a minute or two after they're written; `-f` streams them live.
 
-## 5. Switch to deploy to Azure — 🟡
+## 5. Switch to deploy to Azure — ✅
 Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Container Instances, password-based secrets in GitHub) never worked and was removed.
 - `infra/main.bicep`: resource group `rg-gthx-prod` (westus) holding Log Analytics, a user-assigned managed identity, Azure Container Registry (Basic, pulled with the identity), Key Vault (RBAC), and a Container Apps environment and app (one replica, 0.25 vCPU / 0.5 GiB), plus budgets. Estimated total about $25/month, including the SQL database.
 - Secrets: the IRC server name, the NickServ password and the email settings live in Key Vault and reach the container as Key Vault references. The database uses the managed identity (Entra authentication), so it has no password.
@@ -97,18 +97,18 @@ Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Conta
 - [x] YouTube titles from Azure ([#50](https://github.com/gunnbr/GthxNetBot/pull/50)): YouTube serves the Azure host a page whose `<title>` is empty, so new links got "unknown title". The bot now asks YouTube's oEmbed endpoint first, and the page parsing skips empty titles and no longer captures the rest of the page.
 - [x] **Taking the nick back when the old copy quits unseen** ([#65](https://github.com/gunnbr/GthxNetBot/pull/65), 2026-10-27). At the Libera cutover the old copy was only in `#gthxtestchannel`, which the new copy never joined, so the new copy didn't see its QUIT and stayed `gthx_`. Its 2-minute WHOIS check got 401 "No such nick", but IrcDotNet then raised its WHOIS-reply event with the details cached from the first check, so the bot thought the nick was still taken. The bot now takes the nick back on that 401, and stops the WHOIS checks once it has it. Verified on the test server with a client holding the nick from outside every channel.
 - [x] Nick handoff during deploys ([#51](https://github.com/gunnbr/GthxNetBot/pull/51)): Container Apps starts the new copy before it stops the old one, so the new copy comes up as `gthx_`. It used to take `gthx` back only at its 2-minute WHOIS check, and the old copy was killed without quitting. Now the old copy quits IRC on SIGTERM, and the new one reclaims the nick as soon as it sees the QUIT. On #51's own deploy the new copy had `gthx` back 20 s after starting, the moment the old copy disconnected.
-- [ ] **Switch to Libera** (next; the ban was lifted on 2026-10-26):
+- [x] **Switch to Libera** (done 2026-10-27; the ban was lifted on 2026-10-26):
   1. ✅ Stop the `soaktraffic` container, so test traffic doesn't land in the production data (stopped 2026-10-27; its last hour had every request answered, median 0.08 s).
   2. ✅ Database: keep `Gthx` as it is, with the testing changes (decided 2026-10-27).
   3. ✅ In `infra/main.bicepparam` (done in [#64](https://github.com/gunnbr/GthxNetBot/pull/64)) set `ircChannels` to `#reprap,#mobious,#smoothieware,#gthxtest,#dlp3dprinting,#slic3r,#siderala,#reprap.de` (`#bigdelta` dropped: the channel is long dead) and `useTrustedCa = false`.
   4. ✅ Set the Key Vault secrets `irc-server` to `irc.libera.chat` and `irc-sasl-password` to the Libera NickServ password for `gthx`.
   5. ✅ Deploy (a PR with the bicepparam change, then approve the deploy), and check with `scripts/gthx-logs` that the bot logs in with SASL and joins every channel. Deployed 2026-10-27 04:24 UTC: SASL login on Libera and all eight channels joined, answering in `#reprap`. It came up as `gthx_` and didn't take `gthx` back (fixed below).
-  6. Retire `gthx2.26` (keep a backup of its image), and later delete `GthxTest`.
+  6. ✅ Retired `gthx2.26` (2026-10-27): its container is removed. Its images (`gthxnetbot:v2.26`, also used by the stopped `othx2.26`, and `pre-upgrade-backup/gthx2.26`) and its container settings are saved in `~/backups/gthx2.26/` on the Linux PC. Deleting `GthxTest` waits for phase 14's backups.
 - [x] Error emails from Azure ([#53](https://github.com/gunnbr/GthxNetBot/pull/53), 2026-10-26): `enableEmail = true`, with the mail settings in the `email-*` Key Vault secrets (copied from `gthx2.26`). Warnings and errors are emailed, including the deliberate one on every startup.
 - [x] Batched error emails and a quieter deploy ([#54](https://github.com/gunnbr/GthxNetBot/pull/54)): `Serilog.Sinks.Email` 4.x sent one email per line, where the 2.x sink batched them; the sink now batches for up to 10 seconds in the old line format. Also dropped the "Couldn't quit IRC cleanly" warning that appeared on deploys when the server closed the connection before `Quit()` finished.
 - [x] Deleted the 2020 leftovers in `FirstTests` (2026-10-26): the container group and its network profile and vnet, the classic Application Insights resource and its smart detection rule and action group, the `GthxIrcLogs` workspace, the `okopipi` registry, and the two service principals the old workflow used (their secrets had expired in 2021).
 - [x] Moved the `gthxdb` server (with `Gthx` and `GthxTest`) into `rg-gthx-prod` (2026-10-26); the bot kept reading and writing `Gthx` through the move. Then deleted the empty `FirstTests` and `GthxNetBot` groups and the unused `NetworkWatcherRG` (Azure recreates a network watcher on its own if a vnet is ever added).
-- [ ] At the Libera cutover, decide whether to start from a fresh copy of `GthxTest`. Nothing has written to `GthxTest` since `gthx2.26` stopped on 2026-10-24, and a row-by-row comparison on 2026-10-26 found all of its data in `Gthx`. `Gthx` also holds testing changes since then: soak-test factoid history, seen entries and higher reference counts. Delete `GthxTest` once the new bot has settled on Libera.
+- [x] Database at the cutover: kept `Gthx` as it is (decided 2026-10-27). Nothing has written to `GthxTest` since `gthx2.26` stopped on 2026-10-24, and a row-by-row comparison on 2026-10-26 found all of its data in `Gthx`; `Gthx` also holds the testing changes since then (soak-test factoid history, seen entries and higher reference counts). Delete `GthxTest` once phase 14 has a verified backup.
 
 ## 6. Automatic version numbers — ✅
 - Versions come from Nerdbank.GitVersioning: `version.json` holds the major/minor (`3.0`, restarted for the .NET 10 / Azure rewrite) and the patch is the number of commits since that line last changed, e.g. `3.0.14+a1b2c3d4e5`, where the suffix is the commit. Every build gets it, including local ones; `Directory.Build.props` adds the package to the bot's projects but not to the submodules.
