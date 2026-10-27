@@ -170,7 +170,7 @@ Already fixed; closed with a comment on 2026-10-26:
 Requests from GitHub issues:
 - [ ] Limit the length of factoids ([#11](https://github.com/gunnbr/GthxNetBot/issues/11)), so long sentences with "is" aren't stored as factoids (around 30 characters looked right).
 - [ ] Relax the format for piping factoids to a user ([#33](https://github.com/gunnbr/GthxNetBot/issues/33)): make the `?`/`!` and the spaces in `foo? | bar` optional.
-- [ ] `!remindme <in time> <message>` ([#30](https://github.com/gunnbr/GthxNetBot/issues/30)).
+- [x] Reminders ([#30](https://github.com/gunnbr/GthxNetBot/issues/30), asked for as `!remindme <in time> <message>`). Only the addressed form, like the other commands: `gthx: remind me in 12 hours to post this suggestion`, `gthx: list reminders` and `gthx: cancel reminder <number>`. Relative times only (minutes, hours, days, weeks, 30-day months, 365-day years: `2h`, `1h30m`, `1 day and 3 hours`), from 1 minute to 1 year, at most 10 waiting per nick, 400 characters each. A timer checks every 30 seconds. A due reminder is posted if its author has said something in the last 5 minutes and is still online (shares a channel with the bot): in the channel it was asked in, or by private message if they've left it. Otherwise it's delivered the next time they speak, like `tell`. Kept in the new `Reminder` table ([GthxNetData#8](https://github.com/gunnbr/GthxNetData/pull/8)), so they survive restarts and deploys.
 - [ ] Email the admin when certain keywords are said ([#4](https://github.com/gunnbr/GthxNetBot/issues/4)).
 - [ ] Handle more CTCP requests, perhaps by switching from `IrcClient` to IrcDotNet's `CtcpClient`, which handles them itself (from the old README's TODO list).
 

@@ -1,5 +1,6 @@
 ﻿using Gthx.Bot;
 using Gthx.Bot.Interfaces;
+using Gthx.Core;
 using Gthx.Data;
 using Gthx.Test.Mocks;
 using GthxData;
@@ -15,6 +16,7 @@ using NUnit.Framework;
 using Serilog;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Gthx.Test
@@ -916,6 +918,231 @@ namespace Gthx.Test
             ClassicAssert.AreEqual(1, replies.Messages.Count);
             ClassicAssert.AreEqual(testChannel, replies.Channel);
             ClassicAssert.AreEqual($"2 of the 5 users in {testChannel} right now have never said anything.", replies.Messages[0]);
+        }
+
+        [TestCase("12 hours", 12 * 60)]
+        [TestCase("an hour", 60)]
+        [TestCase("a minute", 1)]
+        [TestCase("2h", 2 * 60)]
+        [TestCase("1h30m", 90)]
+        [TestCase("1 hour and 30 minutes", 90)]
+        [TestCase("1 day, 2 hours", 26 * 60)]
+        [TestCase("3 Days", 3 * 24 * 60)]
+        [TestCase("2w", 14 * 24 * 60)]
+        [TestCase("90 mins", 90)]
+        [TestCase("2 hrs 5 min", 125)]
+        [TestCase("2 months", 60 * 24 * 60)]
+        [TestCase("a year", 365 * 24 * 60)]
+        [TestCase("1mo 2m", 30 * 24 * 60 + 2)]
+        public void TestReminderTimeParsing(string text, int minutes)
+        {
+            ClassicAssert.IsTrue(ReminderTime.TryParse(text, out var time), text);
+            ClassicAssert.AreEqual(TimeSpan.FromMinutes(minutes), time, text);
+        }
+
+        [TestCase("soon")]
+        [TestCase("")]
+        [TestCase("2 fortnights")]
+        [TestCase("and 3 hours")]
+        [TestCase("a m")]
+        [TestCase("hours")]
+        public void TestReminderTimeParsingFailures(string text)
+        {
+            ClassicAssert.IsFalse(ReminderTime.TryParse(text, out _), text);
+        }
+
+        [Test]
+        public void TestReminderSetting()
+        {
+            var testChannel = "#reprap";
+            var testUser = "Wanderer";
+            _data.Reminders.Clear();
+
+            // Not directly addressed, so gthx should ignore it
+            _gthx.HandleReceivedMessage(testChannel, testUser, "remind me in 12 hours to post this suggestion");
+            var replies = _client.GetReplies();
+            ClassicAssert.AreEqual(0, replies.Messages.Count);
+            ClassicAssert.AreEqual(0, _data.Reminders.Count);
+
+            var before = DateTime.UtcNow;
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: remind me in 12 hours to post this suggestion");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, _data.Reminders.Count);
+            var reminder = _data.Reminders[0];
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual(testChannel, replies.Channel);
+            ClassicAssert.AreEqual($"{testUser}: Okay, I'll remind you in 12 hours (reminder {reminder.Id}).", replies.Messages[0]);
+            ClassicAssert.AreEqual(testUser, reminder.Author);
+            ClassicAssert.AreEqual(testChannel, reminder.Channel);
+            ClassicAssert.AreEqual("to post this suggestion", reminder.Message);
+            ClassicAssert.That(reminder.DueTimestamp - before, Is.InRange(TimeSpan.FromHours(12), TimeSpan.FromHours(12) + TimeSpan.FromSeconds(10)));
+
+            // A private message, where "is" in the message mustn't make it a factoid
+            _data.ResetFactoid();
+            _gthx.HandleReceivedMessage(testUser, testUser, "Remind me in 2h30m to check if the print is done");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(2, _data.Reminders.Count);
+            ClassicAssert.AreEqual($"{testUser}: Okay, I'll remind you in 2 hours, 30 minutes (reminder {_data.Reminders[1].Id}).", replies.Messages[0]);
+            ClassicAssert.AreEqual(testUser, _data.Reminders[1].Channel);
+            ClassicAssert.IsNull(_data.FactoidUser);
+
+            var usage = $"{testUser}: Say \"remind me in <time> <message>\", such as \"remind me in 2 hours to check the print\".";
+            foreach (var bad in new[] { "remind me in soon to do it", "remind me in 5 minutes", "remind me to do it" })
+            {
+                _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: {bad}");
+                replies = _client.GetReplies();
+                ClassicAssert.AreEqual(1, replies.Messages.Count, bad);
+                ClassicAssert.AreEqual(usage, replies.Messages[0], bad);
+            }
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: remind me in 0 minutes to blink");
+            ClassicAssert.AreEqual($"{testUser}: I can only remind you a minute or more from now.", _client.GetReplies().Messages[0]);
+
+            foreach (var tooLong in new[] { "53 weeks", "2 years", "1 year and 1 day" })
+            {
+                _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: remind me in {tooLong} to renew");
+                ClassicAssert.AreEqual($"{testUser}: I can only remind you up to a year ahead.", _client.GetReplies().Messages[0], tooLong);
+            }
+
+            var longMessage = "to " + new string('x', 398);
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: remind me in 1 hour {longMessage}");
+            ClassicAssert.AreEqual($"{testUser}: Sorry, that's too long for me to remember (401 characters; the most is 400).", _client.GetReplies().Messages[0]);
+            ClassicAssert.AreEqual(2, _data.Reminders.Count);
+
+            for (var i = 2; i < 10; i++)
+            {
+                _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: remind me in {i} days to do thing {i}");
+            }
+            _client.GetReplies();
+            ClassicAssert.AreEqual(10, _data.Reminders.Count);
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: remind me in 10 days to do one more thing");
+            ClassicAssert.AreEqual($"{testUser}: You already have 10 reminders waiting. Cancel one first with \"cancel reminder <number>\".", _client.GetReplies().Messages[0]);
+            ClassicAssert.AreEqual(10, _data.Reminders.Count);
+
+            _data.Reminders.Clear();
+        }
+
+        [Test]
+        public void TestReminderListAndCancel()
+        {
+            var testChannel = "#reprap";
+            var testUser = "Wanderer";
+            _data.Reminders.Clear();
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: list reminders");
+            var replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual($"{testUser}: You have no reminders.", replies.Messages[0]);
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: remind me in 3 days about the filament order");
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: remind me in 2 hours to post this suggestion");
+            _data.AddReminder("SomeoneElse", testChannel, "to do their thing", DateTime.UtcNow.AddHours(1));
+            _client.GetReplies();
+            var filament = _data.Reminders[0];
+            var suggestion = _data.Reminders[1];
+            var someoneElse = _data.Reminders[2];
+
+            // Soonest first, and only their own
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: list reminders?");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(2, replies.Messages.Count);
+            ClassicAssert.AreEqual($"{testUser}: {suggestion.Id}: in 2 hours: to post this suggestion", replies.Messages[0]);
+            ClassicAssert.AreEqual($"{testUser}: {filament.Id}: in 3 days: about the filament order", replies.Messages[1]);
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: cancel reminder {someoneElse.Id}");
+            ClassicAssert.AreEqual($"{testUser}: I don't have a reminder {someoneElse.Id} for you.", _client.GetReplies().Messages[0]);
+            ClassicAssert.AreEqual(3, _data.Reminders.Count);
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: cancel reminder #{suggestion.Id}");
+            ClassicAssert.AreEqual($"{testUser}: Reminder {suggestion.Id} cancelled.", _client.GetReplies().Messages[0]);
+            CollectionAssert.DoesNotContain(_data.Reminders, suggestion);
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: cancel reminder {suggestion.Id}");
+            ClassicAssert.AreEqual($"{testUser}: I don't have a reminder {suggestion.Id} for you.", _client.GetReplies().Messages[0]);
+
+            _data.Reminders.Clear();
+        }
+
+        [Test]
+        public void TestHeldReminderDelivery()
+        {
+            var testUser = "Wanderer";
+            _data.Reminders.Clear();
+
+            var reminder = _data.AddReminder(testUser, "#reprap", "to post this suggestion", DateTime.UtcNow.AddMinutes(-1));
+            reminder.Timestamp = DateTime.UtcNow.AddHours(-2);
+            var notYet = _data.AddReminder(testUser, "#reprap", "to do it later", DateTime.UtcNow.AddHours(1));
+
+            // Delivered wherever they next speak
+            _gthx.HandleReceivedMessage("#other", testUser, "hello there");
+            var replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual("#other", replies.Channel);
+            ClassicAssert.AreEqual($"{testUser}: 2 hours ago you asked me to remind you to post this suggestion", replies.Messages[0]);
+            CollectionAssert.AreEqual(new[] { notYet }, _data.Reminders);
+
+            // Only once
+            _gthx.HandleReceivedMessage("#other", testUser, "hello again");
+            ClassicAssert.AreEqual(0, _client.GetReplies().Messages.Count);
+
+            _data.Reminders.Clear();
+        }
+
+        [Test]
+        public void TestReminderSchedulerDelivery()
+        {
+            var scheduler = _host.Services.GetRequiredService<ReminderScheduler>();
+            var now = DateTime.UtcNow;
+            _data.Reminders.Clear();
+            _client.OtherOnlineUsers.Clear();
+
+            Reminder AddDue(string author, string channel)
+            {
+                var reminder = _data.AddReminder(author, channel, "to check the print", now.AddMinutes(-1));
+                reminder.Timestamp = now.AddHours(-2);
+                return reminder;
+            }
+
+            // Razor is in the channel and spoke just now, in another channel
+            _gthx.HandleReceivedMessage("#other", "Razor", "hello there");
+            // Wanderer is online, spoke, but isn't in #reprap: it goes by private message
+            _client.OtherOnlineUsers.Add("Wanderer");
+            _gthx.HandleReceivedMessage("#other", "Wanderer", "hello there");
+            // Ghost spoke but has gone offline
+            _gthx.HandleReceivedMessage("#other", "Ghost", "goodbye");
+            _client.GetReplies();
+
+            var forRazor = AddDue("Razor", "#reprap");
+            scheduler.CheckDueReminders(now);
+            var replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual("#reprap", replies.Channel);
+            ClassicAssert.AreEqual("Razor: 2 hours ago you asked me to remind you to check the print", replies.Messages[0]);
+            ClassicAssert.AreEqual(0, _data.Reminders.Count);
+
+            AddDue("Wanderer", "#reprap");
+            scheduler.CheckDueReminders(now);
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual("Wanderer", replies.Channel);
+            ClassicAssert.AreEqual("Wanderer: 2 hours ago you asked me to remind you to check the print", replies.Messages[0]);
+
+            // Held: offline, never spoke, not due yet, or spoke too long ago
+            var forGhost = AddDue("Ghost", "#reprap");
+            var forLurker = AddDue("LameLurker", "#reprap");
+            var notDue = _data.AddReminder("Razor", "#reprap", "to wait", now.AddMinutes(10));
+            scheduler.CheckDueReminders(now);
+            ClassicAssert.AreEqual(0, _client.GetReplies().Messages.Count);
+            CollectionAssert.AreEquivalent(new[] { forGhost, forLurker, notDue }, _data.Reminders);
+
+            _data.Reminders.Remove(notDue);
+            AddDue("Razor", "#reprap");
+            scheduler.CheckDueReminders(now + ReminderScheduler.ActiveTime + TimeSpan.FromMinutes(1));
+            ClassicAssert.AreEqual(0, _client.GetReplies().Messages.Count);
+            ClassicAssert.AreEqual(3, _data.Reminders.Count);
+
+            _data.Reminders.Clear();
+            _client.OtherOnlineUsers.Clear();
         }
     }
 }

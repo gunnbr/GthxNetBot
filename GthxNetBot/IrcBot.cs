@@ -33,6 +33,7 @@ namespace GthxNetBot
             // dedicated scope), so we must not resolve the scoped GthxDataContext from the
             // root provider here.
             var gthx = _services.GetRequiredService<GthxBot>();
+            _services.GetRequiredService<ReminderScheduler>().Start();
 
             _exitSemaphore.Wait();
         }

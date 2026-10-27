@@ -61,6 +61,16 @@ namespace Gthx.Test.Mocks
             });
         }
 
+        /// <summary>
+        /// Users who are online but not in the channels (every channel has the same users here)
+        /// </summary>
+        public HashSet<string> OtherOnlineUsers { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        public bool IsUserOnline(string nick)
+        {
+            return OtherOnlineUsers.Contains(nick) || GetUsersInChannelAsync("#any").Result.Contains(nick, StringComparer.OrdinalIgnoreCase);
+        }
+
         #region Methods for testing
         /// <summary>
         /// Returns only the replies sent since the last time this method was called.
