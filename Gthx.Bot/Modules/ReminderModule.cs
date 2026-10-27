@@ -30,7 +30,8 @@ namespace Gthx.Bot.Modules
         private const int MaxListedMessageLength = 100;
 
         private readonly Regex _remindRegex = new(@"^\s*remind\s+me\b", RegexOptions.IgnoreCase);
-        private readonly Regex _remindInRegex = new(@$"^\s*remind\s+me\s+in\s+(?'time'{ReminderTime.Pattern})\s+(?'message'\S.*?)\s*$", RegexOptions.IgnoreCase);
+        // People often put punctuation after the time: "remind me in 7 days, it's Tuesday again!"
+        private readonly Regex _remindInRegex = new(@$"^\s*remind\s+me\s+in\s+(?'time'{ReminderTime.Pattern})(?:\s*[,:;-]\s*|\s+)(?'message'\S.*?)\s*$", RegexOptions.IgnoreCase);
         private readonly Regex _listRegex = new(@"^\s*list\s+reminders\s*\??\s*$", RegexOptions.IgnoreCase);
         private readonly Regex _cancelRegex = new(@"^\s*cancel\s+reminder\s+#?(?'id'\d{1,9})\s*$", RegexOptions.IgnoreCase);
         private readonly IGthxData _data;

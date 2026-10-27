@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Timers;
 
 namespace Gthx.Bot
@@ -33,6 +34,7 @@ namespace Gthx.Bot
         private readonly ILogger<ReminderScheduler> _logger;
         private readonly Timer _timer;
         private readonly object _checkLock = new();
+        private static readonly Regex _readsOnRegex = new(@"^(to|about|that|of)\b", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// When each nick last spoke anywhere (a channel or a private message), keyed by the nick in lower case
@@ -68,11 +70,13 @@ namespace Gthx.Bot
         }
 
         /// <summary>
-        /// Builds the message that delivers a reminder
+        /// Builds the message that delivers a reminder. "to ...", "about ...", "that ..." and "of ..." follow
+        /// "remind you" directly; anything else (such as "hey it's Tuesday again!") comes after a colon.
         /// </summary>
         public static string DeliveryMessage(Reminder reminder, IGthxUtil util, DateTime now)
         {
-            return $"{reminder.Author}: {util.TimeBetweenString(reminder.Timestamp, now)} ago you asked me to remind you {reminder.Message}";
+            var separator = _readsOnRegex.IsMatch(reminder.Message) ? " " : ": ";
+            return $"{reminder.Author}: {util.TimeBetweenString(reminder.Timestamp, now)} ago you asked me to remind you{separator}{reminder.Message}";
         }
 
         private void HandleTimer(object? sender, ElapsedEventArgs e)
