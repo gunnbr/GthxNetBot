@@ -92,6 +92,7 @@ namespace Gthx.Bot.Modules
             var remindMatch = _remindInRegex.Match(message);
             if (!remindMatch.Success || !ReminderTime.TryParse(remindMatch.Groups["time"].Value, out var time))
             {
+                _logger.LogInformation("{User} in {Channel}: couldn't read the reminder '{Message}'", user, channel, message);
                 _client.SendMessage(channel, $"{user}: Say \"remind me in <time> <message>\", such as \"remind me in 2 hours to check the print\".");
                 return true;
             }
