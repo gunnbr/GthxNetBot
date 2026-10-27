@@ -467,21 +467,23 @@ namespace GthxNetBot
         {
             if (e.User.HostName == null)
             {
-                _logger.LogInformation($"No WhoIs reply: serverinfo {e.User.ServerInfo} servername {e.User.ServerName}");
-                _logger.LogWarning("No user found from WhoIs query. Time to get our nickname back!");
-                // No reply, so get our nickname back!!
-                HandlePreferredNameAvailable();
+                // Nobody has the nickname; the 401 reply before this one already took it back
                 return;
             }
 
             _logger.LogInformation($"WhoIs response for {e.User.NickName}: {e.User.UserName}@{e.User.HostName} ({e.User.RealName})");
-            
-            // Enable the timer to check again later
-            _whoIsTimer.Enabled = true;
+
+            // Check again later, unless we already have our nickname back
+            _whoIsTimer.Enabled = _client.LocalUser.NickName != _options.Nick;
         }
 
         private void HandleWhoIsTimer(object? sender, ElapsedEventArgs e)
         {
+            if (_client.LocalUser.NickName == _options.Nick)
+            {
+                return;
+            }
+
             _logger.LogDebug("WhoIs timer expired. Querying again...");
             _client.QueryWhoIs(new List<string?> { _options.Nick });
         }
@@ -656,6 +658,15 @@ namespace GthxNetBot
                     // work for our local user.
                     _botNick.BotNick = newNick;
                 }
+            }
+            else if (e.Code == (int)IrcProtocolErrorEnum.NoSuchNick &&
+                     _botNick.BotNick != _options.Nick &&
+                     e.Parameters.Contains(_options.Nick))
+            {
+                // The WHOIS check found nobody using our preferred nickname. IrcDotNet still raises
+                // WhoIsReplyReceived afterwards with the details it cached earlier, so take it back here.
+                _logger.LogWarning("Nobody is using our preferred nickname {nick}.", _options.Nick);
+                HandlePreferredNameAvailable();
             }
             else if (e.Code == (int)IrcProtocolErrorEnum.MotdMissing)
             {

@@ -17,6 +17,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 11 | Implement new features | 🟡 |
 | 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | 🟡 |
 | 13 | Bring the documentation up to date | 🟡 |
+| 14 | Verify the database backups, and back up to the Linux PC on a schedule | ⬜ |
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
@@ -93,13 +94,14 @@ Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Conta
 - [x] One-time setup (`infra/README.md`), done 2026-10-25: resource group and bootstrap deploy, Key Vault secrets, SQL Entra admin and database user, OIDC app, GitHub variables and the `production` environment (the owner must approve each deploy).
 - [x] First deploy ([#48](https://github.com/gunnbr/GthxNetBot/pull/48), 2026-10-26). The bot connects to the home test server over TLS with SASL, reads and writes `Gthx` through its managed identity, and answers the soak traffic as quickly as it did at home.
 - [x] YouTube titles from Azure ([#50](https://github.com/gunnbr/GthxNetBot/pull/50)): YouTube serves the Azure host a page whose `<title>` is empty, so new links got "unknown title". The bot now asks YouTube's oEmbed endpoint first, and the page parsing skips empty titles and no longer captures the rest of the page.
+- [x] **Taking the nick back when the old copy quits unseen** ([#65](https://github.com/gunnbr/GthxNetBot/pull/65), 2026-10-27). At the Libera cutover the old copy was only in `#gthxtestchannel`, which the new copy never joined, so the new copy didn't see its QUIT and stayed `gthx_`. Its 2-minute WHOIS check got 401 "No such nick", but IrcDotNet then raised its WHOIS-reply event with the details cached from the first check, so the bot thought the nick was still taken. The bot now takes the nick back on that 401, and stops the WHOIS checks once it has it. Verified on the test server with a client holding the nick from outside every channel.
 - [x] Nick handoff during deploys ([#51](https://github.com/gunnbr/GthxNetBot/pull/51)): Container Apps starts the new copy before it stops the old one, so the new copy comes up as `gthx_`. It used to take `gthx` back only at its 2-minute WHOIS check, and the old copy was killed without quitting. Now the old copy quits IRC on SIGTERM, and the new one reclaims the nick as soon as it sees the QUIT. On #51's own deploy the new copy had `gthx` back 20 s after starting, the moment the old copy disconnected.
 - [ ] **Switch to Libera** (next; the ban was lifted on 2026-10-26):
   1. ✅ Stop the `soaktraffic` container, so test traffic doesn't land in the production data (stopped 2026-10-27; its last hour had every request answered, median 0.08 s).
-  2. Decide on the database (the `GthxTest` item below).
-  3. In `infra/main.bicepparam` (done in [#64](https://github.com/gunnbr/GthxNetBot/pull/64)) set `ircChannels` to `#reprap,#mobious,#smoothieware,#gthxtest,#dlp3dprinting,#slic3r,#siderala,#reprap.de` (`#bigdelta` dropped: the channel is long dead) and `useTrustedCa = false`.
-  4. Set the Key Vault secrets `irc-server` to `irc.libera.chat` and `irc-sasl-password` to the Libera NickServ password for `gthx`.
-  5. Deploy (a PR with the bicepparam change, then approve the deploy), and check with `scripts/gthx-logs` that the bot logs in with SASL and joins every channel.
+  2. ✅ Database: keep `Gthx` as it is, with the testing changes (decided 2026-10-27).
+  3. ✅ In `infra/main.bicepparam` (done in [#64](https://github.com/gunnbr/GthxNetBot/pull/64)) set `ircChannels` to `#reprap,#mobious,#smoothieware,#gthxtest,#dlp3dprinting,#slic3r,#siderala,#reprap.de` (`#bigdelta` dropped: the channel is long dead) and `useTrustedCa = false`.
+  4. ✅ Set the Key Vault secrets `irc-server` to `irc.libera.chat` and `irc-sasl-password` to the Libera NickServ password for `gthx`.
+  5. ✅ Deploy (a PR with the bicepparam change, then approve the deploy), and check with `scripts/gthx-logs` that the bot logs in with SASL and joins every channel. Deployed 2026-10-27 04:24 UTC: SASL login on Libera and all eight channels joined, answering in `#reprap`. It came up as `gthx_` and didn't take `gthx` back (fixed below).
   6. Retire `gthx2.26` (keep a backup of its image), and later delete `GthxTest`.
 - [x] Error emails from Azure ([#53](https://github.com/gunnbr/GthxNetBot/pull/53), 2026-10-26): `enableEmail = true`, with the mail settings in the `email-*` Key Vault secrets (copied from `gthx2.26`). Warnings and errors are emailed, including the deliberate one on every startup.
 - [x] Batched error emails and a quieter deploy ([#54](https://github.com/gunnbr/GthxNetBot/pull/54)): `Serilog.Sinks.Email` 4.x sent one email per line, where the 2.x sink batched them; the sink now batches for up to 10 seconds in the old line format. Also dropped the "Couldn't quit IRC cleanly" warning that appeared on deploys when the server closed the connection before `Quit()` finished.
@@ -184,6 +186,14 @@ Requests from GitHub issues:
 - [x] **README.md rewritten** (2026-10-26). It now says what the bot does and lists its commands and link types, how production runs (Azure, deploys, version numbers, logs, reconnect waits), the repository layout, building and testing, running locally (Compose, console mode, the test bot, soak traffic, Aspire), a configuration reference and how to make changes. The old TODO list was out of date (#29 was fixed in 2.24, the lurkers module exists and actions update "seen"); the CTCP item moved to phase 11. The "Why C#?" section was removed later as no longer relevant.
 - [x] Update the documentation ([#28](https://github.com/gunnbr/GthxNetBot/issues/28)): closed as complete on 2026-10-26; the README covers setting up the database and the ways to configure the bot.
 - [ ] Gthx.Data's README: fix the migration instructions (see phase 12).
+
+## 14. Backups — ⬜
+The data is in the Azure SQL database `Gthx` (Basic tier). Azure keeps automatic backups, but nobody has checked what they cover or tried a restore, and there's no copy outside Azure.
+- [ ] Find out what Azure keeps for `Gthx`: point-in-time restore retention (7 days by default on Basic), whether long-term retention is set, and the backup storage redundancy.
+- [ ] Test a restore: a point-in-time restore to a throwaway database, compare its row counts with `Gthx`, then delete it.
+- [ ] Back up to the Linux PC on a schedule: for example a nightly `systemd` timer that exports `Gthx` (a `.bacpac` with SqlPackage, which holds the schema and the data) into a local folder, keeps the last few weeks, and reports failures. Decide how it signs in (an Entra identity rather than the SQL admin login, so it keeps working after phase 9's Entra-only change) and how often to run it.
+- [ ] Test restoring a local backup into the local SQL Server container, and write down the restore steps (both from Azure and from a local backup) in `infra/README.md`.
+- [ ] Before retiring `gthx2.26`, keep a copy of its image and of `GthxTest` (or confirm that a local backup of `Gthx` covers it).
 
 ---
 _Last updated: 2026-10-27_
