@@ -97,7 +97,7 @@ Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Conta
 - [ ] **Switch to Libera** (next; the ban was lifted on 2026-10-26):
   1. ✅ Stop the `soaktraffic` container, so test traffic doesn't land in the production data (stopped 2026-10-27; its last hour had every request answered, median 0.08 s).
   2. Decide on the database (the `GthxTest` item below).
-  3. In `infra/main.bicepparam` (done in the cutover PR) set `ircChannels` to `#reprap,#bigdelta,#mobious,#smoothieware,#gthxtest,#dlp3dprinting,#slic3r,#siderala,#reprap.de` and `useTrustedCa = false`.
+  3. In `infra/main.bicepparam` (done in [#64](https://github.com/gunnbr/GthxNetBot/pull/64)) set `ircChannels` to `#reprap,#mobious,#smoothieware,#gthxtest,#dlp3dprinting,#slic3r,#siderala,#reprap.de` (`#bigdelta` dropped: the channel is long dead) and `useTrustedCa = false`.
   4. Set the Key Vault secrets `irc-server` to `irc.libera.chat` and `irc-sasl-password` to the Libera NickServ password for `gthx`.
   5. Deploy (a PR with the bicepparam change, then approve the deploy), and check with `scripts/gthx-logs` that the bot logs in with SASL and joins every channel.
   6. Retire `gthx2.26` (keep a backup of its image), and later delete `GthxTest`.
