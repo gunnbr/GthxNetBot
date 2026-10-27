@@ -19,6 +19,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 13 | Bring the documentation up to date | 🟡 |
 | 14 | Verify the database backups, and back up to the Linux PC on a schedule | ⬜ |
 | 15 | Clean up the old branches in this repo | ⬜ |
+| 16 | Move othx to Azure | ⬜ |
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
@@ -202,6 +203,22 @@ Look through the branches still on GitHub, keep anything useful, and delete the 
 - [ ] **One commit not in `master`, from merged PRs**: `docs/roadmap-progress` (#52) and `feature/enable-email` (#53). Check that the commit's changes reached `master` some other way.
 - [ ] **`TcpKeepAlive`** (2022-05-30): 9 commits not in `master` and no PR. Probably superseded by the TCP keepalive in the IrcDotNet fork ([#25](https://github.com/gunnbr/GthxNetBot/issues/25) is fixed), but look for anything else worth keeping.
 - [ ] Turn on "Automatically delete head branches" in the repository settings, so merged PR branches don't pile up again. Do the same for `gunnbr/GthxNetData` and `gunnbr/IrcDotNet`.
+
+## 16. Move othx to Azure — ⬜
+`othx` is the same bot for the OpenSCAD channels (`#openscad`, `#othxtest`; real name "OpenSCAD Factoid Bot"). It still runs the 2022 release as the Docker container `othx2.26` on sakura, with its data in the MariaDB database `othxnet` on sakura. It has been stopped since 2026-10-24, when the Libera ban started. The new release only supports SQL Server (phase 1), so the data has to move before othx can run the new build.
+
+Decisions to make first:
+- [ ] **Until the move:** restart `othx2.26` as it is (it still works with MariaDB, now that the ban is lifted), or leave othx off Libera until it runs in Azure.
+- [ ] **Where the data goes:** a new database (for example `Othx`) on the existing `gthxdb` server (Basic tier, about $5/month), or something else.
+- [ ] **How to copy it:** create the schema with the bot's EF migrations, then copy the rows from MariaDB (a one-off script, or a tool such as SQL Server Migration Assistant for MySQL); check that the row counts match and that text survives (character sets).
+- [ ] **How to run it:** a second Container App in the same environment, with its own settings, sharing the registry, Key Vault, logs and managed identity (or its own identity); and whether `infra/main.bicep` becomes one template per bot or one template for both.
+- [ ] **Deploys:** whether each push to `master` deploys both bots (with one approval or two).
+- [ ] **Secrets:** othx's NickServ password in Key Vault (the old container uses `IrcInfo:Password`; the new build uses it for SASL if `SaslPassword` isn't set), and whether othx sends its own error emails.
+- [ ] **Cost:** the extra container and database, and whether the budgets change.
+
+Then:
+- [ ] Copy the data, deploy othx, and check it on Libera (SASL, both channels, existing factoids).
+- [ ] Retire `othx2.26` (save its image and settings as for `gthx2.26`), back up `othxnet`, then turn off MariaDB on sakura.
 
 ---
 _Last updated: 2026-10-27_
