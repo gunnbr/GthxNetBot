@@ -18,6 +18,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | 🟡 |
 | 13 | Bring the documentation up to date | 🟡 |
 | 14 | Verify the database backups, and back up to the Linux PC on a schedule | ⬜ |
+| 15 | Clean up the old branches in this repo | ⬜ |
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
@@ -194,6 +195,13 @@ The data is in the Azure SQL database `Gthx` (Basic tier). Azure keeps automatic
 - [ ] Back up to the Linux PC on a schedule: for example a nightly `systemd` timer that exports `Gthx` (a `.bacpac` with SqlPackage, which holds the schema and the data) into a local folder, keeps the last few weeks, and reports failures. Decide how it signs in (an Entra identity rather than the SQL admin login, so it keeps working after phase 9's Entra-only change) and how often to run it.
 - [ ] Test restoring a local backup into the local SQL Server container, and write down the restore steps (both from Azure and from a local backup) in `infra/README.md`.
 - [ ] Before retiring `gthx2.26`, keep a copy of its image and of `GthxTest` (or confirm that a local backup of `Gthx` covers it).
+
+## 15. Old branches — ⬜
+Look through the branches still on GitHub, keep anything useful, and delete the rest. As of 2026-10-27 (besides `master`):
+- [ ] **No commits that aren't in `master`** (so they look safe to delete; check nothing else refers to them): `AddIdMigration`, `DependencyInjection`, `net5`, `docs/readme` (#62), `feature/modernize` (#35), `feature/sasl-support` (#40), `fixinitlogging` (#32), `issue16` (#21), `issue17` (#20), `issue18` (#19).
+- [ ] **One commit not in `master`, from merged PRs**: `docs/roadmap-progress` (#52) and `feature/enable-email` (#53). Check that the commit's changes reached `master` some other way.
+- [ ] **`TcpKeepAlive`** (2022-05-30): 9 commits not in `master` and no PR. Probably superseded by the TCP keepalive in the IrcDotNet fork ([#25](https://github.com/gunnbr/GthxNetBot/issues/25) is fixed), but look for anything else worth keeping.
+- [ ] Turn on "Automatically delete head branches" in the repository settings, so merged PR branches don't pile up again. Do the same for `gunnbr/GthxNetData` and `gunnbr/IrcDotNet`.
 
 ---
 _Last updated: 2026-10-27_
