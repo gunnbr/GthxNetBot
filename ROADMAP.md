@@ -16,6 +16,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 10 | Fix reported bugs | 🟡 |
 | 11 | Implement new features | 🟡 |
 | 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | 🟡 |
+| 13 | Bring the documentation up to date | 🟡 |
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
 
@@ -163,7 +164,7 @@ Requests from GitHub issues:
 - [ ] Relax the format for piping factoids to a user ([#33](https://github.com/gunnbr/GthxNetBot/issues/33)): make the `?`/`!` and the spaces in `foo? | bar` optional.
 - [ ] `!remindme <in time> <message>` ([#30](https://github.com/gunnbr/GthxNetBot/issues/30)).
 - [ ] Email the admin when certain keywords are said ([#4](https://github.com/gunnbr/GthxNetBot/issues/4)).
-- [ ] Update the documentation ([#28](https://github.com/gunnbr/GthxNetBot/issues/28)): setting up the database, and the ways to configure the bot.
+- [ ] Handle more CTCP requests, perhaps by switching from `IrcClient` to IrcDotNet's `CtcpClient`, which handles them itself (from the old README's TODO list).
 
 ## 12. Gthx.Data repository — 🟡
 `Gthx.Data` is a submodule from its own repository, [gunnbr/GthxNetData](https://github.com/gunnbr/GthxNetData), so its packages, workflows and settings are looked after there.
@@ -174,6 +175,11 @@ Requests from GitHub issues:
 - [ ] Repository settings: Dependabot security updates are on; turn on secret scanning and push protection.
 - [ ] Adding a migration with the README's `dotnet ef migrations add` command fails: the tools look for `SqlServerMigrations.dll` in Gthx.Data's output folder, but that project builds into `Gthx.Data/bin`. It only worked when an old copy happened to be there. Also, most projects in both repos build into one shared `bin/` folder at the GthxNetBot root, so stale files from older builds get mixed in (an EF Core Design DLL from 10.0.13, and `Serilog.AspNetCore` from the test project, which breaks `dotnet run` of the bot). For `AddPrintablesAndMakerWorldRefs`: delete `bin/`, build `Gthx.Data.sln`, copy `Gthx.Data/bin/Debug/net10.0/SqlServerMigrations.dll` into `bin/Debug/net10.0/`, then run the README command with the EF Core 10 tools. Fix: give each project its own output folder, and make the migrations project the startup project for the tools.
 - [ ] The README says the data component is shared with the gthx website; check whether the website still uses it before changing the schema.
+
+## 13. Documentation — 🟡
+- [x] **README.md rewritten** (2026-10-26). It now says what the bot does and lists its commands and link types, how production runs (Azure, deploys, version numbers, logs, reconnect waits), the repository layout, building and testing, running locally (Compose, console mode, the test bot, soak traffic, Aspire), a configuration reference and how to make changes. The old TODO list was out of date (#29 was fixed in 2.24, the lurkers module exists and actions update "seen"); the CTCP item moved to phase 11.
+- [ ] Update the documentation ([#28](https://github.com/gunnbr/GthxNetBot/issues/28)): setting up the database, and the ways to configure the bot. The README now covers both briefly; close #28 once it's reviewed, or add more.
+- [ ] Gthx.Data's README: fix the migration instructions (see phase 12).
 
 ---
 _Last updated: 2026-10-26_
