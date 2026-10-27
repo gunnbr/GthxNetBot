@@ -763,6 +763,11 @@ namespace GthxNetBot
             return Task.FromResult(users);
         }
 
+        public bool IsUserOnline(string nick)
+        {
+            return _client.Channels.Any(c => c.Users.Any(u => string.Equals(u.User.NickName, nick, StringComparison.OrdinalIgnoreCase)));
+        }
+
         /// <summary>
         /// Sends a message from gthxbot to the IRC server
         /// </summary>

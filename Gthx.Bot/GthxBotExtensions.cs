@@ -12,8 +12,13 @@ namespace Gthx.Bot
         /// </summary>
         public static IServiceCollection AddGthxBot(this IServiceCollection services)
         {
+            services.TryAddSingleton<ReminderScheduler>();
+
             services.TryAddEnumerable(new[]
             {
+                // First, so it sees every message: it notes who's around and delivers held reminders.
+                ServiceDescriptor.Scoped<IGthxModule, ReminderModule>(),
+
                 // This group of commands shouldn't have any
                 // YouTube or Thingiverse links embedded, so they're safe
                 // to process first, before the link handling modules.

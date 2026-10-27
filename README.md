@@ -3,8 +3,8 @@
 [![Build and deploy to Azure](https://github.com/gunnbr/GthxNetBot/actions/workflows/deploy.yml/badge.svg?branch=master)](https://github.com/gunnbr/GthxNetBot/actions/workflows/deploy.yml)
 
 gthx is an IRC bot for the RepRap and 3D printing channels on Libera (`#reprap` and others). It remembers
-factoids ("extruder is the part that pushes the plastic"), passes messages on, tells you when someone was
-last seen, and counts how often YouTube, Thingiverse, Printables and MakerWorld links come up.
+factoids ("extruder is the part that pushes the plastic"), passes messages on, reminds you of things,
+tells you when someone was last seen, and counts how often YouTube, Thingiverse, Printables and MakerWorld links come up.
 
 This is gthx rewritten in C# (.NET 10) from the original Python. It runs in Azure Container Apps and is
 deployed from this repository. [ROADMAP.md](ROADMAP.md) has the current plans and status, and
@@ -24,6 +24,9 @@ need to, but it does no harm. Some commands work without addressing the bot, as 
 | `gthx: forget extruder` | Forgets a factoid. |
 | `info extruder` | How often the factoid was asked for, and who set or deleted it when. |
 | `gthx: tell someuser the parts arrived` | Passes the message on the next time `someuser` says something. |
+| `gthx: remind me in 2 hours to check the print` | Reminds you later (see below). |
+| `gthx: list reminders` | Your reminders that haven't come due, with their numbers. |
+| `gthx: cancel reminder 42` | Cancels one of your reminders. |
 | `seen someuser?` | When and where `someuser` last spoke, and what they said. Not updated by private messages. |
 | `gthx: google pla temperature for someuser` | Gives `someuser` a search link. |
 | `status?` | The bot's version, uptime and mood. |
@@ -32,6 +35,13 @@ need to, but it does no harm. Some commands work without addressing the bot, as 
 A factoid value can start with `<reply>` (the bot says just the rest) or `<action>` (the bot does it as a
 `/me` action), and `!who` and `!channel` in it are replaced by the asker's nick and the channel. Some
 factoids are locked and can't be changed or forgotten.
+
+A reminder's time is relative: `30 minutes`, `an hour`, `2h`, `1h30m`, `1 day and 3 hours`, `2 weeks`
+(units are minutes, hours, days, weeks, months and years; a month is 30 days), from a minute to a year ahead. Each nick can have 10 waiting,
+of up to 400 characters each. When one comes due, the bot posts it right away if you've said something
+in the last 5 minutes and are still online (in the channel you asked in, or by private message if you've
+left it). Otherwise it waits and reminds you the next time you speak. Reminders are kept in the database,
+so they survive restarts.
 
 When someone posts a link, the bot replies with its title and how many times it has been linked:
 

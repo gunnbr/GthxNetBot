@@ -31,6 +31,14 @@ namespace Gthx.Bot.Interfaces
         public Task<List<string>> GetUsersInChannelAsync(string channel);
 
         /// <summary>
+        /// Whether a user is still online, as far as the bot can tell: they're in a channel the bot is in.
+        /// (The server only tells the bot that someone quit when they share a channel.)
+        /// </summary>
+        /// <param name="nick">Nick of the user</param>
+        /// <returns>True if the user is in any channel the bot is in</returns>
+        public bool IsUserOnline(string nick);
+
+        /// <summary>
         /// UTC DateTime that the IrcClient was started
         /// </summary>
         public DateTime StartupTime { get; }

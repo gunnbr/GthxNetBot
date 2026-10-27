@@ -26,7 +26,8 @@ namespace Gthx.Test.Mocks
 
         public DateTime StartupTime => DateTime.UtcNow;
 
-        public event EventHandler BotNickChangedEvent;
+        // The mock's nick never changes, so nothing is ever raised.
+        public event EventHandler BotNickChangedEvent { add { } remove { } }
 
         public bool SendAction(string channel, string action)
         {
@@ -59,6 +60,16 @@ namespace Gthx.Test.Mocks
                 };
                 return users;
             });
+        }
+
+        /// <summary>
+        /// Users who are online but not in the channels (every channel has the same users here)
+        /// </summary>
+        public HashSet<string> OtherOnlineUsers { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        public bool IsUserOnline(string nick)
+        {
+            return OtherOnlineUsers.Contains(nick) || GetUsersInChannelAsync("#any").Result.Contains(nick, StringComparer.OrdinalIgnoreCase);
         }
 
         #region Methods for testing

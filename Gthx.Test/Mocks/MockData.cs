@@ -2,6 +2,7 @@
 using Gthx.Data;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Gthx.Test.Mocks
 {
@@ -337,6 +338,59 @@ namespace Gthx.Test.Mocks
             FactoidGotten = null;
             FactoidUser = null;
             FactoidValue = null;
+        }
+
+        /// <summary>
+        /// Reminders kept in memory, so tests can set them up and check them
+        /// </summary>
+        public List<Reminder> Reminders { get; } = new List<Reminder>();
+        private int _nextReminderId = 1;
+
+        public Reminder AddReminder(string author, string channel, string message, DateTime due)
+        {
+            var reminder = new Reminder()
+            {
+                Id = _nextReminderId++,
+                Author = author,
+                Channel = channel,
+                Message = message,
+                Timestamp = DateTime.UtcNow,
+                DueTimestamp = due
+            };
+            Reminders.Add(reminder);
+            return reminder;
+        }
+
+        public List<Reminder> GetReminders(string author)
+        {
+            return Reminders.Where(r => IsAuthor(r, author)).OrderBy(r => r.DueTimestamp).ToList();
+        }
+
+        public bool CancelReminder(string author, int id)
+        {
+            return Reminders.RemoveAll(r => r.Id == id && IsAuthor(r, author)) > 0;
+        }
+
+        public List<Reminder> GetDueReminders(DateTime now)
+        {
+            return Reminders.Where(r => r.DueTimestamp <= now).OrderBy(r => r.DueTimestamp).ToList();
+        }
+
+        public List<Reminder> TakeDueReminders(string author, DateTime now)
+        {
+            var reminders = GetDueReminders(now).Where(r => IsAuthor(r, author)).ToList();
+            Reminders.RemoveAll(reminders.Contains);
+            return reminders;
+        }
+
+        public bool DeleteReminder(int id)
+        {
+            return Reminders.RemoveAll(r => r.Id == id) > 0;
+        }
+
+        private static bool IsAuthor(Reminder reminder, string author)
+        {
+            return string.Equals(reminder.Author, author, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

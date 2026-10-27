@@ -37,6 +37,12 @@ namespace GthxNetBot
             });
         }
 
+        public bool IsUserOnline(string nick)
+        {
+            // Everyone typing at the console is "online".
+            return true;
+        }
+
         public bool SendMessage(string channel, string message)
         {
             Console.WriteLine($"{channel}: {_botNick.BotNick}> {message}");

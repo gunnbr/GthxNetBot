@@ -244,6 +244,51 @@ namespace Gthx.Test
         }
 
         [Test]
+        public void GthxData_TestReminders()
+        {
+            var author = "reminderUser";
+            var channel = "#reprap";
+            var now = DateTime.UtcNow;
+
+            ClassicAssert.AreEqual(0, _Data.GetReminders(author).Count, "Reminders exist at the start of the test");
+
+            var later = _Data.AddReminder(author, channel, "to do it later", now.AddHours(2));
+            var soon = _Data.AddReminder(author, channel, "to do it soon", now.AddMinutes(-1));
+            var other = _Data.AddReminder("otherReminderUser", channel, "to do their thing", now.AddMinutes(-2));
+            ClassicAssert.AreNotEqual(0, later.Id);
+
+            // Nicks are matched without regard to case
+            var reminders = _Data.GetReminders(author.ToUpperInvariant());
+            CollectionAssert.AreEqual(new[] { soon.Id, later.Id }, reminders.Select(r => r.Id).ToList(), "Not sorted by due time");
+            ClassicAssert.AreEqual("to do it soon", reminders[0].Message);
+            ClassicAssert.AreEqual(channel, reminders[0].Channel);
+
+            var due = _Data.GetDueReminders(now).Select(r => r.Id).ToList();
+            CollectionAssert.Contains(due, soon.Id);
+            CollectionAssert.Contains(due, other.Id);
+            CollectionAssert.DoesNotContain(due, later.Id);
+
+            // Only the author can cancel a reminder
+            ClassicAssert.IsFalse(_Data.CancelReminder(author, other.Id));
+            ClassicAssert.IsTrue(_Data.CancelReminder(author, later.Id));
+            ClassicAssert.IsFalse(_Data.CancelReminder(author, later.Id));
+
+            var taken = _Data.TakeDueReminders(author, now);
+            CollectionAssert.AreEqual(new[] { soon.Id }, taken.Select(r => r.Id).ToList());
+            ClassicAssert.AreEqual(0, _Data.GetReminders(author).Count, "Reminders still exist after being taken");
+
+            // The timer and the message handling use separate contexts: only one of them gets to deliver it.
+            using (var scope = _host.Services.CreateScope())
+            {
+                var otherData = new GthxSqlData(scope.ServiceProvider.GetRequiredService<GthxDataContext>());
+                ClassicAssert.AreEqual(1, otherData.GetDueReminders(now).Count(r => r.Id == other.Id));
+                ClassicAssert.IsTrue(_Data.DeleteReminder(other.Id));
+                ClassicAssert.IsFalse(otherData.DeleteReminder(other.Id));
+            }
+            ClassicAssert.IsFalse(_Data.DeleteReminder(other.Id));
+        }
+
+        [Test]
         public void GthxData_TestSeenRequests()
         {
             var testChannel = "#reprap";
