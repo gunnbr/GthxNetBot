@@ -38,7 +38,7 @@ When someone posts a link, the bot replies with its title and how many times it 
 | Site | Example link | Title from |
 |---|---|---|
 | YouTube | `https://youtu.be/<id>`, `https://www.youtube.com/watch?v=<id>` | YouTube's oEmbed API |
-| Thingiverse | `https://www.thingiverse.com/thing:<number>` | The page. thingiverse.com currently refuses the bot's requests ([#39](https://github.com/gunnbr/GthxNetBot/issues/39)), so the reply leaves out the title. |
+| Thingiverse | `https://www.thingiverse.com/thing:<number>` | Not fetched: thingiverse.com refuses the bot's requests, and its API's license terms aren't acceptable ([#39](https://github.com/gunnbr/GthxNetBot/issues/39)). The reply gives the thing's number, or a title saved before. |
 | Printables | `https://www.printables.com/model/1863827-heavy-duty-keyboard-holder` | The name at the end of the link, or from an earlier link to the same model |
 | MakerWorld | `https://makerworld.com/en/models/2459711-articulated-dragon` | The same as Printables |
 
@@ -67,7 +67,7 @@ When someone posts a link, the bot replies with its title and how many times it 
 | `GthxNetBot` | The program: configuration, logging, the IRC connection (`GthxIrcClient`) and the console test mode. |
 | `Gthx.Bot` | The bot itself. Each command or link type is a module in `Gthx.Bot/Modules`. |
 | `Gthx.Data` | Submodule: the database code and migrations, from [gunnbr/GthxNetData](https://github.com/gunnbr/GthxNetData). |
-| `IrcDotNet` | Submodule: [gunnbr's fork of IrcDotNet](https://github.com/gunnbr/IrcDotNet), with SASL, TCP keepalive and other fixes. |
+| `IrcDotNet` | Submodule: [gunnbr's fork of IrcDotNet](https://github.com/gunnbr/IrcDotNet), with SASL, TCP keepalive and other fixes. The original project is no longer maintained. |
 | `Gthx.Test` | NUnit tests. |
 | `GthxNetBot.AppHost` | .NET Aspire host for running the bot with a SQL Server container from Visual Studio. |
 | `infra` | The Azure deployment (Bicep) and its setup script. |
@@ -165,11 +165,3 @@ Settings come from `GthxNetBot/appsettings.json`, overridden by environment vari
   package, GitHub Actions and `Gthx.Data` updates.
 - **Secrets** (`*.env` files, `testing/services/anope.env`, the TLS keys in `testing/tls/out`) are ignored by
   git. Never commit them.
-
-## Why C#?
-
-- Gthx was originally created to handle Unicode properly, and Unicode is a real pain in Python (or at least
-  Python 2 certainly is!).
-- C# is my main language for daily coding, so I can make changes much faster.
-- It's easy to deploy .NET apps to Azure.
-- Gthx replaced the bot it used to track, so the bot-tracking code no longer needed to exist.

@@ -633,7 +633,7 @@ namespace Gthx.Test
         }
 
         [Test]
-        public async Task TestThingiverseReferences()
+        public void TestThingiverseReferences()
         {
             var testChannel = "#reprap";
             var testUser = "BobYourUncle";
@@ -651,47 +651,20 @@ namespace Gthx.Test
             ClassicAssert.AreEqual(testChannel, replies.Channel);
             ClassicAssert.AreEqual($"{testUser} linked to \"Flexifish 🦈🌊\" on thingiverse => 23 IRC mentions", replies.Messages[0]);
 
-            // Test fetching a new title that uses the <title> element
+            // Without a stored title the bot doesn't fetch one (#39): thingiverse.com refuses the bot's requests
             testUser = "RandomNick";
             _gthx.HandleReceivedMessage(testChannel, testUser, $"Your daughter would really like this: https://www.thingiverse.com/thing:2810756");
-            await Task.Delay(500);
             replies = _client.GetReplies();
             ClassicAssert.AreEqual(1, replies.Messages.Count);
             ClassicAssert.AreEqual(testChannel, replies.Channel);
-            ClassicAssert.AreEqual($"{testUser} linked to \"Articulated Butterfly\" on thingiverse => 1 IRC mentions", replies.Messages[0]);
+            ClassicAssert.AreEqual($"{testUser} linked to thing 2810756 on thingiverse => 1 IRC mentions", replies.Messages[0]);
+            ClassicAssert.IsNull(_data.AddedThingiverseTitle);
 
-            // Test fetching a new title that uses the <meta> element for the title
-            testUser = "AnotherNick";
-            _gthx.HandleReceivedMessage(testChannel, testUser, $"Or this one: https://www.thingiverse.com/thing:2818955");
-            await Task.Delay(500);
-            replies = _client.GetReplies();
-            ClassicAssert.AreEqual(1, replies.Messages.Count);
-            ClassicAssert.AreEqual(testChannel, replies.Channel);
-            ClassicAssert.AreEqual($"{testUser} linked to \"Articulated Slug\" on thingiverse => 1 IRC mentions", replies.Messages[0]);
-
-            // Test message when no title is found
-            testUser = "AnotherNick";
-            _gthx.HandleReceivedMessage(testChannel, testUser, $"Does thie one work for you? https://www.thingiverse.com/thing:4052802");
-            await Task.Delay(500);
-            replies = _client.GetReplies();
-            ClassicAssert.AreEqual(1, replies.Messages.Count);
-            ClassicAssert.AreEqual(testChannel, replies.Channel);
-            ClassicAssert.AreEqual($"{testUser} linked to thing 4052802 on thingiverse => 1 IRC mentions", replies.Messages[0]);
-
-            // A look-alike host isn't Thingiverse, so the bot doesn't fetch it
+            // A look-alike host isn't Thingiverse
             testUser = "Phisher";
             _gthx.HandleReceivedMessage(testChannel, testUser, $"Free stuff: https://wwwXthingiverse.com/thing:2810756");
-            await Task.Delay(500);
             replies = _client.GetReplies();
             ClassicAssert.AreEqual(0, replies.Messages.Count);
-
-            // Issue #39: when thingiverse.com refuses the request, reply without the title instead of not at all
-            testUser = "Blocked";
-            _gthx.HandleReceivedMessage(testChannel, testUser, $"Can you see this? https://www.thingiverse.com/thing:4030403");
-            await Task.Delay(500);
-            replies = _client.GetReplies();
-            ClassicAssert.AreEqual(1, replies.Messages.Count);
-            ClassicAssert.AreEqual($"{testUser} linked to thing 4030403 on thingiverse => 1 IRC mentions", replies.Messages[0]);
         }
 
         [Test]
