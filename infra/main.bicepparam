@@ -6,7 +6,7 @@ param deployApp = bool(readEnvironmentVariable('DEPLOY_APP', 'true'))
 param vaultAdminPrincipalId = readEnvironmentVariable('VAULT_ADMIN_PRINCIPAL_ID', '')
 param budgetContactEmail = readEnvironmentVariable('BUDGET_CONTACT_EMAIL', '')
 
-// The server is the Key Vault secret irc-server (irc.libera.chat). To point the bot at a test server with a
+// The server is the Key Vault secret irc-server. To point the bot at a test server with a
 // private certificate, set useTrustedCa = true and put its CA in the secret irc-trusted-ca.
 param ircChannels = '#reprap,#mobious,#smoothieware,#gthxtest,#dlp3dprinting,#slic3r,#siderala,#reprap.de'
 param useTrustedCa = false
