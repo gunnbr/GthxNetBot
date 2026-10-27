@@ -95,9 +95,9 @@ Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Conta
 - [x] YouTube titles from Azure ([#50](https://github.com/gunnbr/GthxNetBot/pull/50)): YouTube serves the Azure host a page whose `<title>` is empty, so new links got "unknown title". The bot now asks YouTube's oEmbed endpoint first, and the page parsing skips empty titles and no longer captures the rest of the page.
 - [x] Nick handoff during deploys ([#51](https://github.com/gunnbr/GthxNetBot/pull/51)): Container Apps starts the new copy before it stops the old one, so the new copy comes up as `gthx_`. It used to take `gthx` back only at its 2-minute WHOIS check, and the old copy was killed without quitting. Now the old copy quits IRC on SIGTERM, and the new one reclaims the nick as soon as it sees the QUIT. On #51's own deploy the new copy had `gthx` back 20 s after starting, the moment the old copy disconnected.
 - [ ] **Switch to Libera** (next; the ban was lifted on 2026-10-26):
-  1. Stop the `soaktraffic` container, so test traffic doesn't land in the production data.
+  1. ✅ Stop the `soaktraffic` container, so test traffic doesn't land in the production data (stopped 2026-10-27; its last hour had every request answered, median 0.08 s).
   2. Decide on the database (the `GthxTest` item below).
-  3. In `infra/main.bicepparam` set `ircChannels` to `#reprap,#bigdelta,#mobious,#smoothieware,#gthxtest,#dlp3dprinting,#slic3r,#siderala,#reprap.de` and `useTrustedCa = false`.
+  3. In `infra/main.bicepparam` (done in the cutover PR) set `ircChannels` to `#reprap,#bigdelta,#mobious,#smoothieware,#gthxtest,#dlp3dprinting,#slic3r,#siderala,#reprap.de` and `useTrustedCa = false`.
   4. Set the Key Vault secrets `irc-server` to `irc.libera.chat` and `irc-sasl-password` to the Libera NickServ password for `gthx`.
   5. Deploy (a PR with the bicepparam change, then approve the deploy), and check with `scripts/gthx-logs` that the bot logs in with SASL and joins every channel.
   6. Retire `gthx2.26` (keep a backup of its image), and later delete `GthxTest`.
@@ -186,4 +186,4 @@ Requests from GitHub issues:
 - [ ] Gthx.Data's README: fix the migration instructions (see phase 12).
 
 ---
-_Last updated: 2026-10-26_
+_Last updated: 2026-10-27_

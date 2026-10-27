@@ -6,10 +6,10 @@ param deployApp = bool(readEnvironmentVariable('DEPLOY_APP', 'true'))
 param vaultAdminPrincipalId = readEnvironmentVariable('VAULT_ADMIN_PRINCIPAL_ID', '')
 param budgetContactEmail = readEnvironmentVariable('BUDGET_CONTACT_EMAIL', '')
 
-// Until Libera lifts the ban, the bot connects to the home test server (its name is the Key Vault secret
-// irc-server), whose certificate comes from the private CA in testing/tls/.
-param ircChannels = '#gthxtestchannel'
-param useTrustedCa = true
+// The server is the Key Vault secret irc-server (irc.libera.chat). To point the bot at a test server with a
+// private certificate, set useTrustedCa = true and put its CA in the secret irc-trusted-ca.
+param ircChannels = '#reprap,#bigdelta,#mobious,#smoothieware,#gthxtest,#dlp3dprinting,#slic3r,#siderala,#reprap.de'
+param useTrustedCa = false
 
 // Warnings and errors are emailed. The mail settings are the Key Vault secrets email-*.
 param enableEmail = true
