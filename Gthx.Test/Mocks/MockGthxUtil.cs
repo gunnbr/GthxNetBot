@@ -12,7 +12,6 @@ namespace Gthx.Test.Mocks
             ["https://www.youtube.com/watch?v=I7nVrT00ST4"] = "Pro Riders Laughing",
             ["https://www.youtube.com/watch?v=RE9gtTLZ5Ic"] = "BEST Japanese Fried Rice Recipe (焼き飯 - Yakimeshi)",
             ["https://www.youtube.com/watch?v=qFoNGyFrjl4"] = "2022 Weekly Beats Week 2: Forest Adventure",
-            ["https://www.thingiverse.com/thing:2810756"] = "Articulated Butterfly by 8ran"
         };
 
         public string TimeBetweenString(DateTime? firstTime, DateTime? secondTime = null)

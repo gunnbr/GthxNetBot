@@ -31,11 +31,6 @@ namespace Gthx.Test.Mocks
 
                     dataString = utf8Encoding.GetBytes(@"{""title"":""oEmbed Title & \""Quotes\"""",""type"":""video""}");
                 }
-                else if (url.EndsWith(":4030403"))
-                {
-                    // thingiverse.com answers the bot with 403 Forbidden (#39)
-                    throw new HttpRequestException("Response status code does not indicate success: 403 (Forbidden).");
-                }
                 else if (url.EndsWith("/emptytitle"))
                 {
                     dataString = utf8Encoding.GetBytes(@"<head>
@@ -72,18 +67,6 @@ namespace Gthx.Test.Mocks
                 {
                     dataString = utf8Encoding.GetBytes(@"<head>
 <title>Rum &amp; &quot;Coke&quot; - YouTube</title>
-</head>");
-                }
-                else if (url.EndsWith(":2810756"))
-                {
-                    dataString = utf8Encoding.GetBytes(@"<head>
-<title>Articulated Butterfly - Thingiverse</title>
-</head>");
-                }
-                else if (url.EndsWith(":2818955"))
-                {
-                    dataString = utf8Encoding.GetBytes(@"<head>
-<meta name=""title"" content=""Articulated Slug"">
 </head>");
                 }
                 else

@@ -189,25 +189,39 @@ public class IntegrationTests
     }
 
     [Test]
-    public async Task TestThingiverseReferences()
+    public void TestThingiverseReferences()
     {
-        // Test fetching a new title that uses the <title> element
+        // The bot doesn't fetch Thingiverse titles (#39), so the reply has the thing's number
         var testChannel = "#reprap";
         var testUser = "RandomNick";
         _gthx.HandleReceivedMessage(testChannel, testUser, $"Your daughter would really like this: https://www.thingiverse.com/thing:2810756");
-        await Task.Delay(5000);
         var replies = _client.GetReplies();
         ClassicAssert.AreEqual(1, replies.Messages.Count);
         ClassicAssert.AreEqual(testChannel, replies.Channel);
-        ClassicAssert.AreEqual($"{testUser} linked to \"Articulated Butterfly by 8ran\" on thingiverse => 1 IRC mentions", replies.Messages[0]);
+        ClassicAssert.AreEqual($"{testUser} linked to thing 2810756 on thingiverse => 1 IRC mentions", replies.Messages[0]);
 
         // Test the same reference a second time to verify the count increases
         _gthx.HandleReceivedMessage(testChannel, testUser, $"Did you hear what I said? I love this thing! https://www.thingiverse.com/thing:2810756");
-        await Task.Delay(5000);
         replies = _client.GetReplies();
         ClassicAssert.AreEqual(1, replies.Messages.Count);
-        ClassicAssert.AreEqual(testChannel, replies.Channel);
-        ClassicAssert.AreEqual($"{testUser} linked to \"Articulated Butterfly by 8ran\" on thingiverse => 2 IRC mentions", replies.Messages[0]);
+        ClassicAssert.AreEqual($"{testUser} linked to thing 2810756 on thingiverse => 2 IRC mentions", replies.Messages[0]);
+    }
+
+    [Test]
+    public void TestPrintablesReferences()
+    {
+        // The title from the first link is stored and used for a later link without one
+        var testChannel = "#reprap";
+        var testUser = "Printer";
+        _gthx.HandleReceivedMessage(testChannel, testUser, "https://www.printables.com/model/1863827-heavy-duty-keyboard-holder-no-supports");
+        var replies = _client.GetReplies();
+        ClassicAssert.AreEqual(1, replies.Messages.Count);
+        ClassicAssert.AreEqual($"{testUser} linked to \"Heavy duty keyboard holder no supports\" on Printables => 1 IRC mentions", replies.Messages[0]);
+
+        _gthx.HandleReceivedMessage(testChannel, testUser, "again: https://www.printables.com/model/1863827");
+        replies = _client.GetReplies();
+        ClassicAssert.AreEqual(1, replies.Messages.Count);
+        ClassicAssert.AreEqual($"{testUser} linked to \"Heavy duty keyboard holder no supports\" on Printables => 2 IRC mentions", replies.Messages[0]);
     }
 
     /// <summary>
