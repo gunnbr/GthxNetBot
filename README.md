@@ -37,7 +37,7 @@ A factoid value can start with `<reply>` (the bot says just the rest) or `<actio
 factoids are locked and can't be changed or forgotten.
 
 A reminder's time is relative: `30 minutes`, `an hour`, `2h`, `1h30m`, `1 day and 3 hours`, `2 weeks`
-(units are minutes, hours, days, weeks, months and years; a month is 30 days), from a minute to a year ahead. Each nick can have 10 waiting,
+(units are seconds, minutes, hours, days, weeks, months and years; a month is 30 days), from a minute to a year ahead. Each nick can have 10 waiting,
 of up to 400 characters each. When one comes due, the bot posts it right away if you've said something
 in the last 5 minutes and are still online (in the channel you asked in, or by private message if you've
 left it). Otherwise it waits and reminds you the next time you speak. Reminders are kept in the database,

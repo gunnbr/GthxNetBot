@@ -5,10 +5,11 @@ namespace Gthx.Bot
 {
     /// <summary>
     /// Parses the relative times used by reminders, such as "12 hours", "an hour", "1h30m" or "2 days and 3 hours".
-    /// Units are minutes, hours, days, weeks, months (30 days) and years (365 days).
+    /// Units are seconds, minutes, hours, days, weeks, months (30 days) and years (365 days).
     /// </summary>
     public static class ReminderTime
     {
+        private const string Seconds = @"seconds?|secs?|s";
         private const string Minutes = @"minutes?|mins?|m";
         private const string Hours = @"hours?|hrs?|h";
         private const string Days = @"days?|d";
@@ -17,7 +18,7 @@ namespace Gthx.Bot
         private const string Years = @"years?|yrs?|y";
 
         // "a"/"an" only goes with whole words ("an hour"), so a message such as "a meeting" isn't read as a time.
-        private const string Part = @$"(?:\d{{1,6}}\s*(?:{Months}|{Minutes}|{Hours}|{Days}|{Weeks}|{Years})|an?\s+(?:minute|hour|day|week|month|year))(?![a-z])";
+        private const string Part = @$"(?:\d{{1,6}}\s*(?:{Seconds}|{Months}|{Minutes}|{Hours}|{Days}|{Weeks}|{Years})|an?\s+(?:second|minute|hour|day|week|month|year))(?![a-z])";
 
         /// <summary>
         /// Regex pattern for a whole time: one or more parts, optionally separated by spaces, commas or "and"
@@ -49,6 +50,7 @@ namespace Gthx.Bot
                 time += unit[0] switch
                 {
                     // A month is taken as 30 days and a year as 365.
+                    's' => TimeSpan.FromSeconds(count),
                     'm' when unit.StartsWith("mo") => TimeSpan.FromDays(30.0 * count),
                     'm' => TimeSpan.FromMinutes(count),
                     'h' => TimeSpan.FromHours(count),

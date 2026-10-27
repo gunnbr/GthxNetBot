@@ -934,6 +934,9 @@ namespace Gthx.Test
         [TestCase("2 months", 60 * 24 * 60)]
         [TestCase("a year", 365 * 24 * 60)]
         [TestCase("1mo 2m", 30 * 24 * 60 + 2)]
+        [TestCase("2 minutes 60 seconds", 3)]
+        [TestCase("1m60s", 2)]
+        [TestCase("120 secs", 2)]
         public void TestReminderTimeParsing(string text, int minutes)
         {
             ClassicAssert.IsTrue(ReminderTime.TryParse(text, out var time), text);
@@ -995,8 +998,16 @@ namespace Gthx.Test
                 ClassicAssert.AreEqual(usage, replies.Messages[0], bad);
             }
 
-            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: remind me in 0 minutes to blink");
-            ClassicAssert.AreEqual($"{testUser}: I can only remind you a minute or more from now.", _client.GetReplies().Messages[0]);
+            foreach (var tooSoon in new[] { "0 minutes", "10 seconds", "59 secs" })
+            {
+                _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: Remind me in {tooSoon} to tell people that reminders work.");
+                ClassicAssert.AreEqual($"{testUser}: I can only remind you a minute or more from now.", _client.GetReplies().Messages[0], tooSoon);
+            }
+            ClassicAssert.AreEqual(2, _data.Reminders.Count);
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: remind me in 1 minute 30 seconds to stretch");
+            ClassicAssert.AreEqual($"{testUser}: Okay, I'll remind you in 1 minute, 30 seconds (reminder {_data.Reminders[2].Id}).", _client.GetReplies().Messages[0]);
+            _data.Reminders.RemoveAt(2);
 
             foreach (var tooLong in new[] { "53 weeks", "2 years", "1 year and 1 day" })
             {
