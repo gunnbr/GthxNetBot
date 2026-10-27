@@ -989,6 +989,22 @@ namespace Gthx.Test
             ClassicAssert.AreEqual(testUser, _data.Reminders[1].Channel);
             ClassicAssert.IsNull(_data.FactoidUser);
 
+            // Punctuation after the time, and a message that doesn't start with "to"
+            foreach (var (said, time, stored) in new[]
+            {
+                ("remind me in 7 days, hey its tuesday again!", "7 days", "hey its tuesday again!"),
+                ("remind me in 1 year, hey it is oct 27 again!", "1 year", "hey it is oct 27 again!"),
+                ("remind me in 2 hours: stretch", "2 hours", "stretch"),
+                ("remind me in 1 day, 3 hours - water the plants", "1 day, 3 hours", "water the plants"),
+            })
+            {
+                _gthx.HandleReceivedMessage(testChannel, testUser, $"{_client.BotNick}: {said}");
+                var added = _data.Reminders.Last();
+                ClassicAssert.AreEqual($"{testUser}: Okay, I'll remind you in {time} (reminder {added.Id}).", _client.GetReplies().Messages[0], said);
+                ClassicAssert.AreEqual(stored, added.Message, said);
+                _data.Reminders.Remove(added);
+            }
+
             var usage = $"{testUser}: Say \"remind me in <time> <message>\", such as \"remind me in 2 hours to check the print\".";
             foreach (var bad in new[] { "remind me in soon to do it", "remind me in 5 minutes", "remind me to do it" })
             {
@@ -1082,14 +1098,17 @@ namespace Gthx.Test
 
             var reminder = _data.AddReminder(testUser, "#reprap", "to post this suggestion", DateTime.UtcNow.AddMinutes(-1));
             reminder.Timestamp = DateTime.UtcNow.AddHours(-2);
+            var noTo = _data.AddReminder(testUser, "#reprap", "hey its tuesday again!", DateTime.UtcNow.AddMinutes(-1));
+            noTo.Timestamp = DateTime.UtcNow.AddHours(-2);
             var notYet = _data.AddReminder(testUser, "#reprap", "to do it later", DateTime.UtcNow.AddHours(1));
 
             // Delivered wherever they next speak
             _gthx.HandleReceivedMessage("#other", testUser, "hello there");
             var replies = _client.GetReplies();
-            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual(2, replies.Messages.Count);
             ClassicAssert.AreEqual("#other", replies.Channel);
             ClassicAssert.AreEqual($"{testUser}: 2 hours ago you asked me to remind you to post this suggestion", replies.Messages[0]);
+            ClassicAssert.AreEqual($"{testUser}: 2 hours ago you asked me to remind you: hey its tuesday again!", replies.Messages[1]);
             CollectionAssert.AreEqual(new[] { notYet }, _data.Reminders);
 
             // Only once
