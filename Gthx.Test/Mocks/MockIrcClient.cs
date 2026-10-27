@@ -26,7 +26,8 @@ namespace Gthx.Test.Mocks
 
         public DateTime StartupTime => DateTime.UtcNow;
 
-        public event EventHandler BotNickChangedEvent;
+        // The mock's nick never changes, so nothing is ever raised.
+        public event EventHandler BotNickChangedEvent { add { } remove { } }
 
         public bool SendAction(string channel, string action)
         {
