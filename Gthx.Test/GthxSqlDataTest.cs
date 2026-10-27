@@ -309,5 +309,46 @@ namespace Gthx.Test
             ClassicAssert.AreEqual(2, refData.Count, "Count not updated");
             ClassicAssert.AreEqual(testTitle, refData.Title, "Title not available in second attempt");
         }
+
+        [Test]
+        public void GthxData_TestPrintablesRefCount()
+        {
+            var testItem = 1863827;
+            var testTitle = "Heavy duty keyboard holder";
+
+            var refData = _Data.AddPrintablesReference(testItem);
+            ClassicAssert.AreEqual(testItem, refData.Item, "Wrong item returned");
+            ClassicAssert.AreEqual(1, refData.Count, "Wrong initial count value");
+            ClassicAssert.IsNull(refData.Title, "Test failure: Title already exists");
+
+            _Data.AddPrintablesTitle(testItem, testTitle);
+
+            refData = _Data.AddPrintablesReference(testItem);
+            ClassicAssert.AreEqual(2, refData.Count, "Count not updated");
+            ClassicAssert.AreEqual(testTitle, refData.Title, "Title not available in second attempt");
+
+            // The longest title the bot sends fits the column
+            var longTitle = GthxUtil.CleanTitle(new string('x', 400));
+            _Data.AddPrintablesTitle(testItem, longTitle);
+            ClassicAssert.AreEqual(longTitle, _Data.AddPrintablesReference(testItem).Title);
+        }
+
+        [Test]
+        public void GthxData_TestMakerWorldRefCount()
+        {
+            var testItem = 2459711;
+            var testTitle = "Articulated dragon";
+
+            var refData = _Data.AddMakerWorldReference(testItem);
+            ClassicAssert.AreEqual(testItem, refData.Item, "Wrong item returned");
+            ClassicAssert.AreEqual(1, refData.Count, "Wrong initial count value");
+            ClassicAssert.IsNull(refData.Title, "Test failure: Title already exists");
+
+            _Data.AddMakerWorldTitle(testItem, testTitle);
+
+            refData = _Data.AddMakerWorldReference(testItem);
+            ClassicAssert.AreEqual(2, refData.Count, "Count not updated");
+            ClassicAssert.AreEqual(testTitle, refData.Title, "Title not available in second attempt");
+        }
     }
 }

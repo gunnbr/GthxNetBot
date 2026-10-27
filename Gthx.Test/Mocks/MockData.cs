@@ -35,6 +35,10 @@ namespace Gthx.Test.Mocks
         public string LastSeenUserQuery { get; private set; }
         public string AddedThingiverseId { get; private set; }
         public string AddedThingiverseTitle { get; private set; }
+        public int? AddedPrintablesId { get; private set; }
+        public string AddedPrintablesTitle { get; private set; }
+        public int? AddedMakerWorldId { get; private set; }
+        public string AddedMakerWorldTitle { get; private set; }
 
         public bool AddFactoid(string user, string factoid, bool isAre, string value, bool replaceExisting)
         {
@@ -93,6 +97,46 @@ namespace Gthx.Test.Mocks
         {
             AddedThingiverseId = item;
             AddedThingiverseTitle = title;
+        }
+
+        public PrintablesRef AddPrintablesReference(int item)
+        {
+            return item switch
+            {
+                // Linked before with a name in the link
+                1000001 => new PrintablesRef { Item = item, Count = 7, Title = "Stored printables title" },
+                _ => new PrintablesRef { Item = item, Count = 1 },
+            };
+        }
+
+        public void AddPrintablesTitle(int item, string title)
+        {
+            AddedPrintablesId = item;
+            AddedPrintablesTitle = title;
+        }
+
+        public MakerWorldRef AddMakerWorldReference(int item)
+        {
+            return item switch
+            {
+                // Linked before with a name in the link
+                2000002 => new MakerWorldRef { Item = item, Count = 9, Title = "Stored makerworld title" },
+                _ => new MakerWorldRef { Item = item, Count = 1 },
+            };
+        }
+
+        public void AddMakerWorldTitle(int item, string title)
+        {
+            AddedMakerWorldId = item;
+            AddedMakerWorldTitle = title;
+        }
+
+        public void ResetAddedTitles()
+        {
+            AddedPrintablesId = null;
+            AddedPrintablesTitle = null;
+            AddedMakerWorldId = null;
+            AddedMakerWorldTitle = null;
         }
 
         public YoutubeRef AddYoutubeReference(string item)

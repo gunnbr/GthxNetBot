@@ -684,6 +684,87 @@ namespace Gthx.Test
             await Task.Delay(500);
             replies = _client.GetReplies();
             ClassicAssert.AreEqual(0, replies.Messages.Count);
+
+            // Issue #39: when thingiverse.com refuses the request, reply without the title instead of not at all
+            testUser = "Blocked";
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"Can you see this? https://www.thingiverse.com/thing:4030403");
+            await Task.Delay(500);
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual($"{testUser} linked to thing 4030403 on thingiverse => 1 IRC mentions", replies.Messages[0]);
+        }
+
+        [Test]
+        public void TestPrintablesReferences()
+        {
+            var testChannel = "#reprap";
+            var testUser = "Printer";
+            _data.ResetAddedTitles();
+
+            // The title comes from the name at the end of the link, and is stored for later links without one
+            _gthx.HandleReceivedMessage(testChannel, testUser, "Look: https://www.printables.com/model/1863827-heavy-duty-keyboard-holder-no-supports");
+            var replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual(testChannel, replies.Channel);
+            ClassicAssert.AreEqual($"{testUser} linked to \"Heavy duty keyboard holder no supports\" on Printables => 1 IRC mentions", replies.Messages[0]);
+            ClassicAssert.AreEqual(1863827, _data.AddedPrintablesId);
+            ClassicAssert.AreEqual("Heavy duty keyboard holder no supports", _data.AddedPrintablesTitle);
+
+            // No name in the link and none stored: no title in the reply
+            _data.ResetAddedTitles();
+            _gthx.HandleReceivedMessage(testChannel, testUser, "https://www.printables.com/model/1863828 is better");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual($"{testUser} linked to a model on Printables => 1 IRC mentions", replies.Messages[0]);
+            ClassicAssert.IsNull(_data.AddedPrintablesTitle);
+
+            // No name in the link, but one was stored from an earlier link
+            _gthx.HandleReceivedMessage(testChannel, testUser, "again: printables https://printables.com/model/1000001");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual($"{testUser} linked to \"Stored printables title\" on Printables => 7 IRC mentions", replies.Messages[0]);
+            ClassicAssert.IsNull(_data.AddedPrintablesTitle);
+
+            // A language in the link, and a query string and fragment after the name
+            _gthx.HandleReceivedMessage(testChannel, testUser, "https://www.printables.com/de/model/42-tiny_gear-v2?lang=de#preview");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual($"{testUser} linked to \"Tiny gear v2\" on Printables => 1 IRC mentions", replies.Messages[0]);
+
+            // Look-alike hosts aren't Printables
+            _gthx.HandleReceivedMessage(testChannel, testUser, "https://wwwXprintables.com/model/1863827-fake and https://printablesXcom/model/1-fake");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(0, replies.Messages.Count);
+        }
+
+        [Test]
+        public void TestMakerWorldReferences()
+        {
+            var testChannel = "#reprap";
+            var testUser = "Maker";
+            _data.ResetAddedTitles();
+
+            _gthx.HandleReceivedMessage(testChannel, testUser, "https://makerworld.com/en/models/2459711-articulated-dragon-print-in-place#profileId-123");
+            var replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual(testChannel, replies.Channel);
+            ClassicAssert.AreEqual($"{testUser} linked to \"Articulated dragon print in place\" on MakerWorld => 1 IRC mentions", replies.Messages[0]);
+            ClassicAssert.AreEqual(2459711, _data.AddedMakerWorldId);
+            ClassicAssert.AreEqual("Articulated dragon print in place", _data.AddedMakerWorldTitle);
+
+            _data.ResetAddedTitles();
+            _gthx.HandleReceivedMessage(testChannel, testUser, "https://makerworld.com/en/models/2459712");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual($"{testUser} linked to a model on MakerWorld => 1 IRC mentions", replies.Messages[0]);
+            ClassicAssert.IsNull(_data.AddedMakerWorldTitle);
+
+            // No language in the link, and a title stored from an earlier link
+            _gthx.HandleReceivedMessage(testChannel, testUser, "https://makerworld.com/models/2000002?from=search");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual($"{testUser} linked to \"Stored makerworld title\" on MakerWorld => 9 IRC mentions", replies.Messages[0]);
+
+            // A model number too big to be one
+            _gthx.HandleReceivedMessage(testChannel, testUser, "https://makerworld.com/en/models/99999999999-huge");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(0, replies.Messages.Count);
         }
 
         [Test]

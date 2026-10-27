@@ -27,9 +27,10 @@ namespace Gthx.Bot
         private const int MaxPageBytes = 2 * 1024 * 1024;
 
         /// <summary>
-        /// Longest title the bot repeats; anything longer is cut off.
+        /// Longest title the bot repeats; anything longer is cut off. With the "..." it still fits the
+        /// 255-character Title columns in the database.
         /// </summary>
-        private const int MaxTitleLength = 300;
+        private const int MaxTitleLength = 250;
 
         public GthxUtil(IWebReader webReader, ILogger<GthxUtil> logger)
         {
@@ -207,6 +208,23 @@ namespace Gthx.Bot
             }
 
             return cleaned;
+        }
+
+        /// <summary>
+        /// Makes a title from the words at the end of a link, such as "heavy-duty-keyboard-holder" in
+        /// printables.com/model/1863827-heavy-duty-keyboard-holder. Sites like Printables and MakerWorld
+        /// don't let the bot read their pages, but most links to them include the model's name this way.
+        /// </summary>
+        /// <returns>The title, such as "Heavy duty keyboard holder", or an empty string if there are no words</returns>
+        public static string TitleFromSlug(string slug)
+        {
+            var words = CleanTitle(slug.Replace('-', ' ').Replace('_', ' '));
+            if (words.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            return char.ToUpperInvariant(words[0]) + words[1..];
         }
 
         /// <summary>

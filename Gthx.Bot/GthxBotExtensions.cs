@@ -24,6 +24,8 @@ namespace Gthx.Bot
 
                 ServiceDescriptor.Scoped<IGthxModule, ThingiverseModule>(),
                 ServiceDescriptor.Scoped<IGthxModule, YoutubeModule>(),
+                ServiceDescriptor.Scoped<IGthxModule, PrintablesModule>(),
+                ServiceDescriptor.Scoped<IGthxModule, MakerWorldModule>(),
 
                 ServiceDescriptor.Scoped<IGthxModule, TellModule>(),
 
