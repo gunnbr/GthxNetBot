@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -66,7 +67,19 @@ namespace Gthx.Bot.Modules
 
                 var data = messageScope.ServiceProvider.GetRequiredService<IGthxData>();
 
-                var title = await _util.GetTitle(url);
+                string title;
+                try
+                {
+                    title = await _util.GetTitle(url);
+                }
+                catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+                {
+                    // thingiverse.com currently answers the bot with 403 Forbidden (#39), so this is expected.
+                    // Reply without the title rather than not at all.
+                    _logger.LogInformation("Couldn't get the title for thing {id}: {Message}", id, ex.Message);
+                    title = string.Empty;
+                }
+
                 _logger.LogInformation("Got the title for ID {id} as '{title}'", id, title);
                 data.AddThingiverseTitle(id, title);
 

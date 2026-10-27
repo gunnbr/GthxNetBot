@@ -31,6 +31,11 @@ namespace Gthx.Test.Mocks
 
                     dataString = utf8Encoding.GetBytes(@"{""title"":""oEmbed Title & \""Quotes\"""",""type"":""video""}");
                 }
+                else if (url.EndsWith(":4030403"))
+                {
+                    // thingiverse.com answers the bot with 403 Forbidden (#39)
+                    throw new HttpRequestException("Response status code does not indicate success: 403 (Forbidden).");
+                }
                 else if (url.EndsWith("/emptytitle"))
                 {
                     dataString = utf8Encoding.GetBytes(@"<head>

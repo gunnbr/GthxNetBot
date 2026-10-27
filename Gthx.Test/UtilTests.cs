@@ -166,7 +166,7 @@ namespace Gthx.Test
 
             // Long titles are cut off
             var longTitle = GthxUtil.CleanTitle(new string('a', 400));
-            ClassicAssert.AreEqual(new string('a', 300) + "...", longTitle);
+            ClassicAssert.AreEqual(new string('a', 250) + "...", longTitle);
         }
 
         [Test]

@@ -14,7 +14,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 8 | Automatically deploy to Azure from GitHub | ✅ |
 | 9 | Fix known security problems | 🟡 |
 | 10 | Fix reported bugs | 🟡 |
-| 11 | Implement new features | ⬜ |
+| 11 | Implement new features | 🟡 |
 | 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | 🟡 |
 
 **Where development happens:** phases 1–2 on the Windows dev machine; phase 3 onward on the Linux PC (which has Docker).
@@ -139,7 +139,9 @@ Still to do (these change Azure or GitHub settings, so they're the owner's call)
 ## 10. Reported bugs — 🟡
 Open GitHub issues, triaged on 2026-10-26 (feature requests are in phase 11):
 - [x] Factoids don't get set in queries ([#24](https://github.com/gunnbr/GthxNetBot/issues/24)). A private message that starts with the bot's nick (`/msg gthx gthx: foo is bar`) kept the nick, so it set the factoid `gthx: foo` (and a question got no reply). The nick is now removed in private messages too. Confirmed on the test server before the fix, and fixed there after #59 deployed.
-- [ ] Thingiverse titles ([#39](https://github.com/gunnbr/GthxNetBot/issues/39)): thingiverse.com answers the bot's title fetch with 403 Forbidden (probably bot protection), and when a title fetch fails the bot says nothing at all instead of its "unknown title" reply. Found on 2026-10-25 by the soak traffic; production on the 2022 build likely has the same problem.
+- [ ] Thingiverse titles ([#39](https://github.com/gunnbr/GthxNetBot/issues/39)): thingiverse.com answers the bot's title fetch with 403 Forbidden (a Cloudflare bot check), from sakura as well as Azure, so production on the 2022 build likely has the same problem. Found on 2026-10-25 by the soak traffic.
+  - [x] When the fetch fails, the bot now replies `<user> linked to thing <number> on thingiverse => <count> IRC mentions` instead of saying nothing, and logs the failure at Information rather than as an error.
+  - [ ] Titles again: the legitimate route is Thingiverse's official API (`api.thingiverse.com`), which needs an app token (it would go in Key Vault). Pretending to be a browser to get past the bot check isn't an option.
 - [x] EF errors don't appear in the log ([#23](https://github.com/gunnbr/GthxNetBot/issues/23)). A failure at startup, such as a database login or migration error, wasn't caught, so it only reached the console as an untimestamped unhandled exception (exit code 139) and was never emailed. It's now logged at Fatal with the version and the full exception, emailed, and the bot exits with code 1. EF's migration messages (each migration applied, or "already up to date") are now logged at Information. Errors while running were already logged (`GthxBot.HandleIncomingMessage`). Verified with a wrong database password and a fresh database on the local SQL container, and the email with Mailpit.
 - [x] `GthxSqlDataTest` logged to the Windows-only path `c:\tmp\GthxSqlTests.json`, which Serilog quietly dropped on Linux; it now logs to the system temp folder (`/tmp/GthxSqlTests.json` on Linux).
 - [ ] IrcDotNet fork: `CompleteIrcClientTest` now targets `irc.libera.chat` ([#3](https://github.com/gunnbr/IrcDotNet/pull/3)) but fails in `LocalUserModeTest`, because Libera gives new users `+w` by default and the test expects it to be off.
@@ -153,7 +155,9 @@ Already fixed; closed with a comment on 2026-10-26:
 - [x] More information in the starting message ([#3](https://github.com/gunnbr/GthxNetBot/issues/3)): it now includes the version and commit (phase 6).
 - [x] Getting our nick back when the old instance quits ([#2](https://github.com/gunnbr/GthxNetBot/issues/2)): the bot takes the nick back as soon as it's free; every deploy since #51 shows it happening.
 
-## 11. New features — ⬜
+## 11. New features — 🟡
+- [x] **Printables and MakerWorld links** (2026-10-26). Both sites block the bot's requests (Cloudflare), but their links normally end with the model's name, such as `printables.com/model/1863827-heavy-duty-keyboard-holder-no-supports` or `makerworld.com/en/models/2459711-articulated-dragon`. The bot takes the model number from the link and makes the title from the name ("Heavy duty keyboard holder no supports"), stores both, and counts mentions like it does for Thingiverse: `<user> linked to "<title>" on Printables => <count> IRC mentions`. A link without the name uses the title stored from an earlier link, or replies `linked to a model on Printables` without one. New tables `PrintablesRef` and `MakerWorldRef` ([GthxNetData#7](https://github.com/gunnbr/GthxNetData/pull/7)). Titles are now cut at 250 characters (plus "...") so they fit the database's 255-character title columns; before, a title over 255 characters would have failed to save.
+
 Requests from GitHub issues:
 - [ ] Limit the length of factoids ([#11](https://github.com/gunnbr/GthxNetBot/issues/11)), so long sentences with "is" aren't stored as factoids (around 30 characters looked right).
 - [ ] Relax the format for piping factoids to a user ([#33](https://github.com/gunnbr/GthxNetBot/issues/33)): make the `?`/`!` and the spaces in `foo? | bar` optional.
@@ -168,6 +172,7 @@ Requests from GitHub issues:
 - [x] EF Core versions match: GthxNetBot (#58) and GthxNetData (its #6) both moved to 10.0.14, and the submodule now points at GthxNetData's master (`fcd24d6`, which also has its Dependabot Actions update, #5). GthxNetBot references `Microsoft.EntityFrameworkCore.Design` and Gthx.Data references `Microsoft.EntityFrameworkCore.SqlServer` and `.Tools`; when one repo updates EF Core, update the other to the same version.
 - [x] `master` is protected by the same "Protect master" ruleset as this repo, with the CI `build` check required (2026-10-26).
 - [ ] Repository settings: Dependabot security updates are on; turn on secret scanning and push protection.
+- [ ] Adding a migration with the README's `dotnet ef migrations add` command fails: the tools look for `SqlServerMigrations.dll` in Gthx.Data's output folder, but that project builds into `Gthx.Data/bin`. It only worked when an old copy happened to be there. Also, most projects in both repos build into one shared `bin/` folder at the GthxNetBot root, so stale files from older builds get mixed in (an EF Core Design DLL from 10.0.13, and `Serilog.AspNetCore` from the test project, which breaks `dotnet run` of the bot). For `AddPrintablesAndMakerWorldRefs`: delete `bin/`, build `Gthx.Data.sln`, copy `Gthx.Data/bin/Debug/net10.0/SqlServerMigrations.dll` into `bin/Debug/net10.0/`, then run the README command with the EF Core 10 tools. Fix: give each project its own output folder, and make the migrations project the startup project for the tools.
 - [ ] The README says the data component is shared with the gthx website; check whether the website still uses it before changing the schema.
 
 ---
