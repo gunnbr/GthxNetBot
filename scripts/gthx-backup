@@ -1,13 +1,14 @@
 #!/bin/sh
-# Exports the Azure SQL database Gthx to a .bacpac file (schema and data) in a local folder, keeps the
+# Exports an Azure SQL database (Gthx, or $SQL_DATABASE) to a .bacpac file (schema and data) in a local folder, keeps the
 # last 30 days plus the backup from the 1st of each month for a year, and emails the admin if anything
 # fails.
 #
-#   scripts/gthx-backup          # run a backup now
+#   scripts/gthx-backup                     # run a backup now
+#   SQL_DATABASE=Othx scripts/gthx-backup   # back up othx's database
 #
 # Settings come from ~/.config/gthx-backup/backup.env (or $GTHX_BACKUP_CONFIG); see infra/README.md,
 # "Backups", for the setup. It signs in as the gthx-backup app with a certificate, so it doesn't depend
-# on anyone's az login. Runs nightly from the systemd user timer in scripts/systemd/.
+# on anyone's az login. Runs nightly from the systemd user timers in scripts/systemd/.
 set -eu
 
 LOG=$(mktemp)
@@ -29,7 +30,7 @@ alert() {
     printf 'default login "%s" password "%s"\n' "$SMTP_USER" \
         "$(printf '%s' "$SMTP_PASSWORD" | sed 's/[\\"]/\\&/g')" >"$NETRC"
     {
-        printf 'From: %s\nTo: %s\nSubject: gthx backup failed on %s\n\n' "$ALERT_FROM" "$ALERT_TO" "$(hostname)"
+        printf 'From: %s\nTo: %s\nSubject: %s backup failed on %s\n\n' "$ALERT_FROM" "$ALERT_TO" "${SQL_DATABASE:-Gthx}" "$(hostname)"
         printf '%s\n\nLast output:\n' "$1"
         tail -n 40 "$LOG"
     } | curl --silent --show-error --ssl-reqd --url "$SMTP_URL" --netrc-file "$NETRC" \

@@ -1,0 +1,11 @@
+# Runs scripts/gthx-backup once for the othx database. Started by othx-backup.timer; see infra/README.md,
+# "Backups". Uses the same settings file as gthx-backup.service.
+[Unit]
+Description=Back up the othx database from Azure SQL
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+Environment=SQL_DATABASE=Othx
+ExecStart=%h/source/repos/GthxNetBot/scripts/gthx-backup

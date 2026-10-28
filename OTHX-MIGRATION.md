@@ -76,12 +76,14 @@ MariaDB.
       and has its own `othx-irc-sasl-password`. A what-if against production shows no change for gthx; the
       only new resources are `id-othx-prod` and its two role assignments. `scripts/gthx-logs -b othx` shows
       othx's logs. The deploy workflow needed no change: one deploy updates both bots.
-- [ ] Deploy with othx's `deployApp: false`, to create `id-othx-prod`.
-- [ ] Create `Othx` on `gthxdb`; add `id-othx-prod` (db_datareader, db_datawriter, db_ddladmin) and
+- [x] Deploy with othx's `deployApp: false`, to create `id-othx-prod` (2026-10-28).
+- [x] Create `Othx` on `gthxdb` (Basic, geo-redundant backups); add `id-othx-prod` (db_datareader, db_datawriter, db_ddladmin) and
       `gthx-backup` (db_datareader, VIEW DEFINITION). The user runs the SQL as the Entra admin (see
       `infra/README.md`, "Adding a bot").
 - [ ] The user sets `othx-irc-sasl-password`.
-- [ ] Turn on long-term retention for `Othx`, and add its nightly backup.
+- [x] Long-term retention for `Othx`: monthly, kept 12 months, like `Gthx` (2026-10-28).
+- [ ] Nightly backup: `scripts/systemd/othx-backup.{service,timer}` (04:00, `SQL_DATABASE=Othx`, same settings
+      file as gthx's). A test run on 2026-10-28 worked. Turn on the timer once this is on `master`.
 
 ### 4. Move — ⬜
 - [ ] Stop `othx2.26` (if it was restarted), copy the data into `Othx`, and check the row counts.

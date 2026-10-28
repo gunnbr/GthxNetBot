@@ -61,8 +61,8 @@ Or open the workspace's **Logs** page in the Azure portal and query `ContainerAp
 
 ## Backups
 
-The database `Gthx` on the Azure SQL server `gthxdb` (in `rg-gthx-prod`, Basic tier, about 45 MB) is backed
-up in three ways:
+The databases `Gthx` (about 45 MB) and `Othx` (a few MB) on the Azure SQL server `gthxdb` (in `rg-gthx-prod`,
+Basic tier) are each backed up in three ways:
 
 | Backup | Kept | Restores to |
 |---|---|---|
@@ -123,7 +123,7 @@ has no Azure roles; in the database it can only read the data and the schema.
 
    The certificate expires after two years (the current one on 2028-10-27). Make a new one the same way
    and add it with `--append` before then.
-3. In the `Gthx` database, as the Entra admin:
+3. In the `Gthx` database (and `Othx`, see "Adding a bot"), as the Entra admin:
 
        CREATE USER [gthx-backup] FROM EXTERNAL PROVIDER;
        ALTER ROLE db_datareader ADD MEMBER [gthx-backup];
@@ -151,7 +151,10 @@ has no Azure roles; in the database it can only read the data and the schema.
        systemctl --user enable --now gthx-backup.timer
        sudo loginctl enable-linger "$USER"   # so it runs while nobody is logged in
 
-   The service expects the repo at `~/source/repos/GthxNetBot`. Check on it with
+   For `Othx`, the same with `othx-backup.service` and `othx-backup.timer` (04:00). It uses the same settings
+   file, with `SQL_DATABASE=Othx` set in the service.
+
+   The services expect the repo at `~/source/repos/GthxNetBot`. Check on it with
    `systemctl --user list-timers gthx-backup.timer` and `journalctl --user -u gthx-backup`.
 
 ## One-time setup
