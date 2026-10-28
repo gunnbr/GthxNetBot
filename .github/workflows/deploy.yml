@@ -2,11 +2,14 @@
 # container app running that image) to Azure. The deploy job uses the "production" environment, so it
 # waits for approval when that environment has required reviewers.
 #
-# Azure sign-in uses OpenID Connect (no stored Azure password). Repository variables:
-#   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID, AZURE_RESOURCE_GROUP
+# Azure sign-in uses OpenID Connect (no stored Azure password), with two identities: the build job, which
+# runs without approval, can only push images to the registry (AZURE_BUILD_CLIENT_ID); only the approved
+# deploy job signs in as the identity that can change Azure (AZURE_CLIENT_ID). Repository variables:
+#   AZURE_CLIENT_ID, AZURE_BUILD_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID, AZURE_RESOURCE_GROUP,
+#   AZURE_REGISTRY_NAME
 # Repository secret:
 #   BUDGET_CONTACT_EMAIL (where budget alerts go)
-# Until AZURE_CLIENT_ID is set, the build and deploy jobs are skipped. See infra/README.md.
+# Until AZURE_BUILD_CLIENT_ID is set, the build and deploy jobs are skipped. See infra/README.md.
 name: Build and deploy to Azure
 
 on:
@@ -31,7 +34,7 @@ jobs:
 
   build:
     needs: test
-    if: vars.AZURE_CLIENT_ID != ''
+    if: vars.AZURE_BUILD_CLIENT_ID != ''
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -51,16 +54,17 @@ jobs:
           dotnet tool install nbgv --version 3.10.94 --tool-path "$RUNNER_TEMP/nbgv"
           echo "version=$("$RUNNER_TEMP/nbgv/nbgv" get-version --variable SimpleVersion)" >> "$GITHUB_OUTPUT"
 
+      # The build identity can only read and push to the registry.
       - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          client-id: ${{ vars.AZURE_BUILD_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: Build and push the image
         run: |
-          registry=$(az acr list -g "${{ vars.AZURE_RESOURCE_GROUP }}" --query '[0].name' -o tsv)
-          login_server=$(az acr show -n "$registry" --query loginServer -o tsv)
+          registry="${{ vars.AZURE_REGISTRY_NAME }}"
+          login_server=$(az acr show -n "$registry" -g "${{ vars.AZURE_RESOURCE_GROUP }}" --query loginServer -o tsv)
           az acr login -n "$registry"
           docker build --pull \
             -t "$login_server/gthxnetbot:${{ github.sha }}" \

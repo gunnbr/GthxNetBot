@@ -77,9 +77,11 @@ Or open the workspace's **Logs** page in the Azure portal and query `ContainerAp
        ALTER ROLE db_datawriter ADD MEMBER [id-gthx-prod];
        ALTER ROLE db_ddladmin ADD MEMBER [id-gthx-prod];
 
-5. Let GitHub Actions deploy, with OpenID Connect: `infra/setup-github-oidc.sh` creates an app registration
-   that trusts only this repo's `master` branch and `production` environment, and gives it Contributor on
-   the resource group, AcrPush on the registry, and the right to assign only the roles the template uses.
+5. Let GitHub Actions deploy, with OpenID Connect: `infra/setup-github-oidc.sh` creates two app
+   registrations. `gthx-github-deploy` trusts only this repo's `production` environment (the approved
+   deploy job) and gets Contributor on the resource group and the right to assign only the roles the
+   template uses. `gthx-github-build` trusts only the `master` branch (the build job, which runs without
+   approval) and gets only AcrPush and Reader on the registry, so nothing unapproved can change Azure.
    Then set the repository variables and secret it prints, and add yourself as a required reviewer of the
    `production` environment.
 
