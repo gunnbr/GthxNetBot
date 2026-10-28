@@ -12,7 +12,7 @@ the new features. Their details were removed on 2026-10-28 to keep this file sho
 | 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | ✅ |
 | 13 | Bring the documentation up to date | ✅ |
 | 14 | Verify the database backups, and back up to the Linux PC on a schedule | ✅ |
-| 15 | Clean up the old branches in this repo | ⬜ |
+| 15 | Clean up the old branches in this repo | ✅ |
 | 16 | Move othx to Azure | ⬜ |
 
 **Testing rule:** never run test bots or probe clients against Libera (we were banned there on 2026-10-24 after test runs; the ban was lifted on 2026-10-26). Only the production bot connects to Libera. Use the local InspIRCd test server on sakura: `10.0.0.125:6667` plaintext, or `10.0.0.125:6697` TLS (certificate from the private CA in `testing/tls/`).
@@ -46,12 +46,11 @@ The data is in the Azure SQL database `Gthx` (Basic tier, about 45 MB). `infra/R
 - [x] Restoring a local backup into the local SQL Server container works (21 seconds; the row counts matched `Gthx` exactly), and the restore steps, from Azure and from a local backup, are in `infra/README.md`.
 - [x] `GthxTest` (old 2022 data on `gthxdb`) doesn't need a copy: its data was imported into `Gthx`, which is backed up. Deleted on 2026-10-28.
 
-## 15. Old branches — ⬜
-Look through the branches still on GitHub, keep anything useful, and delete the rest. As of 2026-10-27 (besides `master`):
-- [ ] **No commits that aren't in `master`** (so they look safe to delete; check nothing else refers to them): `AddIdMigration`, `DependencyInjection`, `net5`, `docs/readme` (#62), `feature/modernize` (#35), `feature/sasl-support` (#40), `fixinitlogging` (#32), `issue16` (#21), `issue17` (#20), `issue18` (#19).
-- [ ] **One commit not in `master`, from merged PRs**: `docs/roadmap-progress` (#52) and `feature/enable-email` (#53). Check that the commit's changes reached `master` some other way.
-- [ ] **`TcpKeepAlive`** (2022-05-30): 9 commits not in `master` and no PR. Probably superseded by the TCP keepalive in the IrcDotNet fork ([#25](https://github.com/gunnbr/GthxNetBot/issues/25) is fixed), but look for anything else worth keeping.
-- [ ] Turn on "Automatically delete head branches" in the repository settings, so merged PR branches don't pile up again. Do the same for `gunnbr/GthxNetData`, `gunnbr/IrcDotNet` and `gunnbr/GthxWebsite`.
+## 15. Old branches — ✅
+Cleaned up on 2026-10-28. Each branch's last commit is listed, so any of them can be recreated.
+- [x] **This repo:** deleted all 15 branches besides `master`, after checking that `master` has all their work. Most had no commits that weren't in `master`; `docs/roadmap-progress`, `feature/enable-email` and `feature/reminders` had one each whose change reached `master` another way; `TcpKeepAlive` (2022) only switched to the IrcDotNet fork as a submodule with its keepalive commit, which `master` already does. Last commits: `AddIdMigration` 5a0ae5f, `DependencyInjection` 95fd491, `TcpKeepAlive` 291231f, `docs/readme` 2c48834, `docs/roadmap-progress` d2c293d, `feature/enable-email` ea0e6dc, `feature/modernize` 8642331, `feature/reminders` c76c3aa, `feature/sasl-support` 62518cc, `fixinitlogging` de848bf, `issue16` afb65cf, `issue17` 490b521, `issue18` fa9bea8, `net5` 71a4f82, `security/build-identity` dfb7c8f.
+- [x] "Automatically delete head branches" is on in this repo, `gunnbr/GthxNetData`, `gunnbr/IrcDotNet` and `gunnbr/GthxWebsite`.
+- [x] **The other repos:** deleted GthxNetData's `AddIdMigration` (2a84f6f), `feature/modernize` (4fe0c88), `net5` (8e97e88) and `dependabot/nuget/Gthx.Data/nuget-7ba82f31e0` (493d1b5, from the merged #6), and GthxWebsite's `docs/remove-plan` (56552f3, merged as #6), after checkingthat nothing is missing from their default branches. IrcDotNet's branches stay (`develop`, `release`, `gh-pages` and `fix-travis-tsts` come from upstream, and `feature/issue-92-sasl-support` is upstream PR #91).
 
 ## 16. Move othx to Azure — ⬜
 `othx` is the same bot for the OpenSCAD channels (`#openscad`, `#othxtest`; real name "OpenSCAD Factoid Bot"). It still runs the 2022 release as the Docker container `othx2.26` on sakura, with its data in the MariaDB database `othxnet` on sakura. It has been stopped since 2026-10-24, when the Libera ban started. The new release only supports SQL Server, so the data has to move before othx can run the new build.
