@@ -85,11 +85,12 @@ MariaDB.
 - [x] Nightly backup: `scripts/systemd/othx-backup.{service,timer}` (04:00, `SQL_DATABASE=Othx`, same settings
       file as gthx's), turned on 2026-10-28 after a test run worked.
 
-### 4. Move — 🟡
+### 4. Move — ✅
 - [x] Copied the data into `Othx` with `tools/OthxCopy`, run by the user as the Entra admin (2026-10-28;
       `othx2.26` stayed off, so nothing changed since step 2). Same counts as the local run: 106 factoids, 206
       history rows, 61 refs, 2,701 seen, 236 Thingiverse and 350 YouTube refs; 34 values repaired.
-- [ ] Set othx's `deployApp: true` and deploy; check it on Libera: SASL, both channels, existing factoids.
+- [x] Set othx's `deployApp: true` and deployed (#89, 2026-10-28). `ca-othx-prod` runs 3.0.71 on Libera: SASL
+      succeeded, joined `#openscad` and `#othxtest`, no migrations needed, and the user checked existing factoids.
 
 ### 5. Retire the old setup — ⬜
 - [ ] Save `othx2.26`'s image and `docker inspect` output (it has secrets; keep it private) to
