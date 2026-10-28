@@ -70,7 +70,7 @@ MariaDB.
 - [x] The current bot ran against the copy on the local InspIRCd as `othx` in `#othxtest`: factoids, info and
       history, seen, set, also, forget and tell all work, and new rows get ids after the copied ones.
 
-### 3. Azure — 🟡
+### 3. Azure — ✅
 - [x] Split the Bicep: `infra/main.bicep` has the shared resources and a `bots` list; `infra/bot.bicep` has
       each bot's identity and container app. othx shares `irc-server` and `email-*` (subject `Othx Error`)
       and has its own `othx-irc-sasl-password`. A what-if against production shows no change for gthx; the
@@ -82,8 +82,8 @@ MariaDB.
       `infra/README.md`, "Adding a bot").
 - [x] The user set `othx-irc-sasl-password` (2026-10-28).
 - [x] Long-term retention for `Othx`: monthly, kept 12 months, like `Gthx` (2026-10-28).
-- [ ] Nightly backup: `scripts/systemd/othx-backup.{service,timer}` (04:00, `SQL_DATABASE=Othx`, same settings
-      file as gthx's). A test run worked on 2026-10-28; the user turns on the timer (see `infra/README.md`).
+- [x] Nightly backup: `scripts/systemd/othx-backup.{service,timer}` (04:00, `SQL_DATABASE=Othx`, same settings
+      file as gthx's), turned on 2026-10-28 after a test run worked.
 
 ### 4. Move — 🟡
 - [x] Copied the data into `Othx` with `tools/OthxCopy`, run by the user as the Entra admin (2026-10-28;
