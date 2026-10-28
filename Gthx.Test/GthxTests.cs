@@ -268,6 +268,43 @@ namespace Gthx.Test
             ClassicAssert.AreEqual($"{testFactoid} are このアプリケーションで十分にサポートされています", replies.Messages[0]);
         }
 
+        [TestCase("reprap? | bob")]
+        [TestCase("reprap?|bob")]
+        [TestCase("reprap! | bob")]
+        [TestCase("reprap ? | bob")]
+        [TestCase("reprap | bob")]
+        [TestCase("reprap|bob")]
+        [TestCase("reprap |bob ")]
+        public void TestFactoidPipeToUser(string message)
+        {
+            var testChannel = "#reprap";
+
+            _gthx.HandleReceivedMessage(testChannel, "sandman", message);
+
+            var replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual(testChannel, replies.Channel);
+            ClassicAssert.AreEqual("reprap", _data.FactoidGotten);
+            ClassicAssert.AreEqual("bob, reprap is the best way to learn about 3D printing", replies.Messages[0]);
+        }
+
+        [Test]
+        public void TestFactoidGettingWithoutPipe()
+        {
+            // A space before the "?" is fine
+            _gthx.HandleReceivedMessage("#reprap", "sandman", "reprap ?");
+
+            var replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual("reprap is the best way to learn about 3D printing", replies.Messages[0]);
+
+            // Without a pipe, the "?" or "!" is still needed, or every message would be a factoid lookup
+            _gthx.HandleReceivedMessage("#reprap", "sandman", "reprap");
+
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(0, replies.Messages.Count);
+        }
+
         [Test]
         public void TestAdvancedFactoidGetting()
         {

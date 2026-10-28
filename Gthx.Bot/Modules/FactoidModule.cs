@@ -11,7 +11,8 @@ namespace Gthx.Bot.Modules
     {
         private readonly Regex _FactoidSet = new(@"(?'factoid'.+?)\s(?'isAre'is|are)(?'hasAlso'\salso)?\s(?'value'.+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex _InvalidRegex = new(@"^(here|how|it|something|that|this|what|when|where|which|who|why|you)$", RegexOptions.IgnoreCase);
-        private readonly Regex _FactoidGet = new(@$"(?'factoid'.+)[?!](?'hasPipe'\s*$|\s*\|\s*(?'pipeToUser'{GthxUtil.NickMatch})$)", RegexOptions.Compiled);
+        // "foo?" or "foo!", or piped to a user, where the "?"/"!" and the spaces are optional: "foo? | bar", "foo | bar", "foo|bar"
+        private readonly Regex _FactoidGet = new(@$"^(?'factoid'.+?)\s*(?:[?!]\s*$|[?!]?\s*\|\s*(?'pipeToUser'{GthxUtil.NickMatch})\s*$)", RegexOptions.Compiled);
         private readonly IGthxData _Data;
         private readonly IIrcClient _IrcClient;
         private readonly ILogger<FactoidModule> _Logger;

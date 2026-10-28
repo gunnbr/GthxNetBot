@@ -20,7 +20,7 @@ need to, but it does no harm. Some commands work without addressing the bot, as 
 | `gthx: extruder is the part that pushes the plastic` | Sets a factoid. `are` works too (`gthx: hotends are hot`). Setting it again replaces it. |
 | `gthx: extruder is also a motor` | Adds another value to a factoid. |
 | `extruder?` or `extruder!` | Says the factoid, without addressing the bot. All its values are joined with "and also". |
-| `extruder? \| someuser` | Says the factoid to someone. |
+| `extruder? \| someuser` | Says the factoid to someone. The `?` and the spaces are optional: `extruder \| someuser` and `extruder\|someuser` work too. |
 | `gthx: forget extruder` | Forgets a factoid. |
 | `info extruder` | How often the factoid was asked for, and who set or deleted it when. |
 | `gthx: tell someuser the parts arrived` | Passes the message on the next time `someuser` says something. |
