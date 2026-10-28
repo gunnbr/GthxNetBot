@@ -106,9 +106,7 @@ You need the .NET 10 SDK, and Docker for the tests and the container image.
     docker build -t gthxnetbot:dev .
 
 The SQL Server tests start a SQL Server container with Testcontainers. No test needs the internet: web
-pages and titles come from mocks. Most projects build into a shared `bin/` folder at the root, which can
-collect stale files from older builds; if something fails to load, delete `bin/` and build again (see
-ROADMAP.md, phase 12).
+pages and titles come from mocks. Each project builds into its own `bin/` folder.
 
 ## Running locally
 
