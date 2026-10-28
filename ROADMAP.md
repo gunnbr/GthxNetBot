@@ -44,7 +44,7 @@ The data is in the Azure SQL database `Gthx` (Basic tier, about 45 MB). `infra/R
 - [x] The SMTP settings are in `~/.config/gthx-backup/backup.env`, and a test failure email arrived.
 - [x] The timer is on at sakura, with linger (2026-10-28); a run started through systemd saved a backup.
 - [x] Restoring a local backup into the local SQL Server container works (21 seconds; the row counts matched `Gthx` exactly), and the restore steps, from Azure and from a local backup, are in `infra/README.md`.
-- [x] `GthxTest` (old 2022 data on `gthxdb`) doesn't need a copy: its data was imported into `Gthx`, which is backed up. Delete it when convenient.
+- [x] `GthxTest` (old 2022 data on `gthxdb`) doesn't need a copy: its data was imported into `Gthx`, which is backed up. Deleted on 2026-10-28.
 
 ## 15. Old branches — ⬜
 Look through the branches still on GitHub, keep anything useful, and delete the rest. As of 2026-10-27 (besides `master`):
