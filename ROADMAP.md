@@ -11,7 +11,7 @@ the new features. Their details were removed on 2026-10-28 to keep this file sho
 |---|-------|--------|
 | 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | ✅ |
 | 13 | Bring the documentation up to date | ✅ |
-| 14 | Verify the database backups, and back up to the Linux PC on a schedule | 🟡 |
+| 14 | Verify the database backups, and back up to the Linux PC on a schedule | ✅ |
 | 15 | Clean up the old branches in this repo | ⬜ |
 | 16 | Move othx to Azure | ⬜ |
 
@@ -36,13 +36,13 @@ the new features. Their details were removed on 2026-10-28 to keep this file sho
 - [x] Update the documentation ([#28](https://github.com/gunnbr/GthxNetBot/issues/28)): closed as complete on 2026-10-26; the README covers setting up the database and the ways to configure the bot.
 - [x] Gthx.Data's README: the migration instructions are fixed (see phase 12).
 
-## 14. Backups — 🟡
+## 14. Backups — ✅
 The data is in the Azure SQL database `Gthx` (Basic tier, about 45 MB). `infra/README.md` ("Backups") has what's kept and how to restore it.
 - [x] What Azure keeps (checked 2026-10-28): point-in-time restore for 7 days (the most Basic allows), geo-redundant backup storage, and no long-term retention, which is now set to keep a monthly backup for 12 months.
 - [x] Test a restore (2026-10-28): a point-in-time restore to a throwaway database took about 50 minutes; its row counts matched `Gthx` (except one reminder that came due after the restore point), and it was deleted.
 - [x] Nightly backup to the Linux PC: `scripts/gthx-backup` and the systemd user timer in `scripts/systemd/` export `Gthx` to a `.bacpac` (about 2.5 MB) in `~/backups/gthx`, keep 30 days plus the 1st of each month for a year, and email on failure. It signs in as the app registration `gthx-backup` with a certificate (read-only in the database, no Azure roles).
 - [x] The SMTP settings are in `~/.config/gthx-backup/backup.env`, and a test failure email arrived.
-- [ ] Turn on the timer on sakura (and linger), and check that the first nightly run works.
+- [x] The timer is on at sakura, with linger (2026-10-28); a run started through systemd saved a backup.
 - [x] Restoring a local backup into the local SQL Server container works (21 seconds; the row counts matched `Gthx` exactly), and the restore steps, from Azure and from a local backup, are in `infra/README.md`.
 - [x] `GthxTest` (old 2022 data on `gthxdb`) doesn't need a copy: its data was imported into `Gthx`, which is backed up. Delete it when convenient.
 
