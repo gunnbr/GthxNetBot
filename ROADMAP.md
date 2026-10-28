@@ -14,7 +14,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 8 | Automatically deploy to Azure from GitHub | ✅ |
 | 9 | Fix known security problems | ✅ |
 | 10 | Fix reported bugs | ✅ |
-| 11 | Implement new features | 🟡 |
+| 11 | Implement new features | ✅ |
 | 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | 🟡 |
 | 13 | Bring the documentation up to date | 🟡 |
 | 14 | Verify the database backups, and back up to the Linux PC on a schedule | ⬜ |
@@ -164,14 +164,14 @@ Already fixed; closed with a comment on 2026-10-26:
 - [x] More information in the starting message ([#3](https://github.com/gunnbr/GthxNetBot/issues/3)): it now includes the version and commit (phase 6).
 - [x] Getting our nick back when the old instance quits ([#2](https://github.com/gunnbr/GthxNetBot/issues/2)): the bot takes the nick back as soon as it's free; every deploy since #51 shows it happening.
 
-## 11. New features — 🟡
+## 11. New features — ✅
 - [x] **Printables and MakerWorld links** (2026-10-26). Both sites block the bot's requests (Cloudflare), but their links normally end with the model's name, such as `printables.com/model/1863827-heavy-duty-keyboard-holder-no-supports` or `makerworld.com/en/models/2459711-articulated-dragon`. The bot takes the model number from the link and makes the title from the name ("Heavy duty keyboard holder no supports"), stores both, and counts mentions like it does for Thingiverse: `<user> linked to "<title>" on Printables => <count> IRC mentions`. A link without the name uses the title stored from an earlier link, or replies `linked to a model on Printables` without one. New tables `PrintablesRef` and `MakerWorldRef` ([GthxNetData#7](https://github.com/gunnbr/GthxNetData/pull/7)). Titles are now cut at 250 characters (plus "...") so they fit the database's 255-character title columns; before, a title over 255 characters would have failed to save.
 
 Requests from GitHub issues:
 - [x] Limit the length of factoids ([#11](https://github.com/gunnbr/GthxNetBot/issues/11)), so long sentences with "is" aren't stored as factoids. A name over 30 characters (`FactoidModule.MaxFactoidLength`) is ignored without a reply, since it's most likely a sentence rather than someone setting a factoid. Existing longer factoids can still be looked up.
 - [x] Relax the format for piping factoids to a user ([#33](https://github.com/gunnbr/GthxNetBot/issues/33)): the `?`/`!` and the spaces in `foo? | bar` are optional, so `foo | bar` and `foo|bar` work too. Without a pipe, the `?` or `!` is still needed.
 - [x] Reminders ([#30](https://github.com/gunnbr/GthxNetBot/issues/30), asked for as `!remindme <in time> <message>`). Only the addressed form, like the other commands: `gthx: remind me in 12 hours to post this suggestion`, `gthx: list reminders` and `gthx: cancel reminder <number>`. Relative times only (seconds, minutes, hours, days, weeks, 30-day months, 365-day years: `2h`, `1h30m`, `1 day and 3 hours`), from 1 minute to 1 year, at most 10 waiting per nick, 400 characters each. A timer checks every 30 seconds. A due reminder is posted if its author has said something in the last 5 minutes and is still online (shares a channel with the bot): in the channel it was asked in, or by private message if they've left it. Otherwise it's delivered the next time they speak, like `tell`. Kept in the new `Reminder` table ([GthxNetData#8](https://github.com/gunnbr/GthxNetData/pull/8)), so they survive restarts and deploys.
-- [ ] Email the admin when certain keywords are said ([#4](https://github.com/gunnbr/GthxNetBot/issues/4)).
+- [ ] **Deferred** (2026-10-28): email the admin when certain keywords are said ([#4](https://github.com/gunnbr/GthxNetBot/issues/4)). The admin needs a way to set the keywords, which is planned as an admin page on the website ([GthxWebsite](https://github.com/gunnbr/GthxWebsite)), so this will be done during work on the website.
 - [x] Handle more CTCP requests (from the old README's TODO list). The bot answers `VERSION`, `PING`, `TIME` (UTC), `SOURCE` and `CLIENTINFO`, in private or in a channel, and ignores other requests (`Gthx.Bot/Ctcp.cs`). IrcDotNet's `CtcpClient` wasn't used because it only sees private messages. This also fixed `/me` actions: the old CTCP code swallowed every CTCP message, so actions never reached the bot, and `seen` and held reminders ignored them. Tested on the local InspIRCd.
 
 ## 12. Gthx.Data repository — 🟡
