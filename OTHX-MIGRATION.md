@@ -37,30 +37,38 @@ MariaDB.
 
 | Decision | Recommendation |
 |---|---|
-| **Until the move:** restart `othx2.26` on Libera as it is, or leave othx off until it runs in Azure. | Restart it now if the channel misses it: it works as before. Copy the data after stopping it again, so nothing is lost. |
-| **Where the data goes.** | A new Basic database `Othx` on the existing `gthxdb` server (about $5 a month), Entra-only like `Gthx`. |
-| **How to copy it.** | Create the schema with the bot's EF migrations, then copy the rows with a one-off console app (MySqlConnector to read, `SqlBulkCopy` with kept identity values to write). Try it on a local SQL Server database first. |
+| **Until the move:** restart `othx2.26` on Libera as it is, or leave othx off until it runs in Azure. | **Decided (2026-10-28): leave it off.** Its data is frozen, so the copy can be taken any time. |
+| **Where the data goes.** | **Decided (2026-10-28):** a new Basic database `Othx` on the existing `gthxdb` server (about $5 a month), Entra-only like `Gthx`, rather than a schema in `Gthx` (that would need db_ddladmin on gthx's tables, shared restores and code changes). |
+| **How to copy it.** | **Done:** `tools/OthxCopy` (see step 2). It repairs the double-encoded text and drops factoid #110, as decided on 2026-10-28. |
 | **How to run it.** | A second Container App, `ca-othx-prod`, in the same environment, sharing the registry, Key Vault and logs, with its own identity `id-othx-prod` so each bot can only reach its own database. |
 | **Bicep layout.** | Split `infra/main.bicep` into the shared resources and a per-bot module (app, identity, settings), with one parameter set per bot. |
 | **Deploys.** | One approval deploys both bots from the same image. |
 | **Secrets.** | othx's own Key Vault secrets (for example `othx-irc-sasl-password`); the user sets them. Error emails go to the same address as gthx's, with a different subject. |
 | **Backups.** | The same as `Gthx`: monthly long-term retention for 12 months, and a second nightly `scripts/gthx-backup` run with its own settings file (`SQL_DATABASE=Othx`), and the `gthx-backup` user in `Othx`. |
-| **Cost.** | About $5 a month for the database plus the container's share; check the budgets still fit. |
+| **Cost.** | About $5 a month for the database plus $6–20 for the second container app (no free allowance left), so `rg-gthx-prod` goes from about $15–25 to $26–50 a month against the $50 budget. Whether the bots get billed at the idle rate decides it ([#84](https://github.com/gunnbr/GthxNetBot/issues/84)); real figures from about 2026-11-10. Raising the budget to $60 is still open. |
 
 ## Steps
 
-### 1. Look at the data — ⬜
-- [ ] Row counts per table in `othxnet`, the character set and collation of each table and column (latin1 or
-      utf8mb4), the longest values, and anything odd (factoid names over the 30-character limit added in
-      2026, duplicates that differ only in case, dates out of SQL Server's range).
-- [ ] Check what else uses MariaDB on sakura, before planning to turn it off.
+### 1. Look at the data — ✅
+- [x] Row counts: Factoid 107, FactoidHistory 207, Ref 61, Seen 2,701, Tell 0, ThingiverseRef 236,
+      YoutubeRef 350. Every table and text column is utf8mb4, and the column sizes match the SQL Server model.
+      No duplicate factoid names (not even by case), and all dates are from 2014 to 2026.
+- [x] Odd data: about 34 values from before 2022 are encoded twice (`ðŸ°` for `🍰`), from the 2021 import
+      from the latin1 database (`othx`); the copy repairs them. One factoid name is a 54-character sentence
+      (#110); the copy drops it and its history row. 603 old Seen rows have no channel; they're copied as
+      they are.
+- [x] What else uses MariaDB on sakura: **Gitea** (`gitea.service`, database `gitea`), so MariaDB stays on.
+      The only container using it is `othx2.26`. The other databases (`gthx`, `gthxfinal`, `gthxmigrations`,
+      `gthxtestlatin`, `gthxtestutf8`, `othx`, `testlatin`, `testutf8`, `updatetest`) are leftovers.
 
-### 2. Copy the data, locally first — ⬜
-- [ ] Write the copy app; run it into a throwaway database in the local SQL Server container (port 14333),
-      migrated with the current EF migrations.
-- [ ] Compare row counts, and spot-check text with non-ASCII characters and the newest rows.
-- [ ] Run the local bot against the copy on the local InspIRCd (as `othx`, in `#othxtest`): factoids, tells,
-      seen, history.
+### 2. Copy the data, locally first — ✅
+- [x] [`tools/OthxCopy`](tools/OthxCopy/README.md) creates the schema with the bot's migrations and copies
+      all tables in one transaction, keeping the ids. Tried on a throwaway database in the local SQL Server.
+- [x] Row counts match (106 factoids and 206 history rows after dropping #110); repaired text (emoji,
+      `¯\_(ツ)_/¯`, accents) and the newest rows (Seen from 2026-10-24) checked. A second run refuses to copy
+      into a database that has rows.
+- [x] The current bot ran against the copy on the local InspIRCd as `othx` in `#othxtest`: factoids, info and
+      history, seen, set, also, forget and tell all work, and new rows get ids after the copied ones.
 
 ### 3. Azure — ⬜
 - [ ] Create `Othx` on `gthxdb`; add `id-othx-prod` (db_datareader, db_datawriter, db_ddladmin) and
@@ -76,8 +84,8 @@ MariaDB.
 ### 5. Retire the old setup — ⬜
 - [ ] Save `othx2.26`'s image and `docker inspect` output (it has secrets; keep it private) to
       `~/backups/othx2.26/`, as was done for `gthx2.26`, then remove the container.
-- [ ] Dump `othxnet` (`mysqldump`) to `~/backups/othx2.26/`, then turn off MariaDB on sakura if nothing else
-      uses it.
+- [ ] Dump `othxnet` (`mysqldump`) to `~/backups/othx2.26/`, then drop it (and the leftover databases, if
+      wanted). MariaDB stays on for Gitea.
 - [ ] Update `README.md` and `infra/README.md` for two bots.
 
 ---
