@@ -12,7 +12,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 6 | Automatic version numbers suited to CI/CD | ✅ |
 | 7 | Build on GitHub with build/test status badges on the main page | ✅ |
 | 8 | Automatically deploy to Azure from GitHub | ✅ |
-| 9 | Fix known security problems | 🟡 |
+| 9 | Fix known security problems | ✅ |
 | 10 | Fix reported bugs | ✅ |
 | 11 | Implement new features | 🟡 |
 | 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | 🟡 |
@@ -126,7 +126,7 @@ Rebuilt from scratch on 2026-10-25 using current practice. The 2020 setup (Conta
 - Done in phase 5 ([#48](https://github.com/gunnbr/GthxNetBot/pull/48)): every push to `master` tests, builds and pushes the image to Azure Container Registry, then deploys after the owner approves the `production` environment. Azure sign-in uses OpenID Connect.
 - [x] Pushes that change only Markdown files (`**.md`) skip the workflow, so documentation updates don't need a rejected deploy ([#54](https://github.com/gunnbr/GthxNetBot/pull/54)). Run it by hand (`workflow_dispatch`) if one is ever needed.
 
-## 9. Security — 🟡
+## 9. Security — ✅
 Known issues:
 - [x] `MailKit` 4.15.1 vulnerability [GHSA-9j88-vvj5-vhgr](https://github.com/advisories/GHSA-9j88-vvj5-vhgr): fixed in phase 1 (by `Serilog.Sinks.Email` 4.2.1).
 - [x] **The bot didn't check the IRC server's TLS certificate** (fixed 2026-10-25). IrcDotNet accepts any certificate unless `ValidateSslCertificate` is handled, so anyone able to intercept the connection could pose as the server and collect the SASL password. The bot now rejects certificates with any policy error; `IrcInfo:TrustedCaCertificate` can add a private CA for a test server. Also fixed: after a failed TLS handshake the bot logged "Now connected" and hung instead of exiting.
@@ -139,10 +139,10 @@ Review on 2026-10-26: no known vulnerable or deprecated NuGet packages; EF Core 
 - [x] **The container runs as the image's unprivileged `app` user** instead of root. The Azure deploy now passes the private test CA as a secret environment variable (PEM text) rather than a mounted file, so the bot can read it whichever user it runs as.
 - [x] **GitHub Actions pinned to commit SHAs** (a tag can be moved to other code, and `azure/login` runs with the Azure credentials), and `.github/dependabot.yml` opens monthly grouped update PRs for NuGet packages and the actions.
 
-Still to do (these change Azure or GitHub settings, so they're the owner's call):
-- [ ] **Turn on Microsoft Entra-only authentication on `gthxdb`.** It still accepts SQL logins, including the admin login `gthxzeus`, whose password leaked into a session transcript on 2026-10-24. Entra-only turns off every SQL login, so the leaked password stops mattering and there's no password left to change. It also stops `gthx2.26` and the local `gthxtestbot`/rehearsal containers, which use the SQL login, so do it after the Libera cutover has settled (or change the password now and do this then). Command: `az sql server ad-only-auth enable -g rg-gthx-prod -n gthxdb`.
-- [ ] **Split the GitHub deploy identity.** The `github-master` federated credential (used by the build job, which doesn't wait for approval) signs in as the same identity as the approved deploy, which is Contributor on `rg-gthx-prod` (now including `gthxdb`) and can grant itself Key Vault Secrets Officer. Give the build job its own identity with only `AcrPush`, so only an approved deploy can change Azure.
-- [ ] **GitHub repository settings:** turn on secret scanning and push protection (free for public repositories); set the default workflow token to read-only and stop workflows from approving pull requests (both workflows already ask only for what they need).
+Settings changes, made with the owner's approval:
+- [x] **Microsoft Entra-only authentication on `gthxdb`** (2026-10-28). SQL logins are off, including the admin login `gthxzeus`, whose password leaked into a session transcript on 2026-10-24, so that password no longer works anywhere. The bot (`id-gthx-prod`) and the website's API (`id-gthx-web`, read-only) sign in with their managed identities and weren't affected. The stopped local containers `gthx` and `gthxtestbot`, the only things still using the SQL login (and set to restart against the production database), were deleted.
+- [x] **Split the GitHub deploy identity** (2026-10-28). The build job, which runs without approval, signs in as its own identity `gthx-github-build` (repository variable `AZURE_BUILD_CLIENT_ID`), trusted only for `master` and given only AcrPush and Reader on the registry. The deploy identity `gthx-github-deploy` now trusts only the `production` environment, so only an approved deploy can change Azure. `infra/setup-github-oidc.sh` creates both.
+- [x] **GitHub repository settings** (2026-10-28): secret scanning and push protection are on, the default workflow token is read-only and workflows can't approve pull requests, in GthxNetBot, GthxNetData and IrcDotNet (GthxWebsite already had them). The workflows already asked only for what they need.
 - [x] **`master` is protected** (2026-10-26) by a "Protect master" ruleset: no force pushes or deletion, changes go through a pull request, and the CI `test` check must pass before merging. No review is required (GitHub doesn't let you approve your own PR). Repository admins can bypass it for an emergency push.
 - [x] IrcDotNet fork: the bot never finished registering without a SASL password (no `CAP END`); fixed, see phase 10.
 - Optional, not planned: SQL auditing to the Log Analytics workspace (counts against the 0.15 GB/day cap), and Microsoft Defender for SQL (about $15/month).
