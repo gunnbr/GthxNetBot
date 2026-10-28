@@ -6,15 +6,37 @@ param deployApp = bool(readEnvironmentVariable('DEPLOY_APP', 'true'))
 param vaultAdminPrincipalId = readEnvironmentVariable('VAULT_ADMIN_PRINCIPAL_ID', '')
 param budgetContactEmail = readEnvironmentVariable('BUDGET_CONTACT_EMAIL', '')
 
-// The server is the Key Vault secret irc-server. To point the bot at a test server with a
-// private certificate, set useTrustedCa = true and put its CA in the secret irc-trusted-ca.
-param ircChannels = '#reprap,#mobious,#smoothieware,#gthxtest,#dlp3dprinting,#slic3r,#siderala,#reprap.de'
+// Both bots run the same image. The server is the Key Vault secret irc-server; each bot's NickServ password
+// is its own secret. To point the bots at a test server with a private certificate, set useTrustedCa = true
+// and put its CA in the secret irc-trusted-ca.
+param bots = [
+  {
+    name: 'gthx'
+    deployApp: true
+    ircChannels: '#reprap,#mobious,#smoothieware,#gthxtest,#dlp3dprinting,#slic3r,#siderala,#reprap.de'
+    ircNick: 'gthx'
+    ircRealName: 'Gthx Reprap Factoid Bot'
+    ircSaslPasswordSecret: 'irc-sasl-password'
+    sqlDatabaseName: 'Gthx'
+    emailSubject: 'Gthx Error'
+  }
+  {
+    // Only the identity until the database Othx, its user and the secret exist (OTHX-MIGRATION.md).
+    name: 'othx'
+    deployApp: false
+    ircChannels: '#openscad,#othxtest'
+    ircNick: 'othx'
+    ircRealName: 'OpenSCAD Factoid Bot'
+    ircSaslPasswordSecret: 'othx-irc-sasl-password'
+    sqlDatabaseName: 'Othx'
+    emailSubject: 'Othx Error'
+  }
+]
 param useTrustedCa = false
 
 // Warnings and errors are emailed. The mail settings are the Key Vault secrets email-*.
 param enableEmail = true
 
 param sqlServerFqdn = 'gthxdb.database.windows.net'
-param sqlDatabaseName = 'Gthx'
 
 param budgetStartDate = '2026-11-01'

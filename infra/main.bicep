@@ -1,31 +1,31 @@
-// Azure resources for the gthx IRC bot, deployed into one resource group:
+// Azure resources for the IRC bots (gthx, othx), deployed into one resource group. Shared by the bots:
 //
-// - Log Analytics workspace (with a daily cap) that receives the container's console output
-// - User-assigned managed identity that the container runs as
-// - Container registry, pulled from by that identity (no registry password)
-// - Key Vault holding the bot's secrets, read by that identity (RBAC, no access keys)
-// - Container Apps environment and the bot's container app (exactly one replica)
+// - Log Analytics workspace (with a daily cap) that receives the containers' console output
+// - Container registry with the bot image (no registry password)
+// - Key Vault holding the bots' secrets (RBAC, no access keys)
+// - Container Apps environment
 // - Monthly cost budgets with email alerts
 //
-// The bot's secrets are never in this file or its parameters. Set them in the Key Vault before the first
-// deploy with deployApp = true (see infra/README.md); the container app reads them through Key Vault
-// references.
+// And for each bot in `bots`, from bot.bicep: its managed identity and its container app (exactly one replica).
+//
+// The bots' secrets are never in this file or its parameters. Set them in the Key Vault before deploying a
+// bot's app (see infra/README.md); the container apps read them through Key Vault references.
 
 targetScope = 'resourceGroup'
 
 @description('Azure region for all resources.')
 param location string = resourceGroup().location
 
-@description('Short name used in resource names.')
+@description('Short name used in the shared resources\' names.')
 param appName string = 'gthx'
 
 @description('Environment name used in resource names, e.g. prod.')
 param environmentName string = 'prod'
 
-@description('Image tag to run (the git commit SHA). The container app is only deployed when this is set and deployApp is true.')
+@description('Image tag to run (the git commit SHA). A bot\'s container app is only deployed when this is set and deployApp is true for both the deploy and the bot.')
 param imageTag string = ''
 
-@description('Deploy the container app. Set false for the first deploy, before the image and Key Vault secrets exist.')
+@description('Deploy the container apps. Set false for the first deploy, before the image and Key Vault secrets exist.')
 param deployApp bool = true
 
 @description('Object ID of a user or group that may manage Key Vault secrets (e.g. the person setting them). Optional.')
@@ -39,11 +39,11 @@ param vaultAdminPrincipalId string = ''
 ])
 param vaultAdminPrincipalType string = 'User'
 
-// IRC settings that aren't secret. The server name is a Key Vault secret (irc-server).
+@description('The bots, each with its own identity, container app and database.')
+param bots botSettings[]
+
+// IRC settings that aren't secret, the same for every bot. The server name is a Key Vault secret (irc-server).
 param ircPort int = 6697
-param ircChannels string
-param ircNick string = 'gthx'
-param ircRealName string = 'Gthx Reprap Factoid Bot'
 
 @description('Trust the CA certificate in the Key Vault secret irc-trusted-ca (PEM text), for a test server with a private certificate. Leave false for Libera.')
 param useTrustedCa bool = false
@@ -51,11 +51,8 @@ param useTrustedCa bool = false
 @description('Send warnings and errors by email. Needs the email-* Key Vault secrets.')
 param enableEmail bool = false
 
-@description('Fully qualified name of the Azure SQL server. The app signs in with its managed identity.')
+@description('Fully qualified name of the Azure SQL server. Each bot signs in with its managed identity.')
 param sqlServerFqdn string
-
-@description('Database name on the Azure SQL server.')
-param sqlDatabaseName string
 
 @description('Minimum Serilog level written to the console (and so to Log Analytics).')
 @allowed([
@@ -85,6 +82,27 @@ param loggingBudget int = 25
 @description('Email address for budget alerts. No budgets are created when empty.')
 param budgetContactEmail string = ''
 
+type botSettings = {
+  @description('Used in the bot\'s resource names: id-<name>-<env>, ca-<name>-<env>.')
+  name: string
+
+  @description('Deploy this bot\'s container app. False creates only its identity (needed before its database user).')
+  deployApp: bool
+
+  ircChannels: string
+  ircNick: string
+  ircRealName: string
+
+  @description('Key Vault secret with the bot\'s NickServ password.')
+  ircSaslPasswordSecret: string
+
+  @description('The bot\'s database on the Azure SQL server.')
+  sqlDatabaseName: string
+
+  @description('Subject of the bot\'s error emails.')
+  emailSubject: string
+}
+
 var suffix = uniqueString(resourceGroup().id)
 var tags = {
   app: appName
@@ -92,8 +110,6 @@ var tags = {
 }
 
 // Built-in role definition IDs
-var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
-var keyVaultSecretsUserRoleId = '4633458b-17de-408a-b874-0445c86b69e6'
 var keyVaultSecretsOfficerRoleId = 'b86a8fe4-44ce-4948-aee5-eccb2c155cd7'
 
 resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
@@ -111,12 +127,6 @@ resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   }
 }
 
-resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: 'id-${appName}-${environmentName}'
-  location: location
-  tags: tags
-}
-
 resource registry 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
   name: 'cr${appName}${suffix}'
   location: location
@@ -126,16 +136,6 @@ resource registry 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
   }
   properties: {
     adminUserEnabled: false
-  }
-}
-
-resource registryPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(registry.id, identity.id, acrPullRoleId)
-  scope: registry
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', acrPullRoleId)
-    principalId: identity.properties.principalId
-    principalType: 'ServicePrincipal'
   }
 }
 
@@ -152,16 +152,6 @@ resource vault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enableRbacAuthorization: true
     enableSoftDelete: true
     softDeleteRetentionInDays: 90
-  }
-}
-
-resource vaultSecretsUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(vault.id, identity.id, keyVaultSecretsUserRoleId)
-  scope: vault
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', keyVaultSecretsUserRoleId)
-    principalId: identity.properties.principalId
-    principalType: 'ServicePrincipal'
   }
 }
 
@@ -190,111 +180,34 @@ resource containerEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' = {
   }
 }
 
-// Key Vault secrets the app reads. Each becomes a container app secret of the same name.
-var baseSecretNames = [
-  'irc-server'
-  'irc-sasl-password'
-]
-var caSecretNames = useTrustedCa ? ['irc-trusted-ca'] : []
-var emailSecretNames = enableEmail
-  ? [
-      'email-from'
-      'email-to'
-      'email-server'
-      'email-port'
-      'email-username'
-      'email-password'
-    ]
-  : []
-var secretNames = concat(baseSecretNames, caSecretNames, emailSecretNames)
-
-var baseEnv = [
-  { name: 'IrcInfo__Server', secretRef: 'irc-server' }
-  { name: 'IrcInfo__Port', value: string(ircPort) }
-  { name: 'IrcInfo__UseSsl', value: 'true' }
-  { name: 'IrcInfo__Channels', value: ircChannels }
-  { name: 'IrcInfo__Nick', value: ircNick }
-  { name: 'IrcInfo__RealName', value: ircRealName }
-  { name: 'IrcInfo__SaslPassword', secretRef: 'irc-sasl-password' }
-  {
-    name: 'ConnectionStrings__GthxDb'
-    value: 'Server=tcp:${sqlServerFqdn},1433;Initial Catalog=${sqlDatabaseName};Authentication=Active Directory Managed Identity;User Id=${identity.properties.clientId};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-  }
-  { name: 'ConnectionStrings__GthxDb_Type', value: 'sqlserver' }
-  // One JSON object per line, so Log Analytics queries can filter on level and properties
-  { name: 'Serilog__MinimumLevel__Default', value: logLevel }
-  { name: 'Serilog__WriteTo__0__Name', value: 'Console' }
-  {
-    name: 'Serilog__WriteTo__0__Args__formatter'
-    value: 'Serilog.Formatting.Compact.RenderedCompactJsonFormatter, Serilog.Formatting.Compact'
+module bot 'bot.bicep' = [
+  for b in bots: {
+    name: 'bot-${b.name}'
+    params: {
+      location: location
+      tags: tags
+      name: b.name
+      environmentName: environmentName
+      registryName: registry.name
+      vaultName: vault.name
+      containerEnvironmentId: containerEnvironment.id
+      imageTag: imageTag
+      deployApp: deployApp && b.deployApp
+      ircPort: ircPort
+      ircChannels: b.ircChannels
+      ircNick: b.ircNick
+      ircRealName: b.ircRealName
+      ircServerSecret: 'irc-server'
+      ircSaslPasswordSecret: b.ircSaslPasswordSecret
+      useTrustedCa: useTrustedCa
+      enableEmail: enableEmail
+      emailSubject: b.emailSubject
+      sqlServerFqdn: sqlServerFqdn
+      sqlDatabaseName: b.sqlDatabaseName
+      logLevel: logLevel
+    }
   }
 ]
-// Passed as text rather than a mounted file, so it doesn't matter which user the bot runs as.
-var caEnv = useTrustedCa ? [{ name: 'IrcInfo__TrustedCaCertificate', secretRef: 'irc-trusted-ca' }] : []
-var emailEnv = enableEmail
-  ? [
-      { name: 'EmailConfiguration__FromName', secretRef: 'email-from' }
-      { name: 'EmailConfiguration__ToEmail', secretRef: 'email-to' }
-      { name: 'EmailConfiguration__MailServer', secretRef: 'email-server' }
-      { name: 'EmailConfiguration__Port', secretRef: 'email-port' }
-      { name: 'EmailConfiguration__UserName', secretRef: 'email-username' }
-      { name: 'EmailConfiguration__Password', secretRef: 'email-password' }
-      { name: 'EmailConfiguration__EmailSubject', value: 'Gthx Error' }
-    ]
-  : []
-
-resource app 'Microsoft.App/containerApps@2024-03-01' = if (deployApp && !empty(imageTag)) {
-  name: 'ca-${appName}-${environmentName}'
-  location: location
-  tags: tags
-  identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${identity.id}': {}
-    }
-  }
-  properties: {
-    managedEnvironmentId: containerEnvironment.id
-    configuration: {
-      activeRevisionsMode: 'Single'
-      registries: [
-        {
-          server: registry.properties.loginServer
-          identity: identity.id
-        }
-      ]
-      secrets: [
-        for name in secretNames: {
-          name: name
-          keyVaultUrl: '${vault.properties.vaultUri}secrets/${name}'
-          identity: identity.id
-        }
-      ]
-    }
-    template: {
-      containers: [
-        {
-          name: appName
-          image: '${registry.properties.loginServer}/gthxnetbot:${imageTag}'
-          resources: {
-            cpu: json('0.25')
-            memory: '0.5Gi'
-          }
-          env: concat(baseEnv, caEnv, emailEnv)
-        }
-      ]
-      // An IRC bot must run as exactly one copy: two would fight over the nick.
-      scale: {
-        minReplicas: 1
-        maxReplicas: 1
-      }
-    }
-  }
-  dependsOn: [
-    registryPull
-    vaultSecretsUser
-  ]
-}
 
 resource budget 'Microsoft.Consumption/budgets@2023-11-01' = if (!empty(budgetContactEmail)) {
   name: 'budget-${appName}-${environmentName}'
@@ -364,7 +277,12 @@ output registryName string = registry.name
 output keyVaultName string = vault.name
 output workspaceName string = workspace.name
 output workspaceCustomerId string = workspace.properties.customerId
-output identityClientId string = identity.properties.clientId
-output identityPrincipalId string = identity.properties.principalId
-output identityName string = identity.name
-output containerAppName string = 'ca-${appName}-${environmentName}'
+output bots array = [
+  for (b, i) in bots: {
+    name: b.name
+    identityName: bot[i].outputs.identityName
+    identityClientId: bot[i].outputs.identityClientId
+    identityPrincipalId: bot[i].outputs.identityPrincipalId
+    containerAppName: bot[i].outputs.containerAppName
+  }
+]

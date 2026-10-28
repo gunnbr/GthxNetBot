@@ -41,7 +41,7 @@ MariaDB.
 | **Where the data goes.** | **Decided (2026-10-28):** a new Basic database `Othx` on the existing `gthxdb` server (about $5 a month), Entra-only like `Gthx`, rather than a schema in `Gthx` (that would need db_ddladmin on gthx's tables, shared restores and code changes). |
 | **How to copy it.** | **Done:** `tools/OthxCopy` (see step 2). It repairs the double-encoded text and drops factoid #110, as decided on 2026-10-28. |
 | **How to run it.** | A second Container App, `ca-othx-prod`, in the same environment, sharing the registry, Key Vault and logs, with its own identity `id-othx-prod` so each bot can only reach its own database. |
-| **Bicep layout.** | Split `infra/main.bicep` into the shared resources and a per-bot module (app, identity, settings), with one parameter set per bot. |
+| **Bicep layout.** | **Done:** shared resources in `infra/main.bicep`, a per-bot module `infra/bot.bicep` (identity, app, settings), and a `bots` list in `main.bicepparam`. |
 | **Deploys.** | One approval deploys both bots from the same image. |
 | **Secrets.** | othx's own Key Vault secrets (for example `othx-irc-sasl-password`); the user sets them. Error emails go to the same address as gthx's, with a different subject. |
 | **Backups.** | The same as `Gthx`: monthly long-term retention for 12 months, and a second nightly `scripts/gthx-backup` run with its own settings file (`SQL_DATABASE=Othx`), and the `gthx-backup` user in `Othx`. |
@@ -70,16 +70,22 @@ MariaDB.
 - [x] The current bot ran against the copy on the local InspIRCd as `othx` in `#othxtest`: factoids, info and
       history, seen, set, also, forget and tell all work, and new rows get ids after the copied ones.
 
-### 3. Azure — ⬜
+### 3. Azure — 🟡
+- [x] Split the Bicep: `infra/main.bicep` has the shared resources and a `bots` list; `infra/bot.bicep` has
+      each bot's identity and container app. othx shares `irc-server` and `email-*` (subject `Othx Error`)
+      and has its own `othx-irc-sasl-password`. A what-if against production shows no change for gthx; the
+      only new resources are `id-othx-prod` and its two role assignments. `scripts/gthx-logs -b othx` shows
+      othx's logs. The deploy workflow needed no change: one deploy updates both bots.
+- [ ] Deploy with othx's `deployApp: false`, to create `id-othx-prod`.
 - [ ] Create `Othx` on `gthxdb`; add `id-othx-prod` (db_datareader, db_datawriter, db_ddladmin) and
-      `gthx-backup` (db_datareader, VIEW DEFINITION). The user runs the SQL as the Entra admin.
-- [ ] Split the Bicep (shared plus per-bot), add othx's settings and secrets, and update the deploy workflow.
-      Check that a deploy leaves gthx unchanged.
+      `gthx-backup` (db_datareader, VIEW DEFINITION). The user runs the SQL as the Entra admin (see
+      `infra/README.md`, "Adding a bot").
+- [ ] The user sets `othx-irc-sasl-password`.
 - [ ] Turn on long-term retention for `Othx`, and add its nightly backup.
 
 ### 4. Move — ⬜
 - [ ] Stop `othx2.26` (if it was restarted), copy the data into `Othx`, and check the row counts.
-- [ ] Deploy othx; check it on Libera: SASL, both channels, existing factoids.
+- [ ] Set othx's `deployApp: true` and deploy; check it on Libera: SASL, both channels, existing factoids.
 
 ### 5. Retire the old setup — ⬜
 - [ ] Save `othx2.26`'s image and `docker inspect` output (it has secrets; keep it private) to
