@@ -531,43 +531,48 @@ namespace GthxNetBot
 
         private void Channel_MessageReceived(object? sender, IrcMessageEventArgs e)
         {
-            // TODO: Switch to using CtcpClient instead of just IrcClient so it automatically handles such things
-            var wasHandled = HandleCTCP(e.Source.Name, e.Text);
-            if (wasHandled)
-            {
-                return;
-            }
-
             foreach (var target in e.Targets)
             {
                 _logger.LogDebug("Received message: {Source} -> {Target}: {Message}", e.Source, target, e.Text);
+                if (HandleCTCP(target.Name, e.Source.Name, e.Text))
+                {
+                    continue;
+                }
+
                 _gthx.ReceiveMessage(target.Name, e.Source.Name, e.Text);
             }
         }
 
-        private bool HandleCTCP(string fromUser, string message)
+        /// <summary>
+        /// Handles a CTCP message: passes an ACTION on to the bot, and answers the requests in Ctcp.GetReply.
+        /// IrcDotNet's CtcpClient isn't used because it only sees private messages, not channel ones.
+        /// </summary>
+        /// <param name="channel">Channel the message was sent to, or the sender's nick for a private message</param>
+        /// <param name="fromUser">Nick of the sender</param>
+        /// <param name="message">Text of the message</param>
+        /// <returns>True if the message was a CTCP message, false if it's an ordinary message</returns>
+        private bool HandleCTCP(string channel, string fromUser, string message)
         {
-            if (!message.StartsWith('\u0001') || !message.EndsWith('\u0001'))
+            if (!Ctcp.TryParse(message, out var command, out var parameters))
             {
                 return false;
             }
 
-            var ctcp = message.Trim('\u0001');
-            _logger.LogInformation("Received CTCP request from {user}: {command}", fromUser, ctcp);
-
-            // TODO: Fix handling of CTCP messages
-
-            if (ctcp.StartsWith("PING "))
+            if (command == "ACTION")
             {
-                var parameter = ctcp[5..];
-                // TODO: Is this right? Should be PONG?
-                _client.LocalUser.SendNotice(fromUser, $"\u0001PING {parameter}\u0001");
-            }
-            else if (ctcp.StartsWith("VERSION"))
-            {
-                _client.LocalUser.SendNotice(fromUser, $"\u0001VERSION Gthx Bot Version {GthxBot.Version}\u0001");
+                _gthx.ReceiveAction(channel, fromUser, parameters);
+                return true;
             }
 
+            var reply = Ctcp.GetReply(command, parameters, DateTime.UtcNow);
+            if (reply == null)
+            {
+                _logger.LogInformation("Ignored CTCP {command} from {user} in {channel}", command, fromUser, channel);
+                return true;
+            }
+
+            _logger.LogInformation("Answered CTCP {command} from {user} in {channel}", command, fromUser, channel);
+            _client.LocalUser.SendNotice(fromUser, $"{Ctcp.Delimiter}{reply}{Ctcp.Delimiter}");
             return true;
         }
 
@@ -621,7 +626,7 @@ namespace GthxNetBot
         /// <param name="e">IrcMessageEventArgs</param>
         private void LocalUser_MessageReceived(object? sender, IrcMessageEventArgs e)
         {
-            var wasHandled = HandleCTCP(e.Source.Name, e.Text);
+            var wasHandled = HandleCTCP(e.Source.Name, e.Source.Name, e.Text);
             if (wasHandled)
             {
                 return;

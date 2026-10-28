@@ -17,7 +17,7 @@ need to, but it does no harm. Some commands work without addressing the bot, as 
 
 | Command | What it does |
 |---|---|
-| `gthx: extruder is the part that pushes the plastic` | Sets a factoid. `are` works too (`gthx: hotends are hot`). Setting it again replaces it. |
+| `gthx: extruder is the part that pushes the plastic` | Sets a factoid. `are` works too (`gthx: hotends are hot`). Setting it again replaces it. A name over 30 characters is ignored without a reply, since it's most likely just a sentence with "is" in it. |
 | `gthx: extruder is also a motor` | Adds another value to a factoid. |
 | `extruder?` or `extruder!` | Says the factoid, without addressing the bot. All its values are joined with "and also". |
 | `extruder? \| someuser` | Says the factoid to someone. The `?` and the spaces are optional: `extruder \| someuser` and `extruder\|someuser` work too. |
@@ -27,7 +27,7 @@ need to, but it does no harm. Some commands work without addressing the bot, as 
 | `gthx: remind me in 2 hours to check the print` | Reminds you later (see below). |
 | `gthx: list reminders` | Your reminders that haven't come due, with their numbers. |
 | `gthx: cancel reminder 42` | Cancels one of your reminders. |
-| `seen someuser?` | When and where `someuser` last spoke, and what they said. Not updated by private messages. |
+| `seen someuser?` | When and where `someuser` last spoke (or did a `/me`), and what they said. Not updated by private messages. |
 | `gthx: google pla temperature for someuser` | Gives `someuser` a search link. |
 | `status?` | The bot's version, uptime and mood. |
 | `lurkers?` | How many people in the channel have never said anything. |
@@ -35,6 +35,9 @@ need to, but it does no harm. Some commands work without addressing the bot, as 
 A factoid value can start with `<reply>` (the bot says just the rest) or `<action>` (the bot does it as a
 `/me` action), and `!who` and `!channel` in it are replaced by the asker's nick and the channel. Some
 factoids are locked and can't be changed or forgotten.
+
+The bot answers the CTCP requests `VERSION`, `PING`, `TIME` (in UTC), `SOURCE` and `CLIENTINFO`, sent to it
+or to a channel it's in, and ignores others. A `/me` counts as speaking for `seen` and for reminders.
 
 A reminder's time is relative: `30 minutes`, `an hour`, `2h`, `1h30m`, `1 day and 3 hours`, `2 weeks`
 (units are seconds, minutes, hours, days, weeks, months and years; a month is 30 days), from a minute to a year ahead. Each nick can have 10 waiting,

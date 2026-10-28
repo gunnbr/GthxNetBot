@@ -51,12 +51,16 @@ namespace Gthx.Bot.Modules
 
         public bool ProcessAction(string channel, string user, string message)
         {
+            // A /me counts as speaking.
+            UserSpoke(channel, user, DateTime.UtcNow);
             return false;
         }
 
-        public bool ProcessMessage(string channel, string user, string message, bool wasDirectlyAddressed)
+        /// <summary>
+        /// Notes that the user is here and delivers any reminders held for them
+        /// </summary>
+        private void UserSpoke(string channel, string user, DateTime now)
         {
-            var now = DateTime.UtcNow;
             _scheduler.UserSpoke(user, now);
 
             foreach (var reminder in _data.TakeDueReminders(user, now))
@@ -64,6 +68,12 @@ namespace Gthx.Bot.Modules
                 _logger.LogInformation("Delivering held reminder {Id} to {User} in {Channel}", reminder.Id, user, channel);
                 _client.SendMessage(channel, ReminderScheduler.DeliveryMessage(reminder, _util, now));
             }
+        }
+
+        public bool ProcessMessage(string channel, string user, string message, bool wasDirectlyAddressed)
+        {
+            var now = DateTime.UtcNow;
+            UserSpoke(channel, user, now);
 
             if (!wasDirectlyAddressed)
             {

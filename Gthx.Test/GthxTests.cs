@@ -1,5 +1,6 @@
 ﻿using Gthx.Bot;
 using Gthx.Bot.Interfaces;
+using Gthx.Bot.Modules;
 using Gthx.Core;
 using Gthx.Data;
 using Gthx.Test.Mocks;
@@ -183,6 +184,29 @@ namespace Gthx.Test
             ClassicAssert.AreEqual($"{testUser}: Okay.", replies.Messages[0]);
             ClassicAssert.AreEqual(testFactoid, _data.FactoidItem);
             ClassicAssert.AreEqual(testValue, _data.FactoidValue);
+        }
+
+        [Test]
+        public void TestFactoidLengthLimit()
+        {
+            var testChannel = "#reprap";
+            var testUser = "Chatty";
+
+            // Exactly the limit is fine
+            var longest = new string('x', FactoidModule.MaxFactoidLength);
+            _data.ResetFactoid();
+            _gthx.HandleReceivedMessage(testChannel, testUser, $"gthxbot: {longest} is allowed");
+            var replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual($"{testUser}: Okay.", replies.Messages[0]);
+            ClassicAssert.AreEqual(longest, _data.FactoidItem);
+
+            // A sentence with "is" in it is ignored without a reply
+            _data.ResetFactoid();
+            _gthx.HandleReceivedMessage(testChannel, testUser, "gthxbot: the print I started this morning is finally done");
+            replies = _client.GetReplies();
+            ClassicAssert.AreEqual(0, replies.Messages.Count);
+            ClassicAssert.IsNull(_data.FactoidItem);
         }
 
         [Test]
@@ -1153,6 +1177,24 @@ namespace Gthx.Test
             ClassicAssert.AreEqual(0, _client.GetReplies().Messages.Count);
 
             _data.Reminders.Clear();
+        }
+
+        [Test]
+        public void TestHeldReminderDeliveryOnAction()
+        {
+            var testUser = "Waver";
+            _data.Reminders.Clear();
+
+            var reminder = _data.AddReminder(testUser, "#reprap", "to post this suggestion", DateTime.UtcNow.AddMinutes(-1));
+            reminder.Timestamp = DateTime.UtcNow.AddHours(-2);
+
+            // A /me counts as speaking
+            _gthx.HandleReceivedAction("#other", testUser, "waves");
+            var replies = _client.GetReplies();
+            ClassicAssert.AreEqual(1, replies.Messages.Count);
+            ClassicAssert.AreEqual("#other", replies.Channel);
+            ClassicAssert.AreEqual($"{testUser}: 2 hours ago you asked me to remind you to post this suggestion", replies.Messages[0]);
+            ClassicAssert.AreEqual(0, _data.Reminders.Count);
         }
 
         [Test]

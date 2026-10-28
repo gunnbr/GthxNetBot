@@ -9,6 +9,13 @@ namespace Gthx.Bot.Modules
 {
     public class FactoidModule : IGthxModule
     {
+        /// <summary>
+        /// Longest factoid name that can be set (issue #11). A longer one is most likely a sentence with "is" in it
+        /// rather than someone setting a factoid, so it's ignored without a reply. Existing longer factoids can still
+        /// be looked up.
+        /// </summary>
+        public const int MaxFactoidLength = 30;
+
         private readonly Regex _FactoidSet = new(@"(?'factoid'.+?)\s(?'isAre'is|are)(?'hasAlso'\salso)?\s(?'value'.+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex _InvalidRegex = new(@"^(here|how|it|something|that|this|what|when|where|which|who|why|you)$", RegexOptions.IgnoreCase);
         // "foo?" or "foo!", or piped to a user, where the "?"/"!" and the spaces are optional: "foo? | bar", "foo | bar", "foo|bar"
@@ -166,6 +173,13 @@ namespace Gthx.Bot.Modules
             }
 
             var factoidName = factoidMatch.Groups["factoid"].Value;
+            if (factoidName.Length > MaxFactoidLength)
+            {
+                // Most likely just a sentence with "is" in it, so ignore it without a reply.
+                _Logger.LogInformation("Not setting '{factoid}' from {user}: longer than {max} characters", factoidName, user, MaxFactoidLength);
+                return false;
+            }
+
             var isAre = factoidMatch.Groups["isAre"].Value.Equals("are", StringComparison.CurrentCultureIgnoreCase);
             var hasAlso = factoidMatch.Groups["hasAlso"].Success;
             var value = factoidMatch.Groups["value"].Value;
