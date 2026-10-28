@@ -17,7 +17,7 @@ need to, but it does no harm. Some commands work without addressing the bot, as 
 
 | Command | What it does |
 |---|---|
-| `gthx: extruder is the part that pushes the plastic` | Sets a factoid. `are` works too (`gthx: hotends are hot`). Setting it again replaces it. Names can be at most 30 characters, so a sentence with "is" in it isn't stored. |
+| `gthx: extruder is the part that pushes the plastic` | Sets a factoid. `are` works too (`gthx: hotends are hot`). Setting it again replaces it. A name over 30 characters is ignored without a reply, since it's most likely just a sentence with "is" in it. |
 | `gthx: extruder is also a motor` | Adds another value to a factoid. |
 | `extruder?` or `extruder!` | Says the factoid, without addressing the bot. All its values are joined with "and also". |
 | `extruder? \| someuser` | Says the factoid to someone. The `?` and the spaces are optional: `extruder \| someuser` and `extruder\|someuser` work too. |

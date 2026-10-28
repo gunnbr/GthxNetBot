@@ -201,12 +201,11 @@ namespace Gthx.Test
             ClassicAssert.AreEqual($"{testUser}: Okay.", replies.Messages[0]);
             ClassicAssert.AreEqual(longest, _data.FactoidItem);
 
-            // A sentence with "is" in it isn't stored
+            // A sentence with "is" in it is ignored without a reply
             _data.ResetFactoid();
             _gthx.HandleReceivedMessage(testChannel, testUser, "gthxbot: the print I started this morning is finally done");
             replies = _client.GetReplies();
-            ClassicAssert.AreEqual(1, replies.Messages.Count);
-            ClassicAssert.AreEqual($"{testUser}: Sorry, factoid names can only be {FactoidModule.MaxFactoidLength} characters long.", replies.Messages[0]);
+            ClassicAssert.AreEqual(0, replies.Messages.Count);
             ClassicAssert.IsNull(_data.FactoidItem);
         }
 
