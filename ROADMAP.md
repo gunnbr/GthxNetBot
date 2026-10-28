@@ -9,8 +9,8 @@ the new features. Their details were removed on 2026-10-28 to keep this file sho
 
 | # | Phase | Status |
 |---|-------|--------|
-| 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | 🟡 |
-| 13 | Bring the documentation up to date | 🟡 |
+| 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | ✅ |
+| 13 | Bring the documentation up to date | ✅ |
 | 14 | Verify the database backups, and back up to the Linux PC on a schedule | ⬜ |
 | 15 | Clean up the old branches in this repo | ⬜ |
 | 16 | Move othx to Azure | ⬜ |
@@ -21,20 +21,20 @@ the new features. Their details were removed on 2026-10-28 to keep this file sho
 - [ ] **Email the admin when certain keywords are said** ([#4](https://github.com/gunnbr/GthxNetBot/issues/4)), deferred on 2026-10-28. The admin needs a way to set the keywords, which is planned as an admin page on the website ([GthxWebsite](https://github.com/gunnbr/GthxWebsite)), so this will be done during work on the website.
 - [ ] **Final cleanup of build warnings**, left for the very end: CS8981 (the migration class named `init` is all lower case) and CS0618 (the obsolete `IrcRawMessageEventArgs.Message` in `GthxNetBot/GthxIrcClient.cs`).
 
-## 12. Gthx.Data repository — 🟡
+## 12. Gthx.Data repository — ✅
 `Gthx.Data` is a submodule from its own repository, [gunnbr/GthxNetData](https://github.com/gunnbr/GthxNetData), so its packages, workflows and settings are looked after there.
 - [x] Dependabot and a CI build ([GthxNetData#4](https://github.com/gunnbr/GthxNetData/pull/4)): monthly grouped NuGet and Actions update PRs, and a build check on every PR.
 - [x] This repo's Dependabot config moves the `Gthx.Data` submodule to GthxNetData's latest master once a month ([#56](https://github.com/gunnbr/GthxNetBot/pull/56)).
-- [x] EF Core versions match: GthxNetBot (#58) and GthxNetData (its #6) both moved to 10.0.14, and the submodule now points at GthxNetData's master (`fcd24d6`, which also has its Dependabot Actions update, #5). GthxNetBot references `Microsoft.EntityFrameworkCore.Design` and Gthx.Data references `Microsoft.EntityFrameworkCore.SqlServer` and `.Tools`; when one repo updates EF Core, update the other to the same version.
+- [x] EF Core versions match: GthxNetBot (#58) and GthxNetData (its #6) both moved to 10.0.14, and the submodule now points at GthxNetData's master (`fcd24d6`, which also has its Dependabot Actions update, #5). GthxNetBot references `Microsoft.EntityFrameworkCore.Design`, Gthx.Data references `Microsoft.EntityFrameworkCore.SqlServer` and SqlServerMigrations references `.Tools`; when one repo updates EF Core, update the other to the same version.
 - [x] `master` is protected by the same "Protect master" ruleset as this repo, with the CI `build` check required (2026-10-26).
 - [x] Repository settings: Dependabot security updates, secret scanning and push protection are on, the default workflow token is read-only, and workflows can't approve pull requests (2026-10-28).
-- [ ] Adding a migration with the README's `dotnet ef migrations add` command fails: the tools look for `SqlServerMigrations.dll` in Gthx.Data's output folder, but that project builds into `Gthx.Data/bin`. It only worked when an old copy happened to be there. Also, most projects in both repos build into one shared `bin/` folder at the GthxNetBot root, so stale files from older builds get mixed in (an EF Core Design DLL from 10.0.13, and `Serilog.AspNetCore` from the test project, which breaks `dotnet run` of the bot). For `AddPrintablesAndMakerWorldRefs`: delete `bin/`, build `Gthx.Data.sln`, copy `Gthx.Data/bin/Debug/net10.0/SqlServerMigrations.dll` into `bin/Debug/net10.0/`, then run the README command with the EF Core 10 tools. Fix: give each project its own output folder, and make the migrations project the startup project for the tools.
+- [x] Each project builds into its own `bin/` folder, and adding a migration works ([GthxNetData#10](https://github.com/gunnbr/GthxNetData/pull/10), this repo's #77). Before, the EF tools looked for `SqlServerMigrations.dll` where it wasn't built, and the shared `bin/` folder at the GthxNetBot root collected stale files (`Serilog.AspNetCore` from the test project broke `dotnet run` of the bot). `SqlServerMigrations` is now the startup project for the tools and holds the `Microsoft.EntityFrameworkCore.Tools` reference; Gthx.Data's README has the new command.
 - [x] The website uses it: [GthxWebsite](https://github.com/gunnbr/GthxWebsite) has GthxNetData as a submodule (`lib/GthxNetData`) and reads the same `Gthx` database through `IGthxWebData`, with a read-only identity. A schema change has to keep the website's queries working (GthxNetBot's `GthxWebDataTest` covers them).
 
-## 13. Documentation — 🟡
+## 13. Documentation — ✅
 - [x] **README.md rewritten** (2026-10-26). It now says what the bot does and lists its commands and link types, how production runs (Azure, deploys, version numbers, logs, reconnect waits), the repository layout, building and testing, running locally (Compose, console mode, the test bot, soak traffic, Aspire), a configuration reference and how to make changes. The old TODO list was out of date (#29 was fixed in 2.24, the lurkers module exists and actions update "seen"); its CTCP item has since been done. The "Why C#?" section was removed later as no longer relevant.
 - [x] Update the documentation ([#28](https://github.com/gunnbr/GthxNetBot/issues/28)): closed as complete on 2026-10-26; the README covers setting up the database and the ways to configure the bot.
-- [ ] Gthx.Data's README: fix the migration instructions (see phase 12).
+- [x] Gthx.Data's README: the migration instructions are fixed (see phase 12).
 
 ## 14. Backups — ⬜
 The data is in the Azure SQL database `Gthx` (Basic tier). Azure keeps automatic backups, but nobody has checked what they cover or tried a restore, and there's no copy outside Azure.
