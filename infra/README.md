@@ -1,21 +1,29 @@
 # Azure deployment
 
-`main.bicep` describes everything the bot needs in one resource group (`rg-gthx-prod`):
+`main.bicep` describes everything the bots (`gthx`, `othx`) need in one resource group (`rg-gthx-prod`). The
+shared resources are in `main.bicep`; each bot in its `bots` parameter gets the resources in `bot.bicep`.
 
 | Resource | Name | Purpose |
 |---|---|---|
-| Log Analytics workspace | `log-gthx-prod` | Receives the container's console output (one JSON object per line). Daily cap 0.15 GB, inside the free 5 GB/month. |
-| Managed identity | `id-gthx-prod` | What the container runs as. It pulls the image, reads Key Vault and signs in to Azure SQL, so none of those need a password. |
-| Container registry | `crgthx<suffix>` (Basic) | Holds the bot's images. No admin user; the identity has AcrPull. |
-| Key Vault | `kv-gthx-<suffix>` | The bot's secrets (RBAC; the identity has Key Vault Secrets User). |
-| Container Apps environment and app | `cae-gthx-prod`, `ca-gthx-prod` | Runs exactly one copy of the bot (0.25 vCPU, 0.5 GiB). |
+| Log Analytics workspace | `log-gthx-prod` | Receives the containers' console output (one JSON object per line). Daily cap 0.15 GB, inside the free 5 GB/month. |
+| Container registry | `crgthx<suffix>` (Basic) | Holds the bot image, which all the bots run. No admin user. |
+| Key Vault | `kv-gthx-<suffix>` | The bots' secrets (RBAC). |
+| Container Apps environment | `cae-gthx-prod` | Where the bots' container apps run. |
 | Budgets | `budget-gthx-prod`, `budget-gthx-prod-logging` | Email alerts for the resource group ($50/month) and for logging ($25/month). |
+| Managed identity, per bot | `id-gthx-prod`, `id-othx-prod` | What the bot's container runs as. It pulls the image (AcrPull), reads Key Vault (Key Vault Secrets User) and signs in to the bot's own database, so none of those need a password. |
+| Container app, per bot | `ca-gthx-prod`, `ca-othx-prod` | Runs exactly one copy of the bot (0.25 vCPU, 0.5 GiB). |
 
-`main.bicepparam` holds the non-secret settings. Values that change per deploy or shouldn't be in the repo
-come from environment variables (`IMAGE_TAG`, `DEPLOY_APP`, `VAULT_ADMIN_PRINCIPAL_ID`, `BUDGET_CONTACT_EMAIL`).
+The Azure SQL server `gthxdb` and its databases (`Gthx`, `Othx`) aren't in the template; they were created
+by hand.
+
+`main.bicepparam` holds the non-secret settings, including each bot's channels, nick, database and the name of
+its NickServ password secret. A bot with `deployApp: false` gets only its identity. Values that change per
+deploy or shouldn't be in the repo come from environment variables (`IMAGE_TAG`, `DEPLOY_APP`,
+`VAULT_ADMIN_PRINCIPAL_ID`, `BUDGET_CONTACT_EMAIL`).
 
 The deploy workflow (`.github/workflows/deploy.yml`) runs the tests, builds and pushes the image, and
-deploys the template, on every push to `master`, after approval for the `production` environment.
+deploys the template, on every push to `master`, after approval for the `production` environment. One deploy
+updates all the bots to the same image.
 
 ## Key Vault secrets
 
@@ -24,9 +32,13 @@ The container app reads these through Key Vault references. They must exist befo
 | Secret | Setting | Notes |
 |---|---|---|
 | `irc-server` | `IrcInfo__Server` | Kept out of the repo. |
-| `irc-sasl-password` | `IrcInfo__SaslPassword` | The NickServ password for the bot's nick on that server. |
+| `irc-sasl-password` | `IrcInfo__SaslPassword` (gthx) | gthx's NickServ password on that server. |
+| `othx-irc-sasl-password` | `IrcInfo__SaslPassword` (othx) | othx's NickServ password on that server. |
 | `irc-trusted-ca` | `IrcInfo__TrustedCaCertificate` | Only when `useTrustedCa` is true: the PEM text of the CA certificate of a test server with a private certificate (`testing/tls/out/ca.pem`). |
-| `email-from`, `email-to`, `email-server`, `email-port`, `email-username`, `email-password` | `EmailConfiguration__*` | Only when `enableEmail` is true. |
+| `email-from`, `email-to`, `email-server`, `email-port`, `email-username`, `email-password` | `EmailConfiguration__*` | Only when `enableEmail` is true. Shared by the bots; each has its own subject (`emailSubject`). |
+
+`irc-server`, `irc-trusted-ca` and `email-*` are shared by all the bots. Every bot's identity can read every
+secret in the vault.
 
 To change one, set a new version and restart the app; it picks up the latest version:
 
@@ -38,6 +50,7 @@ To change one, set a new version and restart the app; it picks up the latest ver
     scripts/gthx-logs                  # last hour, Information and above
     scripts/gthx-logs -s 1d -l Warning # last day, warnings and errors
     scripts/gthx-logs -f               # stream live
+    scripts/gthx-logs -b othx          # othx instead of gthx
 
 Or open the workspace's **Logs** page in the Azure portal and query `ContainerAppConsoleLogs_CL`, e.g.
 
@@ -182,8 +195,33 @@ has no Azure roles; in the database it can only read the data and the schema.
 
 6. Run the **Build and deploy to Azure** workflow (or push to `master`).
 
+## Adding a bot
+
+How `othx` was added (see `OTHX-MIGRATION.md`); another bot would be the same:
+
+1. Add it to `bots` in `main.bicepparam` with `deployApp: false`, and deploy. That creates its identity
+   (`id-<name>-prod`) and lets it pull the image and read Key Vault.
+2. Create its database on `gthxdb` (Basic, about $5 a month):
+
+       az sql db create -g rg-gthx-prod -s gthxdb -n Othx --service-objective Basic --backup-storage-redundancy Geo
+
+3. In that database, as the Entra admin, let in the bot's identity and the backup app:
+
+       CREATE USER [id-othx-prod] FROM EXTERNAL PROVIDER;
+       ALTER ROLE db_datareader ADD MEMBER [id-othx-prod];
+       ALTER ROLE db_datawriter ADD MEMBER [id-othx-prod];
+       ALTER ROLE db_ddladmin ADD MEMBER [id-othx-prod];
+       CREATE USER [gthx-backup] FROM EXTERNAL PROVIDER;
+       ALTER ROLE db_datareader ADD MEMBER [gthx-backup];
+       GRANT VIEW DEFINITION TO [gthx-backup];
+
+4. Set its NickServ password secret (`othx-irc-sasl-password`), and turn on long-term retention and the
+   nightly backup as for `Gthx` (see Backups).
+5. Set `deployApp: true` and deploy. The bot creates its tables with the migrations at startup (othx's were
+   created by `tools/OthxCopy`, which copied its old data in first).
+
 ## Switching to Libera
 
-In `main.bicepparam`, set `ircChannels` to the production channel list and `useTrustedCa = false`. Set the
-`irc-server` secret to `irc.libera.chat` and `irc-sasl-password` to the Libera NickServ password, then
-deploy.
+In `main.bicepparam`, set each bot's `ircChannels` to its production channel list and `useTrustedCa = false`.
+Set the `irc-server` secret to `irc.libera.chat` and each bot's password secret to its Libera NickServ
+password, then deploy.

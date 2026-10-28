@@ -1,10 +1,11 @@
 #!/bin/sh
-# Shows the Azure-hosted bot's logs from Log Analytics, or streams them live.
+# Shows an Azure-hosted bot's logs from Log Analytics, or streams them live.
 #
 #   scripts/gthx-logs                  # last hour, Information and above
 #   scripts/gthx-logs -s 1d -l Warning # last day, warnings and errors
 #   scripts/gthx-logs -g tell          # messages containing "tell"
 #   scripts/gthx-logs -f               # stream live output from the container
+#   scripts/gthx-logs -b othx          # another bot's logs (default gthx)
 #
 # Needs the Azure CLI, signed in (az login) with read access to the resource group.
 set -eu
@@ -18,15 +19,16 @@ GREP=
 FOLLOW=
 
 usage() {
-    sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'
     exit "${1:-0}"
 }
 
-while getopts "s:l:g:fh" opt; do
+while getopts "s:l:g:b:fh" opt; do
     case $opt in
         s) SINCE=$OPTARG ;;
         l) LEVEL=$OPTARG ;;
         g) GREP=$OPTARG ;;
+        b) APP=ca-$OPTARG-prod ;;
         f) FOLLOW=1 ;;
         h) usage 0 ;;
         *) usage 1 ;;

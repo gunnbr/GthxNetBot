@@ -1,5 +1,5 @@
 # Tests, builds the image into Azure Container Registry, and deploys infra/main.bicep (including the
-# container app running that image) to Azure. The deploy job uses the "production" environment, so it
+# container apps of all the bots, which run that same image) to Azure. The deploy job uses the "production" environment, so it
 # waits for approval when that environment has required reviewers.
 #
 # Azure sign-in uses OpenID Connect (no stored Azure password), with two identities: the build job, which
