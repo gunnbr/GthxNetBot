@@ -7,8 +7,8 @@ factoids ("extruder is the part that pushes the plastic"), passes messages on, r
 tells you when someone was last seen, and counts how often YouTube, Thingiverse, Printables and MakerWorld links come up.
 
 This is gthx rewritten in C# (.NET 10) from the original Python. It runs in Azure Container Apps and is
-deployed from this repository. [ROADMAP.md](ROADMAP.md) has the current plans and status, and
-[History.txt](History.txt) the release notes.
+deployed from this repository. [OTHX-MIGRATION.md](OTHX-MIGRATION.md) has the plan for moving othx to
+Azure, and [History.txt](History.txt) the release notes.
 
 ## Using the bot
 
