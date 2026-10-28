@@ -1,0 +1,11 @@
+# Runs the gthx database backup every night. A run missed while the PC was off happens at the next boot.
+[Unit]
+Description=Nightly gthx database backup
+
+[Timer]
+OnCalendar=*-*-* 03:30
+RandomizedDelaySec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

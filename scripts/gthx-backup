@@ -1,0 +1,95 @@
+#!/bin/sh
+# Exports the Azure SQL database Gthx to a .bacpac file (schema and data) in a local folder, keeps the
+# last 30 days plus the backup from the 1st of each month for a year, and emails the admin if anything
+# fails.
+#
+#   scripts/gthx-backup          # run a backup now
+#
+# Settings come from ~/.config/gthx-backup/backup.env (or $GTHX_BACKUP_CONFIG); see infra/README.md,
+# "Backups", for the setup. It signs in as the gthx-backup app with a certificate, so it doesn't depend
+# on anyone's az login. Runs nightly from the systemd user timer in scripts/systemd/.
+set -eu
+
+LOG=$(mktemp)
+ALERTED=
+# Any other failure (a missing setting, a full disk) also sends an alert.
+trap 'status=$?; [ $status -ne 0 ] && [ -z "$ALERTED" ] && alert "The script stopped with exit status $status."; rm -f "$LOG"' EXIT
+
+# Emails the admin through the same SMTP server the bot uses. Without SMTP settings, it only logs.
+# ALERT_FROM can be a bare address or "Name <address>".
+alert() {
+    ALERTED=1
+    echo "Backup failed: $1" >&2
+    tail -n 40 "$LOG" >&2
+    if [ -z "${SMTP_URL:-}" ]; then
+        return
+    fi
+    # The password goes through a private file, not the command line, where other users could see it.
+    NETRC=$(mktemp)
+    printf 'default login "%s" password "%s"\n' "$SMTP_USER" \
+        "$(printf '%s' "$SMTP_PASSWORD" | sed 's/[\\"]/\\&/g')" >"$NETRC"
+    {
+        printf 'From: %s\nTo: %s\nSubject: gthx backup failed on %s\n\n' "$ALERT_FROM" "$ALERT_TO" "$(hostname)"
+        printf '%s\n\nLast output:\n' "$1"
+        tail -n 40 "$LOG"
+    } | curl --silent --show-error --ssl-reqd --url "$SMTP_URL" --netrc-file "$NETRC" \
+        --mail-from "$(printf '%s' "$ALERT_FROM" | sed 's/.*<\(.*\)>.*/\1/')" --mail-rcpt "$ALERT_TO" --upload-file - \
+        || echo "Couldn't send the alert email" >&2
+    rm -f "$NETRC"
+}
+
+fail() {
+    alert "$1"
+    exit 1
+}
+
+CONFIG=${GTHX_BACKUP_CONFIG:-$HOME/.config/gthx-backup/backup.env}
+# shellcheck disable=SC1090
+. "$CONFIG"
+
+SQL_SERVER=${SQL_SERVER:-gthxdb.database.windows.net}
+SQL_DATABASE=${SQL_DATABASE:-Gthx}
+BACKUP_DIR=${BACKUP_DIR:-$HOME/backups/gthx}
+BACKUP_CERT=${BACKUP_CERT:-$HOME/.config/gthx-backup/gthx-backup.pem}
+SQLPACKAGE=${SQLPACKAGE:-$HOME/.dotnet/tools/sqlpackage}
+KEEP_DAYS=${KEEP_DAYS:-30}
+KEEP_MONTHLY_DAYS=${KEEP_MONTHLY_DAYS:-365}
+
+mkdir -p "$BACKUP_DIR"
+STAMP=$(date -u +%Y-%m-%dT%H%MZ)
+FILE="$BACKUP_DIR/$SQL_DATABASE-$STAMP.bacpac"
+# SqlPackage needs a .bacpac name, so the file being written starts with "partial-" instead.
+PARTIAL="$BACKUP_DIR/partial-$SQL_DATABASE-$STAMP.bacpac"
+
+# SqlClient's "Active Directory Default" sign-in reads the app and certificate from these variables.
+export AZURE_CLIENT_ID="$BACKUP_APP_ID"
+export AZURE_TENANT_ID="$BACKUP_TENANT_ID"
+export AZURE_CLIENT_CERTIFICATE_PATH="$BACKUP_CERT"
+
+echo "Exporting $SQL_DATABASE to $FILE"
+if ! "$SQLPACKAGE" /Action:Export /TargetFile:"$PARTIAL" \
+    /SourceConnectionString:"Server=tcp:$SQL_SERVER,1433;Initial Catalog=$SQL_DATABASE;Authentication=Active Directory Default;Encrypt=True" \
+    >"$LOG" 2>&1; then
+    rm -f "$PARTIAL"
+    fail "SqlPackage couldn't export $SQL_DATABASE."
+fi
+
+# A .bacpac is a zip file; check that it's complete before replacing anything.
+if ! unzip -tq "$PARTIAL" >>"$LOG" 2>&1; then
+    rm -f "$PARTIAL"
+    fail "The exported file $PARTIAL is damaged."
+fi
+mv "$PARTIAL" "$FILE"
+echo "Saved $(du -h "$FILE" | cut -f1) to $FILE"
+
+# Keep every backup for KEEP_DAYS days, and the one from the 1st of each month for KEEP_MONTHLY_DAYS days.
+find "$BACKUP_DIR" -maxdepth 1 -name "$SQL_DATABASE-*.bacpac" -mtime +"$KEEP_DAYS" | while read -r old; do
+    case $(basename "$old") in
+        "$SQL_DATABASE"-????-??-01T*)
+            if [ -z "$(find "$old" -mtime +"$KEEP_MONTHLY_DAYS")" ]; then
+                continue
+            fi ;;
+    esac
+    echo "Removing $old"
+    rm -f "$old"
+done

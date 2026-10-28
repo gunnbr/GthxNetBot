@@ -1,0 +1,9 @@
+# Runs scripts/gthx-backup once. Started by gthx-backup.timer; see infra/README.md, "Backups".
+[Unit]
+Description=Back up the gthx database from Azure SQL
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/source/repos/GthxNetBot/scripts/gthx-backup
