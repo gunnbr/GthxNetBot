@@ -14,7 +14,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 8 | Automatically deploy to Azure from GitHub | ✅ |
 | 9 | Fix known security problems | ✅ |
 | 10 | Fix reported bugs | ✅ |
-| 11 | Implement new features | 🟡 |
+| 11 | Implement new features | ✅ |
 | 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | 🟡 |
 | 13 | Bring the documentation up to date | 🟡 |
 | 14 | Verify the database backups, and back up to the Linux PC on a schedule | ⬜ |
@@ -164,7 +164,7 @@ Already fixed; closed with a comment on 2026-10-26:
 - [x] More information in the starting message ([#3](https://github.com/gunnbr/GthxNetBot/issues/3)): it now includes the version and commit (phase 6).
 - [x] Getting our nick back when the old instance quits ([#2](https://github.com/gunnbr/GthxNetBot/issues/2)): the bot takes the nick back as soon as it's free; every deploy since #51 shows it happening.
 
-## 11. New features — 🟡
+## 11. New features — ✅
 - [x] **Printables and MakerWorld links** (2026-10-26). Both sites block the bot's requests (Cloudflare), but their links normally end with the model's name, such as `printables.com/model/1863827-heavy-duty-keyboard-holder-no-supports` or `makerworld.com/en/models/2459711-articulated-dragon`. The bot takes the model number from the link and makes the title from the name ("Heavy duty keyboard holder no supports"), stores both, and counts mentions like it does for Thingiverse: `<user> linked to "<title>" on Printables => <count> IRC mentions`. A link without the name uses the title stored from an earlier link, or replies `linked to a model on Printables` without one. New tables `PrintablesRef` and `MakerWorldRef` ([GthxNetData#7](https://github.com/gunnbr/GthxNetData/pull/7)). Titles are now cut at 250 characters (plus "...") so they fit the database's 255-character title columns; before, a title over 255 characters would have failed to save.
 
 Requests from GitHub issues:
