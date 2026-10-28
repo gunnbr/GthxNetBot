@@ -1,0 +1,12 @@
+# Runs the othx database backup every night, after gthx's. A run missed while the PC was off happens at the
+# next boot.
+[Unit]
+Description=Nightly othx database backup
+
+[Timer]
+OnCalendar=*-*-* 04:00
+RandomizedDelaySec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
