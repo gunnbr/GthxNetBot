@@ -13,7 +13,7 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 | 7 | Build on GitHub with build/test status badges on the main page | ✅ |
 | 8 | Automatically deploy to Azure from GitHub | ✅ |
 | 9 | Fix known security problems | 🟡 |
-| 10 | Fix reported bugs | 🟡 |
+| 10 | Fix reported bugs | ✅ |
 | 11 | Implement new features | 🟡 |
 | 12 | Look after the Gthx.Data repository (`gunnbr/GthxNetData`) | 🟡 |
 | 13 | Bring the documentation up to date | 🟡 |
@@ -147,13 +147,13 @@ Still to do (these change Azure or GitHub settings, so they're the owner's call)
 - [x] IrcDotNet fork: the bot never finished registering without a SASL password (no `CAP END`); fixed, see phase 10.
 - Optional, not planned: SQL auditing to the Log Analytics workspace (counts against the 0.15 GB/day cap), and Microsoft Defender for SQL (about $15/month).
 
-## 10. Reported bugs — 🟡
+## 10. Reported bugs — ✅
 Open GitHub issues, triaged on 2026-10-26 (feature requests are in phase 11):
 - [x] Factoids don't get set in queries ([#24](https://github.com/gunnbr/GthxNetBot/issues/24)). A private message that starts with the bot's nick (`/msg gthx gthx: foo is bar`) kept the nick, so it set the factoid `gthx: foo` (and a question got no reply). The nick is now removed in private messages too. Confirmed on the test server before the fix, and fixed there after #59 deployed.
 - [x] Thingiverse titles ([#39](https://github.com/gunnbr/GthxNetBot/issues/39), closed as won't do on 2026-10-26): thingiverse.com answers the bot's title fetch with 403 Forbidden (a Cloudflare bot check), from sakura as well as Azure. The only legitimate route is Thingiverse's official API, and we don't agree to its API key's license terms, so the bot no longer fetches Thingiverse titles. It counts Thingiverse links and replies `<user> linked to thing <number> on thingiverse => <count> IRC mentions`, or with a title saved before.
 - [x] EF errors don't appear in the log ([#23](https://github.com/gunnbr/GthxNetBot/issues/23)). A failure at startup, such as a database login or migration error, wasn't caught, so it only reached the console as an untimestamped unhandled exception (exit code 139) and was never emailed. It's now logged at Fatal with the version and the full exception, emailed, and the bot exits with code 1. EF's migration messages (each migration applied, or "already up to date") are now logged at Information. Errors while running were already logged (`GthxBot.HandleIncomingMessage`). Verified with a wrong database password and a fresh database on the local SQL container, and the email with Mailpit.
 - [x] `GthxSqlDataTest` logged to the Windows-only path `c:\tmp\GthxSqlTests.json`, which Serilog quietly dropped on Linux; it now logs to the system temp folder (`/tmp/GthxSqlTests.json` on Linux).
-- [ ] IrcDotNet fork: `CompleteIrcClientTest` now targets `irc.libera.chat` ([#3](https://github.com/gunnbr/IrcDotNet/pull/3)) but fails in `LocalUserModeTest`, because Libera gives new users `+w` by default and the test expects it to be off. The library is fine; the test assumes a server's default user modes. The local InspIRCd gives new users no modes, so it would fail there too (it expects `+i`), and `+w` works there. Planned, not started (deferred on 2026-10-26): make the test toggle `w` from whatever the server set, and skip the integration test unless `ServerHostName` is set, because a plain `dotnet test` in the fork connects two clients to Libera. Then run it against the local server.
+- [x] IrcDotNet fork: `CompleteIrcClientTest` targeted `irc.libera.chat` ([#3](https://github.com/gunnbr/IrcDotNet/pull/3)) and failed in `LocalUserModeTest`, because Libera gives new users `+w` and the test expected it to be off (the library was fine; the test assumed a server's default modes). It's now skipped unless `ServerHostName` is set, so a plain `dotnet test` in the fork no longer connects to Libera; `LocalUserModeTest` toggles `w` from whatever the server set, and `ChannelModeTest` no longer expects `+n` on new channels ([IrcDotNet#5](https://github.com/gunnbr/IrcDotNet/pull/5)). The whole test passes against the local InspIRCd, which gives new users no modes.
 - [x] IrcDotNet fork: without a SASL password the bot never finished signing in. The non-SASL path sends `CAP LS` after `NICK`/`USER`, which makes the server hold registration until `CAP END`, but `CAP END` was only sent after an `ACK`/`NAK`, so registration hung until the server timed it out (60 s on InspIRCd). Now `CAP END` is sent right after the `CAP LS` reply when nothing requested a capability ([IrcDotNet#4](https://github.com/gunnbr/IrcDotNet/pull/4)). Registered in 1 second on the test server. The upstream IrcDotNet project is abandoned, so fixes stay in the fork.
 
 Already fixed; closed with a comment on 2026-10-26:
