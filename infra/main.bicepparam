@@ -21,9 +21,8 @@ param bots = [
     emailSubject: 'Gthx Error'
   }
   {
-    // Only the identity until the database Othx, its user and the secret exist (OTHX-MIGRATION.md).
     name: 'othx'
-    deployApp: false
+    deployApp: true
     ircChannels: '#openscad,#othxtest'
     ircNick: 'othx'
     ircRealName: 'OpenSCAD Factoid Bot'

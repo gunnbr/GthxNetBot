@@ -80,13 +80,15 @@ MariaDB.
 - [x] Create `Othx` on `gthxdb` (Basic, geo-redundant backups); add `id-othx-prod` (db_datareader, db_datawriter, db_ddladmin) and
       `gthx-backup` (db_datareader, VIEW DEFINITION). The user runs the SQL as the Entra admin (see
       `infra/README.md`, "Adding a bot").
-- [ ] The user sets `othx-irc-sasl-password`.
+- [x] The user set `othx-irc-sasl-password` (2026-10-28).
 - [x] Long-term retention for `Othx`: monthly, kept 12 months, like `Gthx` (2026-10-28).
 - [ ] Nightly backup: `scripts/systemd/othx-backup.{service,timer}` (04:00, `SQL_DATABASE=Othx`, same settings
-      file as gthx's). A test run on 2026-10-28 worked. Turn on the timer once this is on `master`.
+      file as gthx's). A test run worked on 2026-10-28; the user turns on the timer (see `infra/README.md`).
 
-### 4. Move — ⬜
-- [ ] Stop `othx2.26` (if it was restarted), copy the data into `Othx`, and check the row counts.
+### 4. Move — 🟡
+- [x] Copied the data into `Othx` with `tools/OthxCopy`, run by the user as the Entra admin (2026-10-28;
+      `othx2.26` stayed off, so nothing changed since step 2). Same counts as the local run: 106 factoids, 206
+      history rows, 61 refs, 2,701 seen, 236 Thingiverse and 350 YouTube refs; 34 values repaired.
 - [ ] Set othx's `deployApp: true` and deploy; check it on Libera: SASL, both channels, existing factoids.
 
 ### 5. Retire the old setup — ⬜
