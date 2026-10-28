@@ -336,6 +336,7 @@ namespace Gthx.Test.Mocks
         internal void ResetFactoid()
         {
             FactoidGotten = null;
+            FactoidItem = null;
             FactoidUser = null;
             FactoidValue = null;
         }
