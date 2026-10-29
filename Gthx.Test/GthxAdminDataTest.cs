@@ -46,6 +46,7 @@ namespace Gthx.Test
                 CREATE USER {LimitedUser} FOR LOGIN {LimitedUser};
                 GRANT SELECT, UPDATE, DELETE ON dbo.Factoid TO {LimitedUser};
                 GRANT SELECT, INSERT ON dbo.FactoidHistory TO {LimitedUser};
+                GRANT SELECT, INSERT, DELETE ON dbo.EmailKeyword TO {LimitedUser};
                 """);
             _LimitedOptions = new DbContextOptionsBuilder<GthxDataContext>()
                 .UseSqlServer(new SqlConnectionStringBuilder(sqlBuilder.ConnectionString) { UserID = LimitedUser, Password = LimitedPassword }.ConnectionString)
@@ -62,7 +63,7 @@ namespace Gthx.Test
             }
         }
 
-        // Every test changes data, so each one starts from the same factoids.
+        // Every test changes data, so each one starts from the same factoids and no keywords.
         [SetUp]
         public async Task SetUp()
         {
@@ -70,6 +71,7 @@ namespace Gthx.Test
             {
                 await db.FactoidHistory.ExecuteDeleteAsync();
                 await db.Factoid.ExecuteDeleteAsync();
+                await db.EmailKeyword.ExecuteDeleteAsync();
 
                 AddFactoid(db, "reprap", "a self-replicating 3D printer");
                 AddFactoid(db, "RepRap", "also a community");
@@ -203,6 +205,34 @@ namespace Gthx.Test
         }
 
         [Test]
+        public async Task EmailKeywords_AddListAndDelete()
+        {
+            var printer = await _Data.AddEmailKeywordAsync("  printer ", "admin");
+            ClassicAssert.AreEqual(("printer", "admin"), (printer.Keyword, printer.User));
+            await _Data.AddEmailKeywordAsync("gthx", "admin");
+
+            CollectionAssert.AreEqual(new[] { "gthx", "printer" },
+                (await _Data.GetEmailKeywordsAsync()).Select(k => k.Keyword).ToArray());
+
+            ClassicAssert.IsTrue(await _Data.DeleteEmailKeywordAsync(printer.Id));
+            ClassicAssert.IsFalse(await _Data.DeleteEmailKeywordAsync(printer.Id));
+            CollectionAssert.AreEqual(new[] { "gthx" },
+                (await _Data.GetEmailKeywordsAsync()).Select(k => k.Keyword).ToArray());
+        }
+
+        [Test]
+        public async Task EmailKeywords_AddingAgainIgnoresCase()
+        {
+            ClassicAssert.IsNotNull(await _Data.AddEmailKeywordAsync("RepRap", "admin"));
+            ClassicAssert.IsNull(await _Data.AddEmailKeywordAsync("reprap", "admin"));
+
+            // The unique index stops a second copy that gets past the check, as when two admins add it at once.
+            await using var db = Fresh();
+            db.EmailKeyword.Add(new EmailKeyword() { Keyword = "REPRAP", User = "admin", Timestamp = DateTime.UtcNow });
+            await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
+        }
+
+        [Test]
         public async Task WorksWithOnlyTheAdminPermissions()
         {
             await using var db = new GthxDataContext(_LimitedOptions);
@@ -213,6 +243,9 @@ namespace Gthx.Test
             ClassicAssert.IsNotNull(await data.UpdateFactoidValueAsync(id, "polylactic acid", "admin"));
             ClassicAssert.AreEqual(1, await data.SetItemLockedAsync("pla", false));
             ClassicAssert.AreEqual(1, await data.DeleteFactoidsAsync(new[] { id }, "admin"));
+            var keyword = await data.AddEmailKeywordAsync("printer", "admin");
+            ClassicAssert.AreEqual(1, (await data.GetEmailKeywordsAsync()).Count);
+            ClassicAssert.IsTrue(await data.DeleteEmailKeywordAsync(keyword.Id));
 
             // And it can't touch anything else.
             await Assert.ThrowsAsync<SqlException>(() => db.Ref.ToListAsync());
@@ -224,6 +257,7 @@ namespace Gthx.Test
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _Data.GetLongFactoidsAsync(30, 0));
             await Assert.ThrowsAsync<ArgumentException>(() => _Data.UpdateFactoidValueAsync(1, " ", "admin"));
             await Assert.ThrowsAsync<ArgumentException>(() => _Data.SetItemLockedAsync("", true));
+            await Assert.ThrowsAsync<ArgumentException>(() => _Data.AddEmailKeywordAsync(" ", "admin"));
         }
     }
 }
