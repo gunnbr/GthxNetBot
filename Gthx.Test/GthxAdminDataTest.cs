@@ -215,15 +215,15 @@ namespace Gthx.Test
             ClassicAssert.AreEqual(1, await data.DeleteFactoidsAsync(new[] { id }, "admin"));
 
             // And it can't touch anything else.
-            Assert.ThrowsAsync<SqlException>(() => db.Ref.ToListAsync());
+            await Assert.ThrowsAsync<SqlException>(() => db.Ref.ToListAsync());
         }
 
         [Test]
-        public void RejectsBadArguments()
+        public async Task RejectsBadArguments()
         {
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _Data.GetLongFactoidsAsync(30, 0));
-            Assert.ThrowsAsync<ArgumentException>(() => _Data.UpdateFactoidValueAsync(1, " ", "admin"));
-            Assert.ThrowsAsync<ArgumentException>(() => _Data.SetItemLockedAsync("", true));
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _Data.GetLongFactoidsAsync(30, 0));
+            await Assert.ThrowsAsync<ArgumentException>(() => _Data.UpdateFactoidValueAsync(1, " ", "admin"));
+            await Assert.ThrowsAsync<ArgumentException>(() => _Data.SetItemLockedAsync("", true));
         }
     }
 }
