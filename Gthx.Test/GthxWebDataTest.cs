@@ -140,10 +140,10 @@ namespace Gthx.Test
         }
 
         [Test]
-        public void RejectsNonPositiveLimits()
+        public async Task RejectsNonPositiveLimits()
         {
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _Data.SearchFactoidsAsync("x", 0));
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _Data.GetTopFactoidsAsync(0));
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _Data.SearchFactoidsAsync("x", 0));
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _Data.GetTopFactoidsAsync(0));
         }
     }
 }
