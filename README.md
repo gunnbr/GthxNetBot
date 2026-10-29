@@ -5,10 +5,11 @@
 gthx is an IRC bot for the RepRap and 3D printing channels on Libera (`#reprap` and others). It remembers
 factoids ("extruder is the part that pushes the plastic"), passes messages on, reminds you of things,
 tells you when someone was last seen, and counts how often YouTube, Thingiverse, Printables and MakerWorld links come up.
+The same program also runs as othx, in the OpenSCAD channel (`#openscad`), with its own nick and data.
 
 This is gthx rewritten in C# (.NET 10) from the original Python. It runs in Azure Container Apps and is
-deployed from this repository. [OTHX-MIGRATION.md](OTHX-MIGRATION.md) has the plan for moving othx to
-Azure, and [History.txt](History.txt) the release notes.
+deployed from this repository. [OTHX-MIGRATION.md](OTHX-MIGRATION.md) records how othx was moved to Azure
+in 2026, and [History.txt](History.txt) has the release notes.
 
 ## Using the bot
 
@@ -57,16 +58,20 @@ When someone posts a link, the bot replies with its title and how many times it 
 
 ## How it runs
 
-- **Production** is one container in Azure Container Apps (resource group `rg-gthx-prod`), using an Azure SQL
-  database and signing in to IRC with SASL over TLS. Secrets are in Key Vault. [infra/README.md](infra/README.md)
-  describes the resources, the secrets, the one-time setup and how to read the logs.
+- **Production** is one container per bot in Azure Container Apps (resource group `rg-gthx-prod`): `ca-gthx-prod`
+  and `ca-othx-prod`, both running the same image. Each bot has its own Azure SQL database (`Gthx`, `Othx`),
+  identity and NickServ account, and signs in to IRC with SASL over TLS. Secrets are in Key Vault.
+  [infra/README.md](infra/README.md) describes the resources, the secrets, the setup, adding a bot, backups
+  and how to read the logs.
 - **Deploys:** every push to `master` runs the tests, builds the image into the registry and deploys it, after
-  approval for the `production` environment. Pushes that change only Markdown files don't deploy. During a
-  deploy the new container joins as `gthx_` and takes the `gthx` nick as soon as the old one quits.
+  approval for the `production` environment, to both bots at once. Pushes that change only Markdown files don't
+  deploy. During a deploy the new container joins as `gthx_` (or `othx_`) and takes the nick back as soon as
+  the old one quits.
 - **Version numbers** come from [Nerdbank.GitVersioning](https://github.com/dotnet/Nerdbank.GitVersioning):
   `3.0.<commits since version.json changed>+<commit>`, shown by `status?`, CTCP VERSION and the startup log
   line. Bump the major or minor version in `version.json`.
-- **Logs** go to the console as JSON, which Azure collects in Log Analytics; `scripts/gthx-logs` reads them.
+- **Logs** go to the console as JSON, which Azure collects in Log Analytics; `scripts/gthx-logs` reads them
+  (`-b othx` for othx).
   Warnings and errors are also emailed, batched every 10 seconds. The startup line is logged as an error on
   purpose, so every restart sends an email.
 - **Reconnects:** the bot exits whenever its connection ends, and the container is restarted. To avoid rapid
@@ -83,9 +88,10 @@ When someone posts a link, the bot replies with its title and how many times it 
 | `IrcDotNet` | Submodule: [gunnbr's fork of IrcDotNet](https://github.com/gunnbr/IrcDotNet), with SASL, TCP keepalive and other fixes. The original project is no longer maintained. |
 | `Gthx.Test` | NUnit tests. |
 | `GthxNetBot.AppHost` | .NET Aspire host for running the bot with a SQL Server container from Visual Studio. |
-| `infra` | The Azure deployment (Bicep) and its setup script. |
+| `infra` | The Azure deployment (Bicep: shared resources in `main.bicep`, one `bot.bicep` per bot) and its setup script. |
 | `testing` | The local test IRC server's NickServ (`services`), TLS certificate (`tls`) and soak traffic (`traffic`). |
-| `scripts` | `gthx-logs` for reading the Azure logs. |
+| `scripts` | `gthx-logs` for reading the Azure logs, and `gthx-backup` with its systemd timers for the nightly database backups. |
+| `tools` | `OthxCopy`, the one-off tool that copied othx's data from MariaDB in 2026. |
 
 ## Getting the source
 

@@ -92,12 +92,12 @@ MariaDB.
 - [x] Set othx's `deployApp: true` and deployed (#89, 2026-10-28). `ca-othx-prod` runs 3.0.71 on Libera: SASL
       succeeded, joined `#openscad` and `#othxtest`, no migrations needed, and the user checked existing factoids.
 
-### 5. Retire the old setup — ⬜
-- [ ] Save `othx2.26`'s image and `docker inspect` output (it has secrets; keep it private) to
-      `~/backups/othx2.26/`, as was done for `gthx2.26`, then remove the container.
-- [ ] Dump `othxnet` (`mysqldump`) to `~/backups/othx2.26/`, then drop it (and the leftover databases, if
-      wanted). MariaDB stays on for Gitea.
-- [ ] Update `README.md` and `infra/README.md` for two bots.
+### 5. Retire the old setup — ✅
+- [x] Saved `othx2.26`'s images (`gthxnetbot:v2.26`, `pre-upgrade-backup/othx2.26`) and `docker inspect`
+      output (it has secrets; private) to `~/backups/othx2.26/`, then removed the container (2026-10-28).
+- [x] Dumped `othxnet` to `~/backups/othx2.26/othxnet.sql.gz` (row counts checked against the database), then
+      dropped it. MariaDB stays on for Gitea; the 2021 leftover databases are still there.
+- [x] Updated `README.md` and `infra/README.md` for two bots.
 
 ---
-_Last updated: 2026-10-28_
+_Last updated: 2026-10-28. The move is done: othx runs in Azure._
