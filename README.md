@@ -47,6 +47,11 @@ in the last 5 minutes and are still online (in the channel you asked in, or by p
 left it). Otherwise it waits and reminds you the next time you speak. Reminders are kept in the database,
 so they survive restarts.
 
+When anyone says one of the keywords set on gthx.net's admin panel, anywhere in a message or `/me`
+and ignoring case, the bot emails the admin (with the [email settings](#configuration)), so they hear about it
+while they're away. It emails about a keyword in a channel at most once every 15 minutes, and picks up changes
+to the keywords within a minute. Each bot reads its own database's keywords; the admin panel sets gthx's.
+
 When someone posts a link, the bot replies with its title and how many times it has been linked:
 
 | Site | Example link | Title from |
@@ -166,7 +171,7 @@ Settings come from `GthxNetBot/appsettings.json`, overridden by environment vari
 | `IrcInfo:SaslPassword` | The NickServ password for the nick, used to log in with SASL. If SASL fails, the bot doesn't join any channels. |
 | `IrcInfo:TrustedCaCertificate` | One more CA to trust for the server's TLS certificate (a file path or the PEM text), for a test server with a private certificate. Leave unset for Libera. |
 | `IrcInfo:BannedExitDelayMinutes`, `SaslFailureExitDelayMinutes`, `EarlyFailureExitDelayMinutes`, `DisconnectExitDelayMinutes`, `StableConnectionMinutes` | The waits before exiting after a lost connection (60, 15, 5 and 0.5 minutes), and how long a connection must last to count as a normal run (5 minutes). |
-| `EmailConfiguration:*` | `MailServer`, `Port`, `UserName`, `Password`, `FromName`, `ToEmail` and `EmailSubject` for the error emails. Email is off unless all are set. |
+| `EmailConfiguration:*` | `MailServer`, `Port`, `UserName`, `Password`, `FromName`, `ToEmail` and `EmailSubject` for the error emails. Email is off unless all are set. The keyword emails (below) use the same server and addresses. |
 | `Serilog` | Log levels and outputs ([Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration)). |
 
 ## Making changes
