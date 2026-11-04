@@ -679,7 +679,15 @@ namespace GthxNetBot
 
         private void SimpleBot_ProtocolError(object? sender, IrcProtocolErrorEventArgs e)
         {
-            _logger.LogError("Protocol Error {code}: {message} ({parameters})", e.Code, e.Message, e.Parameters);
+            if (e.Code == (int)IrcProtocolErrorEnum.MotdMissing)
+            {
+                // A server without a MOTD is normal, and this reply ends registration, so it's not an error.
+                _logger.LogInformation("The server has no MOTD ({code}: {message})", e.Code, e.Message);
+            }
+            else
+            {
+                _logger.LogError("Protocol Error {code}: {message} ({parameters})", e.Code, e.Message, e.Parameters);
+            }
 
             if (e.Code == (int)IrcProtocolErrorEnum.YoureBanned)
             {
