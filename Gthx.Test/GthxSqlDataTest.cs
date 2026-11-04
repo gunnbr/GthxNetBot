@@ -253,7 +253,7 @@ namespace Gthx.Test
             ClassicAssert.AreEqual(0, _Data.GetReminders(author).Count, "Reminders exist at the start of the test");
 
             var later = _Data.AddReminder(author, channel, "to do it later", now.AddHours(2));
-            var soon = _Data.AddReminder(author, channel, "to do it soon", now.AddMinutes(-1));
+            var soon = _Data.AddReminder(author, channel, "to do it soon", now.AddMinutes(-1), isPrivate: true);
             var other = _Data.AddReminder("otherReminderUser", channel, "to do their thing", now.AddMinutes(-2));
             ClassicAssert.AreNotEqual(0, later.Id);
 
@@ -262,6 +262,13 @@ namespace Gthx.Test
             CollectionAssert.AreEqual(new[] { soon.Id, later.Id }, reminders.Select(r => r.Id).ToList(), "Not sorted by due time");
             ClassicAssert.AreEqual("to do it soon", reminders[0].Message);
             ClassicAssert.AreEqual(channel, reminders[0].Channel);
+
+            // Read back through another context, so it's what was saved and not the tracked object
+            using (var scope = _host.Services.CreateScope())
+            {
+                var saved = new GthxSqlData(scope.ServiceProvider.GetRequiredService<GthxDataContext>()).GetReminders(author);
+                CollectionAssert.AreEqual(new[] { true, false }, saved.Select(r => r.Private).ToList());
+            }
 
             var due = _Data.GetDueReminders(now).Select(r => r.Id).ToList();
             CollectionAssert.Contains(due, soon.Id);

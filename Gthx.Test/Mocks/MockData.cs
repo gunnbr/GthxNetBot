@@ -347,7 +347,7 @@ namespace Gthx.Test.Mocks
         public List<Reminder> Reminders { get; } = new List<Reminder>();
         private int _nextReminderId = 1;
 
-        public Reminder AddReminder(string author, string channel, string message, DateTime due)
+        public Reminder AddReminder(string author, string channel, string message, DateTime due, bool isPrivate = false)
         {
             var reminder = new Reminder()
             {
@@ -356,7 +356,8 @@ namespace Gthx.Test.Mocks
                 Channel = channel,
                 Message = message,
                 Timestamp = DateTime.UtcNow,
-                DueTimestamp = due
+                DueTimestamp = due,
+                Private = isPrivate
             };
             Reminders.Add(reminder);
             return reminder;
@@ -387,6 +388,11 @@ namespace Gthx.Test.Mocks
         public bool DeleteReminder(int id)
         {
             return Reminders.RemoveAll(r => r.Id == id) > 0;
+        }
+
+        public List<string> GetEmailKeywords()
+        {
+            return new List<string>();
         }
 
         private static bool IsAuthor(Reminder reminder, string author)

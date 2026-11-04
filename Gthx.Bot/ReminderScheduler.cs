@@ -13,7 +13,8 @@ namespace Gthx.Bot
 {
     /// <summary>
     /// Delivers reminders when they come due, if the person who asked for them has spoken recently
-    /// and is still online. Reminders for someone who isn't are left for <see cref="Modules.ReminderModule"/>
+    /// and is still online. Private reminders go by private message as soon as they're due, as long as the
+    /// person is online. Reminders for someone who isn't around are left for <see cref="Modules.ReminderModule"/>
     /// to deliver the next time they speak.
     /// </summary>
     public class ReminderScheduler : IDisposable
@@ -110,7 +111,8 @@ namespace Gthx.Bot
 
                     foreach (var reminder in data.GetDueReminders(now))
                     {
-                        if (!_lastSpoke.ContainsKey(reminder.Author.ToLowerInvariant()) || !_client.IsUserOnline(reminder.Author))
+                        // A private one doesn't wait for them to speak: it's sent the moment it's due.
+                        if ((!reminder.Private && !_lastSpoke.ContainsKey(reminder.Author.ToLowerInvariant())) || !_client.IsUserOnline(reminder.Author))
                         {
                             continue;
                         }
@@ -134,12 +136,12 @@ namespace Gthx.Bot
         }
 
         /// <summary>
-        /// Where to deliver a reminder: the channel it was asked for in if they're still there,
-        /// otherwise a private message
+        /// Where to deliver a reminder: a private message if it's private, otherwise the channel it was
+        /// asked for in if they're still there, otherwise a private message
         /// </summary>
         private string Target(Reminder reminder)
         {
-            if (reminder.Channel.StartsWith('#'))
+            if (!reminder.Private && reminder.Channel.StartsWith('#'))
             {
                 // This also checks that the bot is still in the channel.
                 var users = _client.GetUsersInChannelAsync(reminder.Channel).Result;
