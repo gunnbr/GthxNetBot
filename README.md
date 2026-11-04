@@ -41,6 +41,9 @@ factoids are locked and can't be changed or forgotten.
 The bot answers the CTCP requests `VERSION`, `PING`, `TIME` (in UTC), `SOURCE` and `CLIENTINFO`, sent to it
 or to a channel it's in, and ignores others. A `/me` counts as speaking for `seen` and for reminders.
 
+Before joining its channels, the bot marks itself as a bot with the server's [bot mode](https://ircv3.net/specs/extensions/bot-mode)
+(`+B` on Libera), when the server has one, so `/whois` and `/who` show it as a bot.
+
 A reminder's time is relative: `30 minutes`, `an hour`, `2h`, `1h30m`, `1 day and 3 hours`, `2 weeks`
 (units are seconds, minutes, hours, days, weeks, months and years; a month is 30 days), from a minute to a year ahead. Each nick can have 10 waiting,
 of up to 400 characters each. When one comes due, the bot posts it right away if you've said something
