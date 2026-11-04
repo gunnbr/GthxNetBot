@@ -66,6 +66,7 @@ namespace GthxNetBot
         private volatile bool _banned;
         private DateTime? _registeredAt;
         private int _exitRequested;
+        private int _joinedChannels;
         private volatile bool _quitting;
         private readonly PosixSignalRegistration _sigtermRegistration;
 
@@ -454,13 +455,52 @@ namespace GthxNetBot
             client.LocalUser.Quit += IrcClient_LocalUser_OnQuit;
             client.LocalUser.JoinedChannel += LocalUser_JoinedChannel;
             client.LocalUser.LeftChannel += IrcClient_LocalUser_LeftChannel;
+            client.LocalUser.ModesChanged += LocalUser_ModesChanged;
+
+            // Channels are joined at the end of the MOTD (OnRegistrationComplete), once the server's
+            // RPL_ISUPPORT values have arrived, so the bot mode can be set before joining.
+        }
+
+        /// <summary>
+        /// Sets the bot mode and joins the channels once registration has finished (end of the MOTD, or
+        /// ERR_NOMOTD). The bot mode has to be set first: Libera doesn't allow changing it in a channel.
+        /// </summary>
+        private void OnRegistrationComplete()
+        {
+            if (Interlocked.Exchange(ref _joinedChannels, 1) == 1)
+            {
+                return;
+            }
+
+            if (_saslFailed)
+            {
+                _logger.LogWarning("Not joining channels because SASL authentication failed.");
+                return;
+            }
+
+            var botMode = BotMode.GetModeLetter(_client.ServerSupportedFeatures);
+            if (botMode != null)
+            {
+                var modeChange = $"+{botMode}";
+                _logger.LogInformation("Setting bot mode {mode}", modeChange);
+                _client.LocalUser.SetModes(modeChange);
+            }
+            else
+            {
+                _logger.LogInformation("The server doesn't advertise a bot mode, so not setting one.");
+            }
 
             var channels = _options.Channels!.Split(',');
             foreach (var channel in channels)
             {
                 _logger.LogInformation("Joining {channel}", channel);
-                client.Channels.Join(channel);
+                _client.Channels.Join(channel);
             }
+        }
+
+        private void LocalUser_ModesChanged(object? sender, EventArgs e)
+        {
+            _logger.LogInformation("User modes are now +{modes}", string.Concat(_client.LocalUser.Modes));
         }
 
         private void Client_WhoIsReplyReceived(object? sender, IrcUserEventArgs e)
@@ -675,7 +715,8 @@ namespace GthxNetBot
             }
             else if (e.Code == (int)IrcProtocolErrorEnum.MotdMissing)
             {
-                // Just ignore
+                // Registration ends with this instead of RPL_ENDOFMOTD when the server has no MOTD.
+                OnRegistrationComplete();
             }
         }
 
@@ -733,6 +774,7 @@ namespace GthxNetBot
         private void Client_MotdReceived(object? sender, EventArgs e)
         {
             _logger.LogInformation("MOTD received: {message}", _client.MessageOfTheDay);
+            OnRegistrationComplete();
         }
 
         private void Client_ErrorMessageReceived(object? sender, IrcErrorMessageEventArgs e)
