@@ -31,7 +31,8 @@ namespace Gthx.Bot.Modules
 
         private readonly Regex _remindRegex = new(@"^\s*remind\s+me\b", RegexOptions.IgnoreCase);
         // People often put punctuation after the time: "remind me in 7 days, it's Tuesday again!"
-        private readonly Regex _remindInRegex = new(@$"^\s*remind\s+me\s+in\s+(?'time'{ReminderTime.Pattern})(?:\s*[,:;-]\s*|\s+)(?'message'\S.*?)\s*$", RegexOptions.IgnoreCase);
+        // "privately", "by dm", "by pm" or "by msg" right after "remind me" asks for it by private message.
+        private readonly Regex _remindInRegex = new(@$"^\s*remind\s+me\s+(?:(?'private'privately|by\s+(?:dm|pm|msg))\s+)?in\s+(?'time'{ReminderTime.Pattern})(?:\s*[,:;-]\s*|\s+)(?'message'\S.*?)\s*$", RegexOptions.IgnoreCase);
         private readonly Regex _listRegex = new(@"^\s*list\s+reminders\s*\??\s*$", RegexOptions.IgnoreCase);
         private readonly Regex _cancelRegex = new(@"^\s*cancel\s+reminder\s+#?(?'id'\d{1,9})\s*$", RegexOptions.IgnoreCase);
         private readonly IGthxData _data;
@@ -65,8 +66,10 @@ namespace Gthx.Bot.Modules
 
             foreach (var reminder in _data.TakeDueReminders(user, now))
             {
-                _logger.LogInformation("Delivering held reminder {Id} to {User} in {Channel}", reminder.Id, user, channel);
-                _client.SendMessage(channel, ReminderScheduler.DeliveryMessage(reminder, _util, now));
+                // A private one goes by private message wherever they spoke.
+                var target = reminder.Private ? user : channel;
+                _logger.LogInformation("Delivering held reminder {Id} to {User} in {Channel}", reminder.Id, user, target);
+                _client.SendMessage(target, ReminderScheduler.DeliveryMessage(reminder, _util, now));
             }
         }
 
@@ -104,15 +107,17 @@ namespace Gthx.Bot.Modules
             if (!remindMatch.Success || !ReminderTime.TryParse(remindMatch.Groups["time"].Value, out var time))
             {
                 _logger.LogInformation("{User} in {Channel}: couldn't read the reminder '{Message}'", user, channel, message);
-                _client.SendMessage(channel, $"{user}: Say \"remind me in <time> <message>\", such as \"remind me in 2 hours to check the print\".");
+                _client.SendMessage(channel, $"{user}: Say \"remind me in <time> <message>\", such as \"remind me in 2 hours to check the print\". Say \"remind me privately in ...\" to get it by private message.");
                 return true;
             }
 
-            AddReminder(channel, user, remindMatch.Groups["message"].Value, time, now);
+            // One asked for in a private message comes back that way too.
+            var isPrivate = remindMatch.Groups["private"].Success || !channel.StartsWith('#');
+            AddReminder(channel, user, remindMatch.Groups["message"].Value, time, isPrivate, now);
             return true;
         }
 
-        private void AddReminder(string channel, string user, string message, TimeSpan time, DateTime now)
+        private void AddReminder(string channel, string user, string message, TimeSpan time, bool isPrivate, DateTime now)
         {
             if (time < TimeSpan.FromMinutes(1))
             {
@@ -138,9 +143,10 @@ namespace Gthx.Bot.Modules
                 return;
             }
 
-            var reminder = _data.AddReminder(user, channel, message, now + time);
-            _logger.LogInformation("{User} in {Channel} set reminder {Id} for {Due}", user, channel, reminder.Id, reminder.DueTimestamp);
-            _client.SendMessage(channel, $"{user}: Okay, I'll remind you in {_util.TimeBetweenString(now, now + time)} (reminder {reminder.Id}).");
+            var reminder = _data.AddReminder(user, channel, message, now + time, isPrivate);
+            _logger.LogInformation("{User} in {Channel} set reminder {Id} for {Due} (private: {Private})", user, channel, reminder.Id, reminder.DueTimestamp, isPrivate);
+            var how = isPrivate ? " by private message" : "";
+            _client.SendMessage(channel, $"{user}: Okay, I'll remind you{how} in {_util.TimeBetweenString(now, now + time)} (reminder {reminder.Id}).");
         }
 
         private void ListReminders(string channel, string user, DateTime now)
@@ -163,7 +169,8 @@ namespace Gthx.Bot.Modules
                 var when = left <= TimeSpan.Zero
                     ? "now"
                     : $"in {_util.TimeBetweenString(now, now + TimeSpan.FromMinutes(Math.Ceiling(left.TotalMinutes)))}";
-                _client.SendMessage(channel, $"{user}: {reminder.Id}: {when}: {message}");
+                var how = reminder.Private ? " by private message" : "";
+                _client.SendMessage(channel, $"{user}: {reminder.Id}: {when}{how}: {message}");
             }
         }
     }

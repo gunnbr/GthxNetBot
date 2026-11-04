@@ -26,6 +26,7 @@ need to, but it does no harm. Some commands work without addressing the bot, as 
 | `info extruder` | How often the factoid was asked for, and who set or deleted it when. |
 | `gthx: tell someuser the parts arrived` | Passes the message on the next time `someuser` says something. |
 | `gthx: remind me in 2 hours to check the print` | Reminds you later (see below). |
+| `gthx: remind me privately in 2 hours to check the print` | Reminds you by private message right when it's due. `by dm`, `by pm` and `by msg` work too. |
 | `gthx: list reminders` | Your reminders that haven't come due, with their numbers. |
 | `gthx: cancel reminder 42` | Cancels one of your reminders. |
 | `seen someuser?` | When and where `someuser` last spoke (or did a `/me`), and what they said. Not updated by private messages. |
@@ -44,8 +45,11 @@ A reminder's time is relative: `30 minutes`, `an hour`, `2h`, `1h30m`, `1 day an
 (units are seconds, minutes, hours, days, weeks, months and years; a month is 30 days), from a minute to a year ahead. Each nick can have 10 waiting,
 of up to 400 characters each. When one comes due, the bot posts it right away if you've said something
 in the last 5 minutes and are still online (in the channel you asked in, or by private message if you've
-left it). Otherwise it waits and reminds you the next time you speak. Reminders are kept in the database,
-so they survive restarts.
+left it). Otherwise it waits and reminds you the next time you speak. A private reminder (asked for with
+`privately`, `by dm`, `by pm` or `by msg`, or asked for in a private message) is sent by private message as
+soon as it's due if you're in a channel with the bot, whether you've spoken lately or not; if you aren't, it's
+sent privately the next time you speak. Asking in a channel still shows the message there, so ask in a private
+message to keep it to yourself. Reminders are kept in the database, so they survive restarts.
 
 When anyone says one of the keywords set on gthx.net's admin panel, anywhere in a message or `/me`
 and ignoring case, the bot emails the admin (with the [email settings](#configuration)), so they hear about it
