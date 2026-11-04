@@ -244,6 +244,17 @@ namespace Gthx.Test
         }
 
         [Test]
+        public void GthxData_TestEmailKeywords()
+        {
+            _Db.EmailKeyword.Add(new Gthx.Core.EmailKeyword() { Keyword = "sqlTestKeyword", User = "web:tester", Timestamp = DateTime.UtcNow });
+            _Db.SaveChanges();
+
+            CollectionAssert.Contains(_Data.GetEmailKeywords(), "sqlTestKeyword");
+
+            _Db.EmailKeyword.Where(k => k.Keyword == "sqlTestKeyword").ExecuteDelete();
+        }
+
+        [Test]
         public void GthxData_TestReminders()
         {
             var author = "reminderUser";

@@ -5,9 +5,9 @@ Status legend: ⬜ not started · 🟡 in progress · ✅ done
 `othx` is the same bot as gthx, for the OpenSCAD channels on Libera. This plan moves it from sakura to
 Azure, next to gthx, running the current release. It replaces `ROADMAP.md`, which tracked the
 modernization of gthx (phases 1–15, all done; see its
-[last version](https://github.com/gunnbr/GthxNetBot/blob/2b5c0d7/ROADMAP.md)). Work left over from that
-is in issues: [#4](https://github.com/gunnbr/GthxNetBot/issues/4) (keyword alert emails, to be done with
-the website) and [#82](https://github.com/gunnbr/GthxNetBot/issues/82) (the final cleanup of build warnings).
+[last version](https://github.com/gunnbr/GthxNetBot/blob/2b5c0d7/ROADMAP.md)). The work left over from that,
+[#4](https://github.com/gunnbr/GthxNetBot/issues/4) (keyword alert emails) and
+[#82](https://github.com/gunnbr/GthxNetBot/issues/82) (the final cleanup of build warnings), is done.
 
 **Testing rule:** never run test bots or probe clients against Libera (we were banned there on 2026-10-24
 after test runs). Only the production bots connect to Libera. Use the local InspIRCd test server on sakura:

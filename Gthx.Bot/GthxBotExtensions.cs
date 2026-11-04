@@ -13,6 +13,9 @@ namespace Gthx.Bot
         public static IServiceCollection AddGthxBot(this IServiceCollection services)
         {
             services.TryAddSingleton<ReminderScheduler>();
+            services.TryAddSingleton<KeywordEmailer>();
+            // The host replaces this with a real sender when email is set up.
+            services.TryAddSingleton<IEmailSender, NoEmailSender>();
 
             services.TryAddEnumerable(new[]
             {

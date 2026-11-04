@@ -24,9 +24,10 @@ namespace Gthx.Bot
         private readonly ILogger<GthxBot> _logger;
         private readonly IGthxMessageConsumer _messageReader;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly KeywordEmailer _keywordEmailer;
         private Regex _matchNick;
         
-        public GthxBot(IIrcClient ircClient, IBotNick botNick, ILogger<GthxBot> logger, IGthxMessageConsumer messageReader, IServiceScopeFactory scopeFactory) 
+        public GthxBot(IIrcClient ircClient, IBotNick botNick, ILogger<GthxBot> logger, IGthxMessageConsumer messageReader, IServiceScopeFactory scopeFactory, KeywordEmailer keywordEmailer) 
         {
             // IrcClient isn't actually used, but is a dependency just to get the whole bot kicked off to start connecting
             _ircClient = ircClient;
@@ -34,6 +35,7 @@ namespace Gthx.Bot
             _logger = logger;
             _messageReader = messageReader;
             _scopeFactory = scopeFactory;
+            _keywordEmailer = keywordEmailer;
 
             _logger.LogDebug($"GthxBot instantiated");
 
@@ -94,6 +96,9 @@ namespace Gthx.Bot
 
         public void HandleReceivedMessage(string channel, string user, string message)
         {
+            // Before the bot's nick is taken off the front, so a keyword can be the nick.
+            _keywordEmailer.Check(channel, user, message, DateTime.UtcNow);
+
             var wasDirectlyAddressed = false;
 
             if (!channel.StartsWith('#') && channel == user)
@@ -128,6 +133,8 @@ namespace Gthx.Bot
 
         public void HandleReceivedAction(string channel, string user, string action)
         {
+            _keywordEmailer.Check(channel, user, $"* {user} {action}", DateTime.UtcNow);
+
             using IServiceScope messageScope = _scopeFactory.CreateScope();
 
             var modules = messageScope.ServiceProvider.GetRequiredService<IEnumerable<IGthxModule>>();

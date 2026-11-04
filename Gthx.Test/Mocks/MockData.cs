@@ -390,9 +390,22 @@ namespace Gthx.Test.Mocks
             return Reminders.RemoveAll(r => r.Id == id) > 0;
         }
 
+        /// <summary>
+        /// Keywords set on the admin panel, and how many times they've been read
+        /// </summary>
+        public List<string> EmailKeywords { get; } = new List<string>();
+        public int EmailKeywordReads { get; private set; }
+        public bool FailEmailKeywordReads { get; set; }
+
         public List<string> GetEmailKeywords()
         {
-            return new List<string>();
+            EmailKeywordReads++;
+            if (FailEmailKeywordReads)
+            {
+                throw new InvalidOperationException("The database is down");
+            }
+
+            return EmailKeywords.ToList();
         }
 
         private static bool IsAuthor(Reminder reminder, string author)

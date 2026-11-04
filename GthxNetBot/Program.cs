@@ -10,6 +10,7 @@ using Serilog.Events;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.Email;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace GthxNetBot
 {
@@ -23,6 +24,19 @@ namespace GthxNetBot
         public string? Password { get; set; }
         public string? MailServer { get; set; }
         public int? Port { get; set; }
+
+        /// <summary>
+        /// Email is off unless every setting is there
+        /// </summary>
+        [MemberNotNullWhen(true, nameof(EmailSubject), nameof(FromName), nameof(MailServer), nameof(Password), nameof(ToEmail), nameof(UserName), nameof(Port))]
+        public bool IsComplete =>
+            !string.IsNullOrWhiteSpace(EmailSubject) &&
+            !string.IsNullOrWhiteSpace(FromName) &&
+            !string.IsNullOrWhiteSpace(MailServer) &&
+            !string.IsNullOrWhiteSpace(Password) &&
+            !string.IsNullOrWhiteSpace(ToEmail) &&
+            !string.IsNullOrWhiteSpace(UserName) &&
+            Port != null;
     }
 
     class Program
@@ -46,13 +60,7 @@ namespace GthxNetBot
 
                     configuration.ReadFrom.Configuration(context.Configuration);
 
-                    if (!string.IsNullOrWhiteSpace(emailOptions.EmailSubject) &&
-                        !string.IsNullOrWhiteSpace(emailOptions.FromName) &&
-                        !string.IsNullOrWhiteSpace(emailOptions.MailServer) &&
-                        !string.IsNullOrWhiteSpace(emailOptions.Password) &&
-                        !string.IsNullOrWhiteSpace(emailOptions.ToEmail) &&
-                        !string.IsNullOrWhiteSpace(emailOptions.UserName) &&
-                        emailOptions.Port != null)
+                    if (emailOptions.IsComplete)
                     {
                         // Wire the full SMTP configuration (server, port, credentials, subject) so
                         // error notifications are actually delivered, and restrict the sink to
@@ -116,6 +124,14 @@ namespace GthxNetBot
                     services.AddSingleton<IWebReader, WebReader>();
                     services.AddSingleton<IGthxUtil, GthxUtil>();
                     services.AddSingleton<GthxBot>();
+                    // Keyword emails go to the same place as the error emails.
+                    var emailOptions = new EmailOptions();
+                    context.Configuration.GetSection(EmailOptions.EmailConfiguration).Bind(emailOptions);
+                    if (emailOptions.IsComplete)
+                    {
+                        services.AddSingleton<IEmailSender>(new SmtpEmailSender(emailOptions));
+                    }
+
                     services.AddGthxBot();
 
                     // Register IRC client implementations

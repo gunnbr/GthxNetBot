@@ -686,17 +686,17 @@ namespace GthxNetBot
 
             // When whoever has our preferred nickname quits or changes nick, take it back right away
             // instead of waiting for the next WHOIS check.
-            var sourceNick = (e.Message.Source as IrcUser)?.NickName;
+            var sourceNick = (e.IrcMessage.Source as IrcUser)?.NickName;
             if (sourceNick != null && sourceNick == _options.Nick && _botNick.BotNick != _options.Nick)
             {
-                if (e.Message.Command == "QUIT")
+                if (e.IrcMessage.Command == "QUIT")
                 {
                     _logger.LogWarning("{nick} quit, which opened our preferred nickname.", sourceNick);
                     HandlePreferredNameAvailable();
                 }
-                else if (e.Message.Command == "NICK" && e.Message.Parameters.Count > 0)
+                else if (e.IrcMessage.Command == "NICK" && e.IrcMessage.Parameters.Count > 0)
                 {
-                    HandleNicknameChanged(sourceNick, e.Message.Parameters[0]);
+                    HandleNicknameChanged(sourceNick, e.IrcMessage.Parameters[0]);
                 }
             }
 #else
